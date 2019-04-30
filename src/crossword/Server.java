@@ -19,7 +19,33 @@ import edu.mit.eecs.parserlib.Visualizer;
  * HTTP web puzzle server.
  */
 public class Server {
+
+
+    /**
+     * Start a Crossword Extravaganza server.
+     * @param args The command line arguments should include only the folder where
+     *             the puzzles are located.
+     * @throws IOException 
+     * @throws UnableToParseException 
+     */
+    public static void main(String[] args) throws IOException, UnableToParseException {
+        String folderPath = args[0];
+        File folder = new File(folderPath);
+        for (File puzzle : folder.listFiles()) {
+            BufferedReader reader = new BufferedReader(new FileReader(puzzle));
+            String fullPuzzle = "";
+            String line = reader.readLine();
+            while (line != null) {
+                fullPuzzle += line;
+                line = reader.readLine();
+            }
+            reader.close();
+            Board parsedBoard = parse(fullPuzzle);
+            break;
+        }
+    }
     
+    // ============ PARSING ============ //
     
     private static enum PuzzleGrammar {
         FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE;
@@ -115,32 +141,6 @@ public class Server {
         
         return null;
     }
-
-
-    /**
-     * Start a Crossword Extravaganza server.
-     * @param args The command line arguments should include only the folder where
-     *             the puzzles are located.
-     * @throws IOException 
-     * @throws UnableToParseException 
-     */
-    public static void main(String[] args) throws IOException, UnableToParseException {
-        String folderPath = args[0];
-        File folder = new File(folderPath);
-        for (File puzzle : folder.listFiles()) {
-            BufferedReader reader = new BufferedReader(new FileReader(puzzle));
-            String fullPuzzle = "";
-            String line = reader.readLine();
-            while (line != null) {
-                fullPuzzle += line;
-                line = reader.readLine();
-            }
-            reader.close();
-            Board parsedBoard = parse(fullPuzzle);
-            
-            
-            
-            break;
-        }
-    }
+    
+    // ============ PARSING ============ //
 }
