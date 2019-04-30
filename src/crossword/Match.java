@@ -61,7 +61,22 @@ public class Match {
                 
                 if(firstVertical && secondVertical) { // #1: the words are the same orientation (VERTICAL)
                     // words with the same orientation CANNOT intersect, we check their bounding rectangles
-                    throw new RuntimeException("not done implementing!");
+                    final int firstCol = firstWord.getColumnLowerBound();
+                    final int secondCol = secondWord.getColumnLowerBound();
+                    
+                    if(firstCol != secondCol) {
+                        continue; // if the columns don't match, there's no way the pair overlaps
+                    }
+                    
+                    final int firstLowerRow = firstWord.getRowLowerBound();
+                    final int firstHigherRow = firstWord.getRowUpperBound();
+                    
+                    final int secondLowerRow = secondWord.getRowLowerBound();
+                    final int secondHigherRow = secondWord.getRowUpperBound();
+                    
+                    if(oneDimensionOverlap(firstLowerRow, firstHigherRow, secondLowerRow, secondHigherRow)) {
+                        return false;
+                    }
                 }
                 else if(!firstVertical && !secondVertical) { // #1: the words are the same orientation (HORIZONTAL)
                     final int firstRow = firstWord.getRowLowerBound();
@@ -81,13 +96,15 @@ public class Match {
                         return false;
                     }
                 }
-                else {
+                else { // #2: check the point of intersection for words with different orientations
+                    
                     throw new RuntimeException("not done implementing!");
                 }
             }
+            
         }
         
-        
+        return true;
     }
     
     private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
