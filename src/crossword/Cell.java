@@ -17,6 +17,8 @@ public class Cell {
     private final List<Word> correspondingWords;
     // Also need: boolean confirmedState;
     
+    // Methods also need a toString()
+    
     public Cell(int pRow, int pCol) {
         row = pRow;
         col = pCol;
