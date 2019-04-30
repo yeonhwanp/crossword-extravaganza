@@ -23,6 +23,7 @@ public class Server {
     
     // LoadBoard()/StartServer?
     // Also need List<String> validFiles and List<Match> ActiveMatches;
+    // Also need to load handlers
 
     /**
      * Start a Crossword Extravaganza server.

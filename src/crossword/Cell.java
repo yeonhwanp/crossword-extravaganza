@@ -15,6 +15,7 @@ public class Cell {
     private final int col; 
     private String value;
     private final List<Word> correspondingWords;
+    // Also need: boolean confirmedState;
     
     public Cell(int pRow, int pCol) {
         row = pRow;

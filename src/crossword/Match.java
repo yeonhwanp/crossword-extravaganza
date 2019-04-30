@@ -8,19 +8,24 @@ public class Match {
     //      Map<Player player, int score>
     //      Map<Player player, int challengePts>
     //      Cell[][] board
-    //      List<Word> words
+    //      Map<String ID, Word word> words
     //      State state
     
     // Methods: decreaseChallenge()
     //          increaseChallenge()
     //          incrementScore()
     //          getState()
+    //          checkValidInsert()
+    //          insertWord()
+    //          checkValidChallenge()
+    //          challenge()
     //          toString() [Need this in this implementation to send over the server]
     
     // Handlers: tryWord()
     //           challengeWord()
     //           exit()
     //           watch()
+    // These handlers should all return the updated board after completion
     
     private final List<Word> words;
 
