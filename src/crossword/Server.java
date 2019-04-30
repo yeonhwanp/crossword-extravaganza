@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
@@ -15,7 +16,7 @@ import edu.mit.eecs.parserlib.UnableToParseException;
 import edu.mit.eecs.parserlib.Visualizer;
 
 /**
- * TODO
+ * HTTP web puzzle server.
  */
 public class Server {
     
@@ -63,8 +64,8 @@ public class Server {
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
         // display the parse tree in various ways, for debugging only
-         System.out.println("parse tree " + parseTree);
-         Visualizer.showInBrowser(parseTree);
+//         System.out.println("parse tree " + parseTree);
+//         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree
         final Board expression = makeBoard(parseTree);
@@ -75,7 +76,43 @@ public class Server {
     
     
     private static Board makeBoard(ParseTree<PuzzleGrammar> parseTree) {
-        // TODO Auto-generated method stub
+        final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
+        ParseTree<PuzzleGrammar> nameTree = children.get(0);
+        String name = nameTree.text();
+        
+        ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
+        String description = descriptionTree.text();
+        
+        System.out.println("");
+        System.out.println("puzzle name: " + name);
+        System.out.println("puzzle description: " + description);
+        System.out.println("");
+
+        //Set<Word> allWords = new HashSet<>();
+        
+        //initiate Board constructor here - putting in name of puzzle, and description of puzzle
+        
+        for (int i = 2; i < children.size(); i++) {
+            
+            //for every entry, use all of the printed information below to create a Word object
+            //put this Word object into the set of words that the board holds on to
+            
+            ParseTree<PuzzleGrammar> entryTree = children.get(i);
+            
+            String wordname = entryTree.children().get(0).text();
+            String clue = entryTree.children().get(1).text();
+            String direction = entryTree.children().get(2).text();
+            int row = Integer.valueOf(entryTree.children().get(3).text());
+            int col = Integer.valueOf(entryTree.children().get(4).text());
+            
+            System.out.println("wordname: "+ wordname);
+            System.out.println("clue: "+ clue);
+            System.out.println("direction: "+ direction);
+            System.out.println("row: "+ row);
+            System.out.println("col: "+ col);
+            System.out.println("");
+        }
+        
         return null;
     }
 
@@ -89,10 +126,8 @@ public class Server {
      */
     public static void main(String[] args) throws IOException, UnableToParseException {
         String folderPath = args[0];
-        System.out.println(folderPath);
         File folder = new File(folderPath);
         for (File puzzle : folder.listFiles()) {
-            System.out.println(puzzle.getName());
             BufferedReader reader = new BufferedReader(new FileReader(puzzle));
             String fullPuzzle = "";
             String line = reader.readLine();
@@ -103,6 +138,9 @@ public class Server {
             reader.close();
             Board parsedBoard = parse(fullPuzzle);
             
+            
+            
+            break;
         }
     }
 }
