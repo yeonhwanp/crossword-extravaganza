@@ -36,13 +36,39 @@ public class Board {
                     return false;
                 }
                 
-                if(firstVertical == secondVertical) // #1: the words are the same orientation
-                {
+                if(firstVertical && secondVertical) { // #1: the words are the same orientation (VERTICAL)
                     // words with the same orientation CANNOT intersect, we check their bounding rectangles
+                    throw new RuntimeException("not done implementing!");
+                }
+                else if(!firstVertical && !secondVertical) { // #1: the words are the same orientation (HORIZONTAL)
+                    final int firstRow = firstWord.getRowLowerBound();
+                    final int secondRow = secondWord.getRowLowerBound();
+                    
+                    if(firstRow != secondRow) {
+                        continue; // if the rows don't match, then this pair definitely doesn't overlap
+                    }
+                    
+                    final int firstLowerCol = firstWord.getColumnLowerBound();
+                    final int firstHigherCol = firstWord.getColumnUpperBound();
+                    
+                    final int secondLowerCol = secondWord.getColumnLowerBound();
+                    final int secondHigherCol = secondWord.getColumnUpperBound();
+                    
+                    if(oneDimensionOverlap(firstLowerCol, firstHigherCol, secondLowerCol, secondHigherCol)) {
+                        return false;
+                    }
+                }
+                else {
                     throw new RuntimeException("not done implementing!");
                 }
             }
         }
+        
+        
+    }
+    
+    private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
+        return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
     
     
