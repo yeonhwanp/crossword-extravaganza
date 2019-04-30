@@ -20,6 +20,9 @@ import edu.mit.eecs.parserlib.Visualizer;
  */
 public class Server {
 
+    
+    // LoadBoard()/StartServer?
+    // Also need List<String> validFiles and List<Match> ActiveMatches;
 
     /**
      * Start a Crossword Extravaganza server.
@@ -40,7 +43,7 @@ public class Server {
                 line = reader.readLine();
             }
             reader.close();
-            Board parsedBoard = parse(fullPuzzle);
+            Match parsedBoard = parse(fullPuzzle);
             break;
         }
     }
@@ -85,7 +88,7 @@ public class Server {
      * @return Expression parsed from the string
      * @throws UnableToParseException if the string doesn't match the Expression grammar
      */
-    public static Board parse(final String string) throws UnableToParseException {
+    public static Match parse(final String string) throws UnableToParseException {
         // parse the example into a parse tree
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
@@ -94,14 +97,14 @@ public class Server {
 //         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree
-        final Board expression = makeBoard(parseTree);
+        final Match expression = makeBoard(parseTree);
         // System.out.println("AST " + expression);
         
         return expression;
     }
     
     
-    private static Board makeBoard(ParseTree<PuzzleGrammar> parseTree) {
+    private static Match makeBoard(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
         ParseTree<PuzzleGrammar> nameTree = children.get(0);
         String name = nameTree.text();

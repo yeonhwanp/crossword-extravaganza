@@ -2,7 +2,7 @@ package crossword;
 
 import java.util.List;
 
-public class Board {
+public class Match {
     
     private final List<Word> words;
 
