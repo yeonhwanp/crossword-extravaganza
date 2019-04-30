@@ -3,27 +3,48 @@
  */
 package crossword;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
+import com.sun.net.httpserver.Filter;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import crossword.web.ExceptionsFilter;
+import crossword.web.HeadersFilter;
+import crossword.web.LogFilter;
 import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
 import edu.mit.eecs.parserlib.UnableToParseException;
-import edu.mit.eecs.parserlib.Visualizer;
 
 /**
  * HTTP web puzzle server.
  */
 public class Server {
-
     
-    // LoadBoard()/StartServer?
-    // Also need List<String> validFiles and List<Match> ActiveMatches;
-    // Also need to load handlers
+    private final HttpServer server;
+    private final List<Match> allMatches;
+    
+    // LoadBoard()/StartServer? - done
+    // Also need List<String> validFiles and List<Match> ActiveMatches; - a little confused on this
+    
+    
+    private static final int VALID = 200;
+    private static final int INVALID = 404;
 
     /**
      * Start a Crossword Extravaganza server.
@@ -36,21 +57,95 @@ public class Server {
         String folderPath = args[0];
         File folder = new File(folderPath);
         for (File puzzle : folder.listFiles()) {
-            BufferedReader reader = new BufferedReader(new FileReader(puzzle));
-            String fullPuzzle = "";
-            String line = reader.readLine();
-            while (line != null) {
-                fullPuzzle += line;
-                line = reader.readLine();
-            }
-            reader.close();
-            Match parsedBoard = parse(fullPuzzle);
+            Match match = loadMatch(puzzle);
+            
+            List<Match> matches = new ArrayList<>();
+            matches.add(match);
+            
+            //need to check if this match is valid
+            //if (match.checkConsistency()) {
+            
+            final Server server = new Server(matches, 4949);
+            server.start();
+            //}
+            
+            
+            
+            //do we need to stop the server? I feel like we don't?
             break;
         }
     }
     
-    // ============ PARSING ============ //
     
+    public Server(List<Match> matches, int port) throws IOException {
+        this.server = HttpServer.create(new InetSocketAddress(port), 0);
+        this.allMatches = matches;
+        
+        // handle concurrent requests with multiple threads
+        server.setExecutor(Executors.newCachedThreadPool());
+        
+        HeadersFilter headers = new HeadersFilter(Map.of(
+                // allow requests from web pages hosted anywhere
+                "Access-Control-Allow-Origin", "*",
+                // all responses will be plain-text UTF-8
+                "Content-Type", "text/plain; charset=utf-8"
+                ));
+        List<Filter> filters = List.of(new ExceptionsFilter(), new LogFilter(), headers);
+        
+        // handle requests for paths that start with /connect/
+        HttpContext look = server.createContext("/connect/", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                communicatePuzzle(matches.get(0), exchange);
+                //for now we just use first match in matches, since only single puzzle
+            }
+        });
+        look.getFilters().addAll(filters);
+        
+    }
+    
+    
+    private static Match loadMatch(File puzzle) throws IOException, UnableToParseException {
+        BufferedReader reader = new BufferedReader(new FileReader(puzzle));
+        String fullPuzzle = "";
+        String line = reader.readLine();
+        while (line != null) {
+            fullPuzzle += line;
+            line = reader.readLine();
+        }
+        reader.close();
+        Match parsedMatch = parse(fullPuzzle);
+        return parsedMatch;
+    }
+    
+    
+    
+    private void communicatePuzzle(Match match, HttpExchange exchange) throws IOException {
+        
+        final String response;
+        exchange.sendResponseHeaders(VALID, 0);
+        
+        response = match.toString(); //string of puzzle that the client should see
+        
+        // write the response to the output stream using UTF-8 character encoding
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+        out.print(response);
+        out.flush();
+        
+        // if you do not close the exchange, the response will not be sent!
+        exchange.close();
+        
+        
+    }
+
+
+
+
+    // ============ PARSING ============ //
+
+
+
+
     private static enum PuzzleGrammar {
         FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE;
     }
@@ -98,10 +193,10 @@ public class Server {
 //         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree
-        final Match expression = makeBoard(parseTree);
+        final Match match = makeBoard(parseTree);
         // System.out.println("AST " + expression);
         
-        return expression;
+        return match;
     }
     
     
@@ -112,6 +207,7 @@ public class Server {
         
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.text();
+        
         
         System.out.println("");
         System.out.println("puzzle name: " + name);
@@ -146,5 +242,32 @@ public class Server {
         return null;
     }
     
-    // ============ PARSING ============ //
+    // ============ END PARSING ============ //
+    
+    
+    
+    
+    /**
+     * @return the port on which this server is listening for connections
+     */
+    public int port() {
+        return server.getAddress().getPort();
+    }
+    
+    /**
+     * Start this server in a new background thread.
+     */
+    public void start() {
+        System.err.println("Server will listen on " + server.getAddress());
+        server.start();
+    }
+    
+    /**
+     * Stop this server. Once stopped, this server cannot be restarted.
+     */
+    public void stop() {
+        System.err.println("Server will stop");
+        server.stop(0);
+    }
+    
 }
