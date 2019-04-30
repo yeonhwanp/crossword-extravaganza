@@ -4,6 +4,24 @@ import java.util.List;
 
 public class Match {
     
+    // Rep: Map<String ID, Player player>
+    //      Map<Player player, int score>
+    //      Map<Player player, int challengePts>
+    //      Cell[][] board
+    //      List<Word> words
+    //      State state
+    
+    // Methods: decreaseChallenge()
+    //          increaseChallenge()
+    //          incrementScore()
+    //          getState()
+    //          toString() [Need this in this implementation to send over the server]
+    
+    // Handlers: tryWord()
+    //           challengeWord()
+    //           exit()
+    //           watch()
+    
     private final List<Word> words;
 
     
