@@ -8,17 +8,30 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
+import com.sun.net.httpserver.Filter;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import crossword.web.ExceptionsFilter;
+import crossword.web.HeadersFilter;
+import crossword.web.LogFilter;
 import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
 import edu.mit.eecs.parserlib.UnableToParseException;
-import edu.mit.eecs.parserlib.Visualizer;
 
 /**
  * HTTP web puzzle server.
  */
 public class Server {
+    
+    private final HttpServer server;
 
     
     // LoadBoard()/StartServer?
@@ -35,19 +48,60 @@ public class Server {
         String folderPath = args[0];
         File folder = new File(folderPath);
         for (File puzzle : folder.listFiles()) {
-            BufferedReader reader = new BufferedReader(new FileReader(puzzle));
-            String fullPuzzle = "";
-            String line = reader.readLine();
-            while (line != null) {
-                fullPuzzle += line;
-                line = reader.readLine();
-            }
-            reader.close();
-            Match parsedBoard = parse(fullPuzzle);
+            Match firstMatch = loadMatch(puzzle);
             break;
         }
     }
     
+    
+    private static Match loadMatch(File puzzle) throws IOException, UnableToParseException {
+        BufferedReader reader = new BufferedReader(new FileReader(puzzle));
+        String fullPuzzle = "";
+        String line = reader.readLine();
+        while (line != null) {
+            fullPuzzle += line;
+            line = reader.readLine();
+        }
+        reader.close();
+        Match parsedMatch = parse(fullPuzzle);
+        return parsedMatch;
+    }
+    
+    public Server(int port) throws IOException {
+        this.server = HttpServer.create(new InetSocketAddress(port), 0);
+        
+        // handle concurrent requests with multiple threads
+        server.setExecutor(Executors.newCachedThreadPool());
+        
+        HeadersFilter headers = new HeadersFilter(Map.of(
+                // allow requests from web pages hosted anywhere
+                "Access-Control-Allow-Origin", "*",
+                // all responses will be plain-text UTF-8
+                "Content-Type", "text/plain; charset=utf-8"
+                ));
+        List<Filter> filters = List.of(new ExceptionsFilter(), new LogFilter(), headers);
+        
+        // handle requests for paths that start with /connect/
+        HttpContext look = server.createContext("/connect/", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                communicatePuzzle(exchange);
+            }
+        });
+        look.getFilters().addAll(filters);
+        
+    }
+    
+    
+    
+    
+    private void communicatePuzzle(HttpExchange exchange) {
+        // TODO Auto-generated method stub
+        
+    }
+
+
+
+
     // ============ PARSING ============ //
     
     private static enum PuzzleGrammar {
