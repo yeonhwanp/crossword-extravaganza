@@ -13,7 +13,7 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 /**
- * TODO
+ * Crossword game client for server.
  */
 public class Client {
 
@@ -22,19 +22,33 @@ public class Client {
 
     /**
      * Start a Crossword Extravaganza client.
+     * 
+     * ADDITIONS TO MAIN METHOD FOR BRIAN TO CODE:
+     * Given the server address, connect to the server. The server will send over a client's view of a match (toString), which holds
+     * length, position, and orientation of the words, as well as their associated hint.
+     * 
+     * Then, the client should display this information as a puzzle. The information is displayed via CrosswordCanvas
+     * 
+     * 
+     * 
      * @param args The command line arguments should include only the server address.
      */
     public static void main(String[] args) {
 
-        launchGameWindow();
+        launchGameWindow(/*match*/);
 
     }
     
     /**
      * Starter code to display a window with a CrosswordCanvas,
      * a text box to enter commands and an Enter button.
+     * 
+     * @param matchStr toString of client view of a match. Use this to display the puzzle, its hints, and any extra info.
+     * Brian - I think all you need to do for the warmup in client is simply display the puzzle and stuff. You shouldn't
+     * have to worry too much about input into the textbox, etc.
+     * 
      */
-    private static void launchGameWindow() {
+    private static void launchGameWindow(String matchStr) {
 
         CrosswordCanvas canvas = new CrosswordCanvas();
         canvas.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -45,6 +59,7 @@ public class Client {
             // button. Recall from reading 24 that this code runs on the
             // Event Dispatch Thread, which is different from the main
             // thread.
+            System.out.println();
             canvas.repaint();
         });
         enterButton.setSize(10, 10);

@@ -1,6 +1,7 @@
 package crossword;
 
 import java.util.List;
+import java.util.Map;
 
 public class Match {
     
@@ -27,7 +28,106 @@ public class Match {
     //           watch()
     // These handlers should all return the updated board after completion
     
-    private final List<Word> words;
+    private final Map<String, Word> words; // Replaced List with Map to account for word IDs
+    private final Cell[][] gameBoard;
+    private Map<String, Player> players;
+    private Map<Player, Integer> scores;
+    private Map<Player, Integer> challengePts;
+    private GameState state;
+    
+    /**
+     * Used to start the game once two players join.
+     */
+    public void startGame() {
+        
+    }
+    
+    /**
+     * Decreases a player's challenge points
+     * @param player the player to decrease challenge points for
+     */
+    private void decreaseChallenge(Player player) {
+    }
+    
+    /**
+     * Increments a player's challenge points
+     * @param player the player to increase challenge points for
+     */
+    private void incrementChallenge(Player player) {
+        
+    }
+    
+    /**
+     * Increase a player's score count
+     * @param player the player to increase score for
+     */
+    public void incrementScore(Player player) {
+        
+    }
+    
+    /**
+     * @param player the player we want to get the score for
+     * @return the score of the given player
+     */
+    public int getScore(Player player) {
+        
+    }
+    
+    /**
+     * @return the current state of the game
+     */
+    public GameState getState() {
+        
+    }
+    
+    /**
+     * Checks if an attempted word is valid according to the final project handout
+     * @param player the player attempting the word
+     * @param wordID the id of the word being attempted
+     * @param wordString the actual word inserted by the player
+     * @return if the insert is valid or not
+     */
+    public boolean CheckValidInsert(Player player, String wordID, String wordString) {
+        
+    }
+    
+    /**
+     * Inserts an attempt at a given location.
+     * @param player the player attempting the insert
+     * @param wordID the word being attempted
+     * @param wordString the guessed word
+     */
+    public void insertWord(Player player, String wordID, String wordString) {
+        
+    }
+    
+    /**
+     * Checks if an attempted challenge is valid according to the final project handout
+     * @param player the player attempting the word
+     * @param wordID the id of the word being attempted
+     * @param wordString the actual word used to challenge the other player's guess
+     * @return if the challenge is valid or not
+     */
+    public boolean checkValidChallenge(Player player, String wordID, String wordString) {
+        
+    }
+    
+    /**
+     * Challenges the other player's guess and increments/decrements challengepoints accordingly.
+     * @param player the player doing the challenging
+     * @param wordID the id of the word being challenged
+     * @param wordString the actual word used to challenge the other player's guesses
+     */
+    public void challenge(Player player, String wordID, String wordString) {
+        
+    }
+    
+    @Override
+    public String toString() {
+        
+    }
+    
+    
 
     
     public boolean checkConsistency() {
