@@ -1,5 +1,6 @@
 package crossword;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -288,7 +289,9 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    
+    // covers toString non-empty string for name
+    //      non-empty description
+    //      number of entries: >1
     @Test
     public void testToStringSimple() {
         List<Word> words = new ArrayList<>();
@@ -304,6 +307,18 @@ public class MatchTest {
         
         Match currentMatch = new Match("Match name", "Match description", words);
         
+        String expected = "3x11\n" + 
+                "#########??\n" + 
+                "########???\n" + 
+                "#########??\n" + 
+                "3\n" + 
+                "0 10 DOWN 1\n" + 
+                "hint\n" + 
+                "0 9 DOWN 1\n" + 
+                "hint\n" + 
+                "1 8 ACROSS 1\n" + 
+                "hint\n";
+        assertEquals(expected, currentMatch.toString());
         
     }
     
