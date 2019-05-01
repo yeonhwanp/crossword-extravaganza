@@ -1,7 +1,5 @@
 package crossword;
 
-import memory.Player;
-
 /**
  * An immutable player of memory scramble.
  *
