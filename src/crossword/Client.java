@@ -137,6 +137,12 @@ public class Client {
             for (int i = 0; i < Integer.valueOf(dimensions.split("x")[0]); i++) {
                 wholeString += socketIn.readLine() + "\n";
             }
+            String numWords = socketIn.readLine();
+            wholeString += numWords + "\n";
+            int numCount = 2 * Integer.valueOf(numWords);
+            for (int i = 0; i < numCount; i++) {
+                wholeString += socketIn.readLine() + "\n";
+            }
             canvas.setCanvas(wholeString);
             launchGameWindow();
             

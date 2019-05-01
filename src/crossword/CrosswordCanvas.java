@@ -186,14 +186,35 @@ class CrosswordCanvas extends JComponent {
         System.out.println(currentBoard);
         String[] lines = currentBoard.split("\\n");
         String[] dimensions = lines[0].split("x");
-        for (int i = 1; i < Integer.valueOf(dimensions[0]) + 1; i++) {
+        int lineCounter = 1;
+        for (; lineCounter < Integer.valueOf(dimensions[0]) + 1; lineCounter++) {
             for (int j = 0; j <Integer.valueOf(dimensions[1]); j++) {
-                if (lines[i].charAt(j) == '?') {
-                    drawCell(i-1, j, g);
+                if (lines[lineCounter].charAt(j) == '?') {
+                    drawCell(lineCounter-1, j, g);
                 }
             }
         }
-        
-        println("hello", g);
+        int numCount = 2 * Integer.valueOf(lines[lineCounter]);
+        lineCounter++;
+        for (; lineCounter < Integer.valueOf(dimensions[0]) + numCount;) {
+            String wordString = "";
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    String[] split = lines[lineCounter].split(" ");
+                    if (split[2].equals("ACROSS")) {
+                        horizontalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
+                    }
+                    else if (split[2].equals("DOWN")) {
+                        verticalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
+                    }
+                    wordString += split[3] + ". ";
+                }
+                else if (i == 1) {
+                    wordString += " " + lines[lineCounter];
+                }
+                lineCounter++;
+            }
+            println(wordString, g);
+        }
     }
 }
