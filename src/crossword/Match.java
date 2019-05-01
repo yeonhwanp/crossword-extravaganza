@@ -28,6 +28,9 @@ public class Match {
     //           watch()
     // These handlers should all return the updated board after completion
     
+    
+    private final String matchName;
+    private final String matchDescription;
     private final List<Word> words;
     private final Map<Integer, Word> idToWordMap;
     private final Cell[][] gameBoard;
@@ -35,6 +38,17 @@ public class Match {
     private Map<Player, Integer> scores;
     private Map<Player, Integer> challengePts;
     private GameState state;
+    
+    
+    public Match(String matchName, String matchDescription, List<Word> words, Map<Integer, Word> idToWordMap) {
+        this.matchName = matchName;
+        this.matchDescription = matchDescription;
+        this.words = words;
+        this.idToWordMap = idToWordMap;
+        
+        this.gameBoard = new Cell[0][0]; //TODO CHANGE THIS LATER - not done implementing
+    }
+    
     
     /**
      * Used to start the game once two players join.
@@ -126,7 +140,9 @@ public class Match {
     
     @Override
     public String toString() {
-        throw new RuntimeException("not done implementing!");
+        // TODO NOT DONE IMPLEMENTING!
+        
+        return matchName;
     }
     
     

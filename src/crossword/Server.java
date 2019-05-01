@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -60,14 +61,17 @@ public class Server {
             Match match = loadMatch(puzzle);
             
             List<Match> matches = new ArrayList<>();
-            matches.add(match);
+            
             
             //need to check if this match is valid
-            //if (match.checkConsistency()) {
+            if (match.checkConsistency()) {
+                matches.add(match);
+                
+                final Server server = new Server(matches, 4949);
+                server.start();
+            }
             
-            final Server server = new Server(matches, 4949);
-            server.start();
-            //}
+            
             
             
             
@@ -114,12 +118,14 @@ public class Server {
         }
         reader.close();
         Match parsedMatch = parse(fullPuzzle);
+        
+        
         return parsedMatch;
     }
     
     
     
-    private void communicatePuzzle(Match match, HttpExchange exchange) throws IOException {
+    private static void communicatePuzzle(Match match, HttpExchange exchange) throws IOException {
         
         final String response;
         exchange.sendResponseHeaders(VALID, 0);
@@ -214,7 +220,8 @@ public class Server {
         System.out.println("puzzle description: " + description);
         System.out.println("");
 
-        //Set<Word> allWords = new HashSet<>();
+        List<Word> allWords = new ArrayList<>();
+        Map<Integer, Word> idMap = new HashMap<>();
         
         //initiate Board constructor here - putting in name of puzzle, and description of puzzle
         
@@ -226,20 +233,27 @@ public class Server {
             ParseTree<PuzzleGrammar> entryTree = children.get(i);
             
             String wordname = entryTree.children().get(0).text();
-            String clue = entryTree.children().get(1).text();
+            String hint = entryTree.children().get(1).text();
             String direction = entryTree.children().get(2).text();
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
+            Word currentWord = new Word(row, col, hint, i - 1, wordname, direction);
+            idMap.put(i - 1, currentWord);
+            
             System.out.println("wordname: "+ wordname);
-            System.out.println("clue: "+ clue);
+            System.out.println("hint: "+ hint);
             System.out.println("direction: "+ direction);
             System.out.println("row: "+ row);
             System.out.println("col: "+ col);
             System.out.println("");
+            
+            allWords.add(currentWord);
         }
         
-        return null;
+        Match currentMatch = new Match(name, description, allWords, idMap);
+        
+        return currentMatch;
     }
     
     // ============ END PARSING ============ //
