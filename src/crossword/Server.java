@@ -42,7 +42,7 @@ public class Server {
     
     /*
      * Abstraction Function:
-     * AF(server, allMatches) = Server that is playd on server, with allMatches being the possible matches that can be played
+     * AF(server, allMatches) = Server that is played on server, with allMatches being the possible matches that can be played
      *      by players
      * 
      * Rep Invariant:
@@ -51,7 +51,13 @@ public class Server {
      * Safety from rep exposure:
      *  server and allMatches are both private and final
      *      server is mutated in the Server constructor (parameter as well), start(), and stop(), but this is part of the expected behavior, so no rep exposure
-     *      allMatches TODO
+     *      allMatches allMatches is taken in as a parameter only to the constructor, but since our constructor is private,
+     *          no rep exposure here. Though the constructor calls on other methods, these methods that have access to matches
+     *          are private, so no rep exposure.
+     *          
+     *          
+     * Thread safety argument:
+     *  TODO
      * 
      * 
      * 
@@ -129,6 +135,16 @@ public class Server {
         });
         look.getFilters().addAll(filters);
         
+        
+        checkRep();
+    }
+    
+    /**
+     * Check for valid server rep
+     */
+    private void checkRep() {
+        assert server != null;
+        assert allMatches != null;
     }
     
     /**
@@ -227,7 +243,7 @@ public class Server {
      * @return Expression parsed from the string
      * @throws UnableToParseException if the string doesn't match the Expression grammar
      */
-    public static Match parse(final String string) throws UnableToParseException {
+    private static Match parse(final String string) throws UnableToParseException {
         // parse the example into a parse tree
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
@@ -286,6 +302,7 @@ public class Server {
             System.out.println("row: "+ row);
             System.out.println("col: "+ col);
             System.out.println("");
+            
             
             allWords.add(currentWord);
         }
