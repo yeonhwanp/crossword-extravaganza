@@ -103,8 +103,16 @@ public class Word {
      * Return the direction of the word
      * @return the direction of the word
      */
-    public Exist getDirection() {
+    public Direction getDirection() {
         return direction;
+    }
+    
+    /**
+     * Get the hint corresponding to the word
+     * @return the hint
+     */
+    public String getHint() {
+        return hint;
     }
     
     /**
