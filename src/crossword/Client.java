@@ -54,9 +54,6 @@ public class Client {
      * Thread safety argument:
      *  TODO
      * 
-     * 
-     * 
-     * 
      */
     
 
