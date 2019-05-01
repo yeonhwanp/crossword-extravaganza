@@ -223,7 +223,6 @@ public class Server {
         System.out.println("");
 
         List<Word> allWords = new ArrayList<>();
-        Map<Integer, Word> idMap = new HashMap<>();
         
         //initiate Board constructor here - putting in name of puzzle, and description of puzzle
         
@@ -241,7 +240,6 @@ public class Server {
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
             Word currentWord = new Word(row, col, hint, i - 1, wordname, direction);
-            idMap.put(i - 1, currentWord);
             
             System.out.println("wordname: "+ wordname);
             System.out.println("hint: "+ hint);
@@ -253,7 +251,7 @@ public class Server {
             allWords.add(currentWord);
         }
         
-        Match currentMatch = new Match(name, description, allWords, idMap);
+        Match currentMatch = new Match(name, description, allWords);
         
         return currentMatch;
     }
