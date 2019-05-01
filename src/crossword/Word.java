@@ -6,7 +6,11 @@ public class Word {
     
     // Abstraction function:
     //    AF(startRow, startCol, id, hint, correctValue, direction, confirmed, owner) =
-    //      A word that's a part of the crossword puzzle that starts at the cell [startRow x startCol]
+    //      A word with the value correctValue with an "id" referenced by id that's a part of the crossword puzzle 
+    //      that starts at the cell [startRow x startCol] with an orientation direction with a "hint" referenced by hint.
+    //      confirmed and owner refer to if this word has been confirmed by either a challenge or a completed game with
+    //      owner referencing the player who is "guessing" this word.
+    //      
     // Representation invariant:
     //    row >= 0 && col >= 0
     //    len(value) <= 1
@@ -41,10 +45,6 @@ public class Word {
         this.direction = pDirectionStr.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN;
         
         this.confirmed = false;
-    }
-    
-    public int getID() {
-        return id;
     }
     
     public String getCorrectValue() {
