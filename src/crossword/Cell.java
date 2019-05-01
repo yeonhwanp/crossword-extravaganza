@@ -33,7 +33,7 @@ public class Cell {
     private final List<Word> correspondingWords;
     private final Exist existState;
     
-    private static final String EMPTY_CELL = " ";
+    private static final String EMPTY_CELL = "?";
     
     /**
      * Constructor for a cell 
