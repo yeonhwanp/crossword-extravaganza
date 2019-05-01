@@ -36,6 +36,15 @@ public class Word {
     private boolean confirmed;
     private Optional<Player> owner;
     
+    /**
+     * Construct a new Word object for our crossword puzzle
+     * @param pRow the row of the starting point of the word (leftmost coordinate)
+     * @param pCol the column of the starting point of the word (smallest column coordinate)
+     * @param inputHint the hint for the word
+     * @param pID the ID of the word
+     * @param pValue the correct value of the word
+     * @param pDirectionStr the direction of the word
+     */
     public Word(int pRow, int pCol, String inputHint, int pID, String pValue, String pDirectionStr) {
         this.startRow = pRow;
         this.startCol = pCol;
@@ -47,30 +56,59 @@ public class Word {
         this.confirmed = false;
     }
     
+    /**
+     * Get the ID of the current word
+     * @return the ID of the word
+     */
     public int getID() {
         return id;
     }
     
+    /**
+     * Get the correct value of the word
+     * @return the correct value
+     */
     public String getCorrectValue() {
         return correctValue;
     }
     
+    /**
+     * Gets the correct character at a certain index along the word
+     * @param i the index to get the correct character of (0-indexed)
+     * @return the correct character
+     */
     public char getCorrectCharAt(int i) {
         return correctValue.charAt(i);
     }
     
+    /**
+     * Return true iff the word is down
+     * @return whether or not the word is down
+     */
     public boolean isVertical() {
         return direction == Direction.DOWN;
     }
     
+    /**
+     * Return true iff the word is across
+     * @return whether or not the word is across
+     */
     public boolean isHorizontal() {
         return direction == Direction.ACROSS;
     }
     
+    /**
+     * Get the smallest row index that the word covers (0-indexed)
+     * @return the smallest row index
+     */
     public int getRowLowerBound() {
         return startRow;
     }
     
+    /**
+     * Get the largest row index that the word covers (0-indexed)
+     * @return the largest row index
+     */
     public int getRowUpperBound() {
         if (this.isVertical()) {
             return startRow + this.getLength() - 1;
@@ -80,10 +118,18 @@ public class Word {
         }
     }
     
+    /**
+     * Get the smallest column index that the word covers (0-indexed)
+     * @return the smallest column index
+     */
     public int getColumnLowerBound() {
         return startCol;
     }
     
+    /**
+     * Get the largest column index that the word covers (0-indexed)
+     * @return the largest column index
+     */
     public int getColumnUpperBound() {
         if (this.isHorizontal()) {
             return startCol + this.getLength() - 1;
@@ -93,10 +139,18 @@ public class Word {
         }
     }
     
+    /**
+     * Get the length of the word
+     * @return the length
+     */
     public int getLength() {
         return correctValue.length();
     }
     
+    /**
+     * Get whether or not the word has been confirmed
+     * @return whether or not the word has been confirmed
+     */
     public boolean isConfirmed() {
         return confirmed;
     }
