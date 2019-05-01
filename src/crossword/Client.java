@@ -9,11 +9,13 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.BreakIterator;
 import java.util.LinkedList;
@@ -35,10 +37,10 @@ public class Client {
     private static final int CANVAS_WIDTH = 1200;
     private static final int CANVAS_HEIGHT = 900;
     private String sendString;
-    private CrosswordCanvas canvas;
+    private CrosswordCanvas canvas = new CrosswordCanvas();
     
     /**
-     * Make a client object lol
+     * Make a client object 
      */
     public Client() {
     }
@@ -61,11 +63,11 @@ public class Client {
         // Create a new client object and have it connect
         Client thisClient = new Client();
         thisClient.connectToServer(args);
+        thisClient.launchGameWindow();
 
     }
     
     private synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
-        
         // Take the args and make it into a linked list
         final Queue<String> arguments = new LinkedList<>(List.of(args));
         
@@ -85,21 +87,26 @@ public class Client {
             throw new IllegalArgumentException("missing or invalid PORT", e);
         }
         
+        final URL loadRequest = new URL("http://" + host + ":" + port + "/connect/");
+        
         // Create a new connection
         try (
                 Socket socket = new Socket(host, port);
-                BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream(), UTF_8));
+                InputStream stream = loadRequest.openStream();
+                BufferedReader socketIn = new BufferedReader(new InputStreamReader(stream, UTF_8));
                 PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
                 BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             
-            // TODO load board
+            System.out.println(socketIn.readLine());
+            
             launchGameWindow();
             
             while ( ! socket.isClosed()) {
                 
                 // Wait until we get notified by enter button
                 try {
+                    System.out.println("booga monster");
                     this.wait();
                 }  catch (InterruptedException e) {
                     e.printStackTrace();
@@ -116,6 +123,7 @@ public class Client {
             }
             System.out.println("connection closed");
         }
+
     }
     
     /**
@@ -184,15 +192,20 @@ public class Client {
         // Upon enter, want to load into sendString and prompt the main thread to send to the server
         JButton enterButton = new JButton("Enter");
         enterButton.addActionListener((event) -> {
+            
             // This code executes every time the user presses the Enter
             // button. Recall from reading 24 that this code runs on the
             // Event Dispatch Thread, which is different from the main
             // thread.
-            sendString = textbox.getText();
-            System.out.println(sendString);
-            canvas.repaint();
-            this.notifyAll();
+            synchronized (this) {
+                sendString = textbox.getText();
+                System.out.println(sendString);
+                canvas.repaint();
+                this.notifyAll();
+            }
+            
         });
+
         enterButton.setSize(10, 10);
 
         JFrame window = new JFrame("Crossword Client");
