@@ -46,6 +46,7 @@ public class Match {
     private final String matchName;
     private final String matchDescription;
     private final List<Word> words; // TODO Uhhh where's our Map for the words?
+    private final Map<Integer, Word> idToWordMap;
     private final Cell[][] gameBoard;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
@@ -83,6 +84,8 @@ public class Match {
                 gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
             }
         }
+        
+        
         
         throw new RuntimeException("not done implementing yet!");
     }
