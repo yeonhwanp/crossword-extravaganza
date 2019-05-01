@@ -29,9 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import memory.Card;
-import memory.CardStatus;
-
 /**
  * Crossword game client for server.
  */

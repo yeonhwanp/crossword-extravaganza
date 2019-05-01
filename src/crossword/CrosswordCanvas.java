@@ -10,9 +10,6 @@ import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
-import memory.Card;
-import memory.CardStatus;
-
 /**
  * This component allows you to draw a crossword puzzle. Right now it just has
  * some helper methods to draw cells and add text in them, and some demo code
