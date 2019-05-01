@@ -45,8 +45,8 @@ public class Match {
     //      as specified in the final project handout.
     // Representation invariant:
     //    matchName cannot contain newlines, or tabs
-    //    rows > 0 && col > 0
-    //    ids in idToWordMap are >= 0, unique, and increasingly sequential.
+    //    rows >= 0 && col >= 0
+    //    ids in idToWordMap are >= 1, unique, and increasingly sequential.
     //
     // Safety from rep exposure:
     //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
@@ -113,6 +113,22 @@ public class Match {
                     gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
                 }
             }
+        }
+        checkRep();
+    }
+    
+    /**
+     * Check for valid match rep
+     */
+    private void checkRep() {
+//        assert matchName.matches("\" [^\"\r\n\t\\]* \"");
+        assert rows >= 0;
+        assert columns >= 0;
+        
+        int lower = 0;
+        for (Integer i : idToWordMap.keySet()) {
+            assert i > lower;
+            lower = i;
         }
     }
     

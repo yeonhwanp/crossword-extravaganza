@@ -291,7 +291,18 @@ public class MatchTest {
     
     @Test
     public void testToStringSimple() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 10, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(0, 9, "hint", 1, "cat", "DOWN");
+        Word thirdWord = new Word(1, 8, "hint", 1, "bab", "ACROSS");
         
+        words.add(firstWord);
+        words.add(secondWord);
+        words.add(thirdWord);
+        
+        
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
         
         
     }
