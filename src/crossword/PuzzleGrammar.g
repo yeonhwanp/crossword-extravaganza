@@ -1,6 +1,4 @@
-@skip spaces { 
-    FILE ::= ">>" NAME DESCRIPTION "\n"* ENTRY*;
-}
+FILE ::= ">>" NAME DESCRIPTION "\n"* ENTRY*;
 @skip whitespace {
     NAME ::= StringIdent;
     DESCRIPTION ::= String;
