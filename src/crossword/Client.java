@@ -39,10 +39,41 @@ public class Client {
     private String sendString;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
+    
+    /*
+     * Abstraction Function
+     * AF(sendString, canvas) = client object that uses canvas to display and take in information.
+     *      sendString represents the information that is sent in by the client
+     * 
+     * Rep Invariant:
+     *  true (for now, until we implement the rest of the game)
+     * 
+     * Safety from Rep Exposure:
+     *  TODO
+     *  
+     * Thread safety argument:
+     *  TODO
+     * 
+     * 
+     * 
+     * 
+     */
+    
+    
+    
     /**
      * Make a client object 
      */
     public Client() {
+    }
+    
+    /**
+     * Check for valid Client rep
+     */
+    private void checkRep() {
+        assert sendString != null;
+        assert canvas != null;
+                
     }
 
     /**
