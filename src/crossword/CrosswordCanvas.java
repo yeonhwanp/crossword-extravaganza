@@ -10,6 +10,9 @@ import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
+import memory.Card;
+import memory.CardStatus;
+
 /**
  * This component allows you to draw a crossword puzzle. Right now it just has
  * some helper methods to draw cells and add text in them, and some demo code
@@ -18,6 +21,8 @@ import javax.swing.JComponent;
  * @author asolar
  */
 class CrosswordCanvas extends JComponent {
+    
+    private String currentBoard;
 
     /**
      * Horizontal offset from corner for first cell.
@@ -157,6 +162,14 @@ class CrosswordCanvas extends JComponent {
     }
 
     private int x = 1;
+    
+    /**
+     * Sets what the canvas should look like
+     * @param input the inputted string
+     */
+    public void setCanvas(String input) {
+        currentBoard = input;
+    }
 
     /**
      * Simple demo code just to illustrate how to paint cells in a crossword puzzle.
@@ -168,19 +181,19 @@ class CrosswordCanvas extends JComponent {
      */
     @Override
     public void paint(Graphics g) {
-        for (int i = 0; i < x; ++i) {
-            drawCell(i, i, g);
-            letterInCell(Character.toString(i + 65), i, i, g);
-            verticalId(Integer.toString(i), i, i, g);
-            horizontalId(Integer.toString(i), i, i, g);
-            resetLine();
-            println("This is an example of adding text to the canvas.", g);
-            println("You can use formatting to convey information about the state of the game.", g);
-            println("Remember, this code is mostly here to show you how things work.", g);
-            println("Make it your own.", g);
-            printlnFancy("It's ok to get fancy with format.", g);
-            printlnFancy("Have some fun with your UI!", g);
+        
+        // First, we want to get the dimensions
+        System.out.println(currentBoard);
+        String[] lines = currentBoard.split("\\n");
+        String[] dimensions = lines[0].split("x");
+        for (int i = 1; i < Integer.valueOf(dimensions[0]) + 1; i++) {
+            for (int j = 0; j <Integer.valueOf(dimensions[1]); j++) {
+                if (lines[i].charAt(j) == '?') {
+                    drawCell(i-1, j, g);
+                }
+            }
         }
-        x = x + 1;
+        
+        println("hello", g);
     }
 }

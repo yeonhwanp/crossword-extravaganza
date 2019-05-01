@@ -29,6 +29,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import memory.Card;
+import memory.CardStatus;
+
 /**
  * Crossword game client for server.
  */
@@ -58,14 +61,6 @@ public class Client {
      * 
      * 
      */
-    
-    
-    
-    /**
-     * Make a client object 
-     */
-    public Client() {
-    }
     
     /**
      * Check for valid Client rep
@@ -134,8 +129,14 @@ public class Client {
                 BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             
-            System.out.println(socketIn.readLine());
-            
+            // Creating the board
+            String wholeString = "";
+            String dimensions = socketIn.readLine();
+            wholeString += dimensions + "\n";
+            for (int i = 0; i < Integer.valueOf(dimensions.split("x")[0]); i++) {
+                wholeString += socketIn.readLine() + "\n";
+            }
+            canvas.setCanvas(wholeString);
             launchGameWindow();
             
             while ( ! socket.isClosed()) {
