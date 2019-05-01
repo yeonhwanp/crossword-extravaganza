@@ -43,6 +43,7 @@ public class Match {
     //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
     //    players, scores, challengePts, state are final
     //    Match constructor takes in immutable types and 
+    //    Other public methods only take in and return immutable types
     //   
     // Thread safety argument:
     //   TODO: Later
