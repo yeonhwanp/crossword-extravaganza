@@ -201,7 +201,7 @@ class CrosswordCanvas extends JComponent {
         // Put in IDs 
         int numCount = 2 * Integer.valueOf(lines[lineCounter]);
         lineCounter++;
-        for (; lineCounter < Integer.valueOf(dimensions[0]) + numCount;) {
+        for (; lineCounter < Integer.valueOf(dimensions[0]) + numCount + 1;) {
             String wordString = "";
             
             // Each word is formatted with two lines. The first line has details and second has hints.
@@ -218,7 +218,7 @@ class CrosswordCanvas extends JComponent {
                     wordString += split[3] + ". ";
                 }
                 else if (i == 1) {
-                    wordString += " " + lines[lineCounter];
+                    wordString += " " + lines[lineCounter].substring(1, lines[lineCounter].length()-1);
                 }
                 lineCounter++;
             }
