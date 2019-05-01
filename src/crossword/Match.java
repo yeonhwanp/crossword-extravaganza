@@ -46,6 +46,7 @@ public class Match {
     // Representation invariant:
     //    matchName cannot contain newlines, or tabs
     //    rows > 0 && col > 0
+    //    ids in idToWordMap are >= 0, unique, and increasingly sequential.
     //
     // Safety from rep exposure:
     //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
@@ -60,7 +61,7 @@ public class Match {
     private final String matchName;
     private final String matchDescription;
     private final List<Word> words;
-    private final Map<Integer, Word> idToWordMap;
+    private final Map<Integer, Word> idToWordMap; 
     private final Cell[][] gameBoard;
     private final int rows;
     private final int columns;
