@@ -29,19 +29,43 @@ public class Match {
     //           watch()
     // These handlers should all return the updated board after completion
     
+    // Abstraction function:
+    //    AF(matchName, matchDescription, words, gameBoard, players, scores, challengePts, state, rows, columns) = 
+    //      A [rows x columns] crossword match with the name & description matchName/matchDescription respectively and a board with
+    //      contents specified by gameBoard and words -- players, scores, challengePts represent the players and their respective
+    //      points that they've accumulated throughout the game. Finally, the state represents the state of the match
+    //      as specified in the final project handout.
+    // Representation invariant:
+    //    matchName cannot contain newlines, or tabs
+    //    rows > 0 && col > 0
+    //
+    // Safety from rep exposure:
+    //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
+    //    players, scores, challengePts, state are final
+    //    Match constructor takes in immutable types and 
+    //   
+    // Thread safety argument:
+    //   TODO: Later
+    
     
     private final String matchName;
     private final String matchDescription;
-    private final List<Word> words;
+    private final List<Word> words; // TODO Uhhh where's our Map for the words?
+    private final Map<Integer, Word> idToWordMap;
     private final Cell[][] gameBoard;
+    private final int rows;
+    private final int columns;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
     private Map<Player, Integer> challengePts;
     private GameState state;
-    private final int rows;
-    private final int columns;
     
-    
+    /**
+     * Constructor for the Match object
+     * @param matchName the name of the match
+     * @param matchDescription the description of the match
+     * @param words the words associated with this match
+     */
     public Match(String matchName, String matchDescription, List<Word> words) {
         this.matchName = matchName;
         this.matchDescription = matchDescription;
@@ -65,7 +89,6 @@ public class Match {
                 gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
             }
         }
-        
     }
     
     
@@ -172,9 +195,10 @@ public class Match {
         return resultString;
     }
     
-    
-
-    
+    /**
+     * Checks if this board is consistent with regards to the specifications laid out in the Final Project handout
+     * @return true if the board is consistent with regards to the Final Project handout
+     */
     public boolean checkConsistency() {
         /*
          * IMPLEMENTATION IDEA
@@ -263,6 +287,14 @@ public class Match {
         return true;
     }
     
+    /**
+     * TODO: SPEC
+     * @param firstLow
+     * @param firstHigh
+     * @param secondLow
+     * @param secondHigh
+     * @return
+     */
     private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
