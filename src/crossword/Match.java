@@ -36,8 +36,13 @@ public class Match {
     //      points that they've accumulated throughout the game. Finally, the state represents the state of the match
     //      as specified in the final project handout.
     // Representation invariant:
+    //    matchName cannot contain newlines, or tabs
+    //    rows > 0 && col > 0
     //
     // Safety from rep exposure:
+    //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
+    //    players, scores, challengePts, state are final
+    //    Match constructor takes in immutable types and 
     //   
     // Thread safety argument:
     //   TODO: Later
@@ -47,12 +52,12 @@ public class Match {
     private final String matchDescription;
     private final List<Word> words; // TODO Uhhh where's our Map for the words?
     private final Cell[][] gameBoard;
+    private final int rows;
+    private final int columns;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
     private Map<Player, Integer> challengePts;
     private GameState state;
-    private final int rows;
-    private final int columns;
     
     /**
      * Constructor for the Match object
@@ -83,8 +88,6 @@ public class Match {
                 gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
             }
         }
-        
-        throw new RuntimeException("not done implementing yet!");
     }
     
     
