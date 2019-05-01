@@ -1,8 +1,16 @@
 package crossword;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map; //lol hi
 import crossword.Cell.Exist;
+
+
+/*
+ * NOTES/TODOs:
+ *  - fix the rep exposure
+ */
+
 
 public class Match {
     
@@ -69,7 +77,8 @@ public class Match {
     public Match(String matchName, String matchDescription, List<Word> words) {
         this.matchName = matchName;
         this.matchDescription = matchDescription;
-        this.words = words;
+        this.words = words; // TODO: this is rep exposure, but we will change it later
+        this.idToWordMap = new HashMap<Integer, Word>();
         
         int maxRow = 0;
         int maxColumn = 0;
@@ -82,11 +91,24 @@ public class Match {
         rows = maxRow;
         columns = maxColumn;
         
-        this.gameBoard = new Cell[maxRow][maxColumn]; // TODO CHANGE THIS LATER - not done implementing
+        this.gameBoard = new Cell[maxRow][maxColumn];
         
         for(int i = 0; i < maxRow; i++) {
             for(int j = 0; j < maxColumn; j++) {
                 gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
+            }
+        }
+        
+        for(Word word : words) {
+            final int rowLower = word.getRowLowerBound();
+            final int rowHigher = word.getRowUpperBound();
+            final int colLower = word.getColumnLowerBound();
+            final int colHigher = word.getColumnUpperBound();
+            
+            for(int i = rowLower; i <= rowHigher; i++) {
+                for(int j = colLower; j <= colHigher; j++) {
+                    gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
+                }
             }
         }
 
