@@ -2,7 +2,6 @@ package crossword;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +17,7 @@ public class MatchTest {
     // Testing strategy for checkConsistency():
     //  Partition the input as follows:
     //
-    //      Size of words: 0, 1, >1
+    //      Size of words: 0, 1, 2, >2
     //      Type of directions: all across, all down, both across and down
     //          all across: different rows, same row
     //              same row: no overlap, yes overlap
@@ -26,20 +25,13 @@ public class MatchTest {
     //              same column: no overlap, yes overlap
     //          both across and down: no overlap, yes overlap
     //              Yes overlap with same letter, different letter
-    //              Down word compared with vertical, across word compared with down
+    //              Down word compared with across, across word compared with down
+    //              Number of overlaps: 0, 1, >1
+    //          
     //
     //
     //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+
     
     //covers size of words: 0
     @Test
@@ -62,7 +54,7 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      both across, different rows
     @Test
     public void testCheckConsistencyAcrossAcossDifferentRows() {
@@ -77,7 +69,7 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      both across, same rows, no overlap
     @Test
     public void testCheckConsistencyAcrossAcossSameRowsNoOverlap() {
@@ -92,7 +84,7 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      both across, same rows, yes overlap
     @Test
     public void testCheckConsistencyAcrossAcossSameRowsYesOverlap() {
@@ -107,8 +99,8 @@ public class MatchTest {
         assertTrue(!currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
-    //      both down, different columns, yes overlap
+    //covers size of words: 2
+    //      both down, different columns, no overlap
     @Test
     public void testCheckConsistencyDownDownDifferentColumns() {
         List<Word> words = new ArrayList<>();
@@ -122,7 +114,7 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      both down, same columns, no overlap
     @Test
     public void testCheckConsistencyDownDownSameColumnsNoOverlap() {
@@ -137,9 +129,24 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
+    //covers size of words: 2
+    //      both down, same columns, no overlap
+    @Test
+    public void testCheckConsistencyDownDownSameColumnsYesOverlap() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(5, 2, "hint", 1, "cat", "DOWN");
+        Word secondWord = new Word(1, 2, "hint", 1, "splat", "DOWN");
+        words.add(firstWord);
+        words.add(secondWord);
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(!currentMatch.checkConsistency());
+    }
     
-    //covers size of words: >1
-    //      one across one down, no overlap
+    //covers size of words: 2
+    //      one across then one down, no overlap
+    //      Number of overlaps: 0
     @Test
     public void testCheckConsistencyAcrossDownNoOverlap() {
         List<Word> words = new ArrayList<>();
@@ -153,8 +160,9 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      one across one down, yes overlap
+    //      Number of overlaps: 1
     @Test
     public void testCheckConsistencyAcrossDownYesOverlapDifferentLetter() {
         List<Word> words = new ArrayList<>();
@@ -168,7 +176,7 @@ public class MatchTest {
         assertTrue(!currentMatch.checkConsistency());
     }
     
-    //covers size of words: >1
+    //covers size of words: 2
     //      one across one down, yes overlap, same letter
     @Test
     public void testCheckConsistencyAcrossDownYesOverlapSameLetter() {
@@ -183,7 +191,98 @@ public class MatchTest {
         assertTrue(currentMatch.checkConsistency());
     }
     
+    //covers size of words: 2
+    //      one down then one across, yes overlap, same letter
+    @Test
+    public void testCheckConsistencyDownAcrossYesOverlapDifferentLetter() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 1, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(1, 0, "hint", 1, "cat", "ACROSS");
+        
+        words.add(firstWord);
+        words.add(secondWord);
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(!currentMatch.checkConsistency());
+    }
     
+    //covers size of words: >2
+    //      one down then one across, yes overlap, same letter
+    @Test
+    public void testCheckConsistencyDownAcrossMoreWordsYesOverlap() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 1, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(1, 0, "hint", 1, "cat", "ACROSS");
+        Word thirdWord = new Word(2, 0, "hint", 1, "hey", "ACROSS");
+        
+        words.add(firstWord);
+        words.add(secondWord);
+        words.add(thirdWord);
+        
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(!currentMatch.checkConsistency());
+    }
+    
+    //covers size of words: >2
+    //      one down then one across, yes overlap, same letter
+    @Test
+    public void testCheckConsistencyDownAcrossMoreWordsNoOverlap() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(3, 1, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(1, 0, "hint", 1, "cat", "ACROSS");
+        Word thirdWord = new Word(2, 0, "hint", 1, "bad", "ACROSS");
+        
+        words.add(firstWord);
+        words.add(secondWord);
+        words.add(thirdWord);
+        
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(currentMatch.checkConsistency());
+    }
+    
+    //covers size of words: >2
+    //      one down then one across, yes overlap, same letter
+    @Test
+    public void testCheckConsistencyDownAcrossMoreWordsBothOverlapInvalid() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 10, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(0, 9, "hint", 1, "cat", "DOWN");
+        Word thirdWord = new Word(1, 8, "hint", 1, "bad", "ACROSS");
+        
+        words.add(firstWord);
+        words.add(secondWord);
+        words.add(thirdWord);
+        
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(!currentMatch.checkConsistency());
+    }
+    
+    //covers size of words: >2
+    //      one down then one across, yes overlap, same letter
+    //      Number of overlaps: >1
+    @Test
+    public void testCheckConsistencyDownAcrossMoreWordsMultipleOverlapValid() {
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 10, "hint", 1, "dba", "DOWN");
+        Word secondWord = new Word(0, 9, "hint", 1, "cat", "DOWN");
+        Word thirdWord = new Word(1, 8, "hint", 1, "bab", "ACROSS");
+        
+        words.add(firstWord);
+        words.add(secondWord);
+        words.add(thirdWord);
+        
+        
+        Map<Integer, Word> map = new HashMap<>();
+        Match currentMatch = new Match("Match name", "Match description", words, map);
+        assertTrue(currentMatch.checkConsistency());
+    }
     
     
     
