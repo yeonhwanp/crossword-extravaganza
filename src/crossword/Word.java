@@ -2,6 +2,8 @@ package crossword;
 
 import java.util.Optional;
 
+import sun.security.action.GetBooleanAction;
+
 public class Word {
     
     // Abstraction function:
@@ -45,6 +47,10 @@ public class Word {
         this.direction = pDirectionStr.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN;
         
         this.confirmed = false;
+    }
+    
+    public int getID() {
+        return id;
     }
     
     public String getCorrectValue() {
