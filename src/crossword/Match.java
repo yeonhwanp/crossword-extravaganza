@@ -93,10 +93,10 @@ public class Match {
         rows = maxRow;
         columns = maxColumn;
         
-        this.gameBoard = new Cell[maxRow][maxColumn];
+        this.gameBoard = new Cell[rows][columns];
         
-        for(int i = 0; i < maxRow; i++) {
-            for(int j = 0; j < maxColumn; j++) {
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < columns; j++) {
                 gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
             }
         }
