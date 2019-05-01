@@ -2,6 +2,7 @@ package crossword;
 
 import java.util.List;
 import java.util.Map;
+import crossword.Cell.Exist;;
 
 public class Match {
     
@@ -37,6 +38,8 @@ public class Match {
     private Map<Player, Integer> scores;
     private Map<Player, Integer> challengePts;
     private GameState state;
+    private final int rows;
+    private final int columns;
     
     
     public Match(String matchName, String matchDescription, List<Word> words) {
@@ -44,7 +47,26 @@ public class Match {
         this.matchDescription = matchDescription;
         this.words = words;
         
-        this.gameBoard = new Cell[0][0]; //TODO CHANGE THIS LATER - not done implementing
+        int maxRow = 0;
+        int maxColumn = 0;
+        
+        for(Word word : words) {
+            maxRow = Math.max(maxRow, word.getRowUpperBound());
+            maxColumn = Math.max(maxColumn, word.getColumnUpperBound());
+        }
+        
+        rows = maxRow;
+        columns = maxColumn;
+        
+        this.gameBoard = new Cell[maxRow][maxColumn]; // TODO CHANGE THIS LATER - not done implementing
+        
+        for(int i = 0; i < maxRow; i++) {
+            for(int j = 0; j < maxColumn; j++) {
+                gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
+            }
+        }
+        
+        throw new RuntimeException("not done implementing yet!");
     }
     
     
@@ -138,9 +160,17 @@ public class Match {
     
     @Override
     public String toString() {
-        // TODO NOT DONE IMPLEMENTING!
+        String resultString = "";
+        resultString += rows + "x" + columns + "\n";
         
-        return matchName;
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < columns; j++) {
+                resultString += gameBoard[i][j].toString();
+            }
+            resultString += "\n";
+        }
+        
+        return resultString;
     }
     
     

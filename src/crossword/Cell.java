@@ -10,20 +10,25 @@ public class Cell {
     /*
      * TODO AF, RI, SRE, etc.
      */
+    
+    public enum Exist {PRESENT, ABSENT}
 
     private final int row; // (0-indexed)
     private final int col; 
     private String value;
     private final List<Word> correspondingWords;
-    // Also need: boolean confirmedState;
+    private final Exist existState;
+    
+    private static final String EMPTY_CELL = " ";
     
     // Methods also need a toString()
     
-    public Cell(int pRow, int pCol) {
+    public Cell(int pRow, int pCol, Exist state) {
         row = pRow;
         col = pCol;
-        value = ""; // empty string represents no character there
+        value = EMPTY_CELL; // empty cell represents no character there
         correspondingWords = new ArrayList<Word>();
+        existState = state;
         
         checkRep();
     }
@@ -40,6 +45,14 @@ public class Cell {
         return col;
     }
     
+    public boolean isPresent() {
+        return existState == Exist.PRESENT;
+    }
+    
+    public boolean isAbsent() {
+        return existState == Exist.ABSENT;
+    }
+    
     public boolean changeValue(char pValue, Player player) {
         if(canChangeValue(player))
         {
@@ -53,7 +66,7 @@ public class Cell {
     public boolean clearValue(Player player) {
         if(canChangeValue(player))
         {
-            value = "";
+            value = EMPTY_CELL;
             return true;
         }
         
@@ -74,5 +87,13 @@ public class Cell {
     
     public boolean canChangeValue(Player player) {
         throw new RuntimeException("not done implementing");
+    }
+    
+    @Override
+    public String toString() {
+        if(isAbsent()) {
+            return "#";
+        }
+        return getValue();
     }
 }
