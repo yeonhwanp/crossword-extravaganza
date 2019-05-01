@@ -39,6 +39,23 @@ public class Client {
     private String sendString;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
+    
+    /*
+     * Abstraction Function
+     * AF(sendString, canvas) = client object that uses canvas to display and take in information.
+     *      Information that is sent by the 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
+    
+    
+    
     /**
      * Make a client object 
      */
