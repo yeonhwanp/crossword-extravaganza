@@ -279,8 +279,4 @@ public class Match {
     private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
-    
-    class Tuple {
-        
-    }
 }

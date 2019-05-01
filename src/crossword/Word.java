@@ -36,13 +36,12 @@ public class Word {
         return correctValue.charAt(i);
     }
     
-    
     public boolean isVertical() {
-        return direction.equals(Direction.DOWN);
+        return direction == Direction.DOWN;
     }
     
     public boolean isHorizontal() {
-        return direction.equals(Direction.ACROSS);
+        return direction == Direction.ACROSS;
     }
     
     public int getRowLowerBound() {
@@ -51,7 +50,7 @@ public class Word {
     
     public int getRowUpperBound() {
         if (this.isVertical()) {
-            return startRow + this.getLength();
+            return startRow + this.getLength() - 1;
         }
         else {
             return startRow;
@@ -64,7 +63,7 @@ public class Word {
     
     public int getColumnUpperBound() {
         if (this.isHorizontal()) {
-            return startCol + this.getLength();
+            return startCol + this.getLength() - 1;
         }
         else {
             return startCol;
@@ -75,6 +74,9 @@ public class Word {
         return correctValue.length();
     }
     
+    public boolean isConfirmed() {
+        return confirmed;
+    }
     
     public String toString() {
         throw new RuntimeException("not done implementing!");
