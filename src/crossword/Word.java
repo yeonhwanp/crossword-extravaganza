@@ -2,8 +2,6 @@ package crossword;
 
 import java.util.Optional;
 
-import sun.security.action.GetBooleanAction;
-
 public class Word {
     
     // Abstraction function:
