@@ -252,6 +252,7 @@ public class Match {
                         final int secondHigherRow = secondWord.getRowUpperBound();
                         final int potentialCol = secondWord.getColumnLowerBound();
                         
+                        
                         if (potentialRow <= secondHigherRow && potentialRow >= secondLowerRow &&
                                 potentialCol <= firstHigherCol && potentialCol >= firstLowerCol) { // we have an intersection
                             
@@ -280,7 +281,4 @@ public class Match {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
     
-    class Tuple {
-        
-    }
 }
