@@ -12,14 +12,14 @@ public class Word {
     //      owner referencing the player who is "guessing" this word.
     //      
     // Representation invariant:
-    //    row >= 0 && col >= 0
-    //    len(value) <= 1
+    //    startRow >= 0 && startCol >= 0
+    //    id >= 0 && id should be unique
+    //    direction == "DOWN" or direction == "ACROSS"
     //
     // Safety from rep exposure:
-    //    Constructor takes in immutable types
-    //    All methods take in and return immutable types except for addWord
-    //    addWord takes in a mutable type but this is intended rep exposure because words need to be shared between cells
-    //        because each word occupies multiple cells
+    //    startRow, startCol, id, hint, correctValue, and direction are all private and final
+    //    confirmed and owner are private and are only changed using methods of the class
+    //    All methods take in and return immutable types
     //   
     // Thread safety argument:
     //   TODO: Later

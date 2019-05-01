@@ -65,6 +65,7 @@ public class Client {
      * Make a client object 
      */
     public Client() {
+        checkRep();
     }
     
     /**
