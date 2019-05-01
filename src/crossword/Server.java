@@ -40,7 +40,7 @@ public class Server {
     private final List<Match> allMatches;
     
     // LoadBoard()/StartServer? - done
-    // Also need List<String> validFiles and List<Match> ActiveMatches; - a little confused on this
+    // Also need List<String> validFiles and List<Match> ActiveMatches;
     
     
     private static final int VALID = 200;
