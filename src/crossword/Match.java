@@ -32,7 +32,7 @@ public class Match {
     private final String matchName;
     private final String matchDescription;
     private final List<Word> words;
-    private final Map<Integer, Word> idToWordMap;
+    private final Map<Integer, Word> idToWordMap; //do we really need this if words is a list in order?
     private final Cell[][] gameBoard;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;

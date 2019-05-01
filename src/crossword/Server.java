@@ -132,6 +132,8 @@ public class Server {
         
         response = match.toString(); //string of puzzle that the client should see
         
+        System.out.println("RESPONSE: " + response);
+        
         // write the response to the output stream using UTF-8 character encoding
         OutputStream body = exchange.getResponseBody();
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
