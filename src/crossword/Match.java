@@ -336,12 +336,12 @@ public class Match {
     }
     
     /**
-     * TODO: SPEC
-     * @param firstLow
-     * @param firstHigh
-     * @param secondLow
-     * @param secondHigh
-     * @return
+     * Check if two one dimensional ranges, [firstLow, firstHigh] and [secondLow, secondHigh] intersect.
+     * @param firstLow the beginning of the first range
+     * @param firstHigh the end of the first range
+     * @param secondLow the beginning of the second range
+     * @param secondHigh the end of the second range
+     * @return true iff the ranges overlap
      */
     private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
