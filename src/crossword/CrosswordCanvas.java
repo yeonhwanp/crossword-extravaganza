@@ -182,11 +182,17 @@ class CrosswordCanvas extends JComponent {
     @Override
     public void paint(Graphics g) {
         
-        // First, we want to get the dimensions
-        System.out.println(currentBoard);
+
+//        System.out.println(currentBoard); // Debugging
+        
+        // First, split input string according to newlines
         String[] lines = currentBoard.split("\\n");
-        String[] dimensions = lines[0].split("x");
         int lineCounter = 1;
+        
+        // First line is going to give us dimensions so split according to x
+        String[] dimensions = lines[0].split("x");
+        
+        // Create the board with values
         for (; lineCounter < Integer.valueOf(dimensions[0]) + 1; lineCounter++) {
             for (int j = 0; j <Integer.valueOf(dimensions[1]); j++) {
                 if (lines[lineCounter].charAt(j) == '?') {
@@ -194,10 +200,15 @@ class CrosswordCanvas extends JComponent {
                 }
             }
         }
+        
+        // Put in IDs 
         int numCount = 2 * Integer.valueOf(lines[lineCounter]);
         lineCounter++;
         for (; lineCounter < Integer.valueOf(dimensions[0]) + numCount;) {
             String wordString = "";
+            
+            // Each word is formatted with two lines. The first line has details and second has hints.
+            // Add ID and Hint from the two lines then print onto the board
             for (int i = 0; i < 2; i++) {
                 if (i == 0) {
                     String[] split = lines[lineCounter].split(" ");
