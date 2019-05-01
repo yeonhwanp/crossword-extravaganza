@@ -28,7 +28,8 @@ public class Match {
     //           watch()
     // These handlers should all return the updated board after completion
     
-    private final Map<String, Word> words; // Replaced List with Map to account for word IDs
+    private final List<Word> words;
+    private final Map<String, Word> idToWordMap;
     private final Cell[][] gameBoard;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
@@ -39,7 +40,7 @@ public class Match {
      * Used to start the game once two players join.
      */
     public void startGame() {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -47,6 +48,7 @@ public class Match {
      * @param player the player to decrease challenge points for
      */
     private void decreaseChallenge(Player player) {
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -54,7 +56,7 @@ public class Match {
      * @param player the player to increase challenge points for
      */
     private void incrementChallenge(Player player) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -62,7 +64,7 @@ public class Match {
      * @param player the player to increase score for
      */
     public void incrementScore(Player player) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -70,14 +72,14 @@ public class Match {
      * @return the score of the given player
      */
     public int getScore(Player player) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
      * @return the current state of the game
      */
     public GameState getState() {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -87,8 +89,8 @@ public class Match {
      * @param wordString the actual word inserted by the player
      * @return if the insert is valid or not
      */
-    public boolean CheckValidInsert(Player player, String wordID, String wordString) {
-        
+    public boolean checkValidInsert(Player player, String wordID, String wordString) {
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -98,7 +100,7 @@ public class Match {
      * @param wordString the guessed word
      */
     public void insertWord(Player player, String wordID, String wordString) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -109,7 +111,7 @@ public class Match {
      * @return if the challenge is valid or not
      */
     public boolean checkValidChallenge(Player player, String wordID, String wordString) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     /**
@@ -119,12 +121,12 @@ public class Match {
      * @param wordString the actual word used to challenge the other player's guesses
      */
     public void challenge(Player player, String wordID, String wordString) {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     @Override
     public String toString() {
-        
+        throw new RuntimeException("not done implementing!");
     }
     
     
