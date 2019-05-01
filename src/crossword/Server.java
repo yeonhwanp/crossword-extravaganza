@@ -111,7 +111,7 @@ public class Server {
      * @param port server port number
      * @throws IOException if an error occurs starting the server
      */
-    private Server(List<Match> matches, int port) throws IOException {
+    protected Server(List<Match> matches, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
         this.allMatches = matches;
         
