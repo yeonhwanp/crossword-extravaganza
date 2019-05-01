@@ -233,6 +233,8 @@ public class Match {
             resultString += "\n";
         }
         
+        resultString += words.size() + "\n";
+        
         for(Word word : words) {
             resultString += word.getRowLowerBound() + " " + word.getColumnLowerBound() + " " + word.getDirection().name() + " " + word.getID() + "\n";
             resultString += word.getHint() + "\n";
