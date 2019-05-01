@@ -51,7 +51,7 @@ public class Word {
         this.hint = inputHint;
         this.id = pID;
         this.correctValue = pValue;
-        this.direction = pDirectionStr.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN;
+        this.direction = pDirectionStr.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this
         
         this.confirmed = false;
     }

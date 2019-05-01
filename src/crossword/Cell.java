@@ -52,7 +52,8 @@ public class Cell {
     }
     
     private void checkRep() {
-        // TODO
+        assert row >= 0;
+        assert col >= 0;
     }
     
     /**

@@ -3,6 +3,7 @@ package crossword;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,6 +41,8 @@ public class ServerTest {
         
         List<Match> matches = new ArrayList<>();
         Match currentMatch = new Match("Match name", "Match description", words);
+        
+        assertTrue(currentMatch.checkConsistency());
         
         matches.add(currentMatch);
         
@@ -83,6 +86,7 @@ public class ServerTest {
         
         List<Match> matches = new ArrayList<>();
         Match currentMatch = new Match("Match name", "Match description", words);
+        assertTrue(currentMatch.checkConsistency());
         
         matches.add(currentMatch);
         
