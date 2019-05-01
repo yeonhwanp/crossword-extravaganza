@@ -42,11 +42,11 @@ public class Cell {
      * @param state A state representing if this cell is part of the gameboard or not 
      */
     public Cell(int pRow, int pCol, Exist state) {
-        row = pRow;
-        col = pCol;
-        value = EMPTY_CELL; // empty cell represents no character there
-        correspondingWords = new ArrayList<Word>();
-        existState = state;
+        this.row = pRow;
+        this.col = pCol;
+        this.value = EMPTY_CELL; // empty cell represents no character there
+        this.correspondingWords = new ArrayList<Word>();
+        this.existState = state;
         
         checkRep();
     }
