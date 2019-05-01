@@ -1,6 +1,5 @@
 package crossword;
 
-import java.util.List;
 import java.util.Optional;
 
 public class Word {
@@ -78,8 +77,10 @@ public class Word {
         return confirmed;
     }
     
+    @Override
     public String toString() {
-        throw new RuntimeException("not done implementing!");
+        return this.id + ". " + this.correctValue + " at (" + this.startRow + "," + this.startCol + "), in the " + this.direction
+                + " direction, with the hint: " + this.hint;
     }
     
 }
