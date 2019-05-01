@@ -38,7 +38,7 @@ public class MatchTest {
     public void testCheckConsistencyEmpty() {
         List<Word> words = new ArrayList<>();
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -50,7 +50,7 @@ public class MatchTest {
         words.add(firstWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -65,7 +65,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -80,7 +80,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -95,7 +95,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -110,7 +110,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -125,7 +125,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -140,7 +140,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -156,7 +156,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -172,7 +172,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -187,7 +187,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -203,7 +203,7 @@ public class MatchTest {
         words.add(secondWord);
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -222,7 +222,7 @@ public class MatchTest {
         
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -241,7 +241,7 @@ public class MatchTest {
         
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     
@@ -260,7 +260,7 @@ public class MatchTest {
         
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(!currentMatch.checkConsistency());
     }
     
@@ -280,7 +280,7 @@ public class MatchTest {
         
         
         Map<Integer, Word> map = new HashMap<>();
-        Match currentMatch = new Match("Match name", "Match description", words, map);
+        Match currentMatch = new Match("Match name", "Match description", words);
         assertTrue(currentMatch.checkConsistency());
     }
     

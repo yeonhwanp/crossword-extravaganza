@@ -32,7 +32,6 @@ public class Match {
     private final String matchName;
     private final String matchDescription;
     private final List<Word> words;
-    private final Map<Integer, Word> idToWordMap; //do we really need this if words is a list in order?
     private final Cell[][] gameBoard;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
@@ -40,11 +39,10 @@ public class Match {
     private GameState state;
     
     
-    public Match(String matchName, String matchDescription, List<Word> words, Map<Integer, Word> idToWordMap) {
+    public Match(String matchName, String matchDescription, List<Word> words) {
         this.matchName = matchName;
         this.matchDescription = matchDescription;
         this.words = words;
-        this.idToWordMap = idToWordMap;
         
         this.gameBoard = new Cell[0][0]; //TODO CHANGE THIS LATER - not done implementing
     }
