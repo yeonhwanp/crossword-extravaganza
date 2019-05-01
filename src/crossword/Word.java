@@ -43,6 +43,10 @@ public class Word {
         this.confirmed = false;
     }
     
+    public int getID() {
+        return id;
+    }
+    
     public String getCorrectValue() {
         return correctValue;
     }

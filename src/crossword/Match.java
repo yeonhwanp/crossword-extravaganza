@@ -85,8 +85,9 @@ public class Match {
         int maxColumn = 0;
         
         for(Word word : words) {
-            maxRow = Math.max(maxRow, word.getRowUpperBound());
-            maxColumn = Math.max(maxColumn, word.getColumnUpperBound());
+            maxRow = Math.max(maxRow, word.getRowUpperBound()+1);
+            maxColumn = Math.max(maxColumn, word.getColumnUpperBound()+1);
+            idToWordMap.put(word.getID(), word);
         }
         
         rows = maxRow;
