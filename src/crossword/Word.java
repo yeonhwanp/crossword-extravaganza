@@ -1,7 +1,6 @@
 package crossword;
 
 import java.util.Optional;
-import crossword.Cell.Exist;
 
 public class Word {
     

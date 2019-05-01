@@ -14,10 +14,21 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-
-
 public class ServerTest {
     
+    /*
+     * Testing strategy for Server.handleConnect():
+     *  Partition the input as follows:
+     *      Type of Cell: empty, non-existent
+     *      Number of words: 0, 1, > 1
+     *      Orientation: Across, Down, both
+     *      Dimensions: 0, > 0
+     * 
+     */
+    
+    // Covers: Type of Cell: empty, non-existent
+    //         Number of words: > 1
+    //         Orientation: Across
     @Test
     public void testValidPuzzleSimple() throws IOException {
         
@@ -54,7 +65,52 @@ public class ServerTest {
                 "hint\n";
         
         assertEquals(expected, result);
+        input.close();
+        reader.close();
+        server.stop();
+    }
+    
+    // Covers: Number of words: > 1
+    //         Orientation: Down
+    @Test
+    public void testValidPuzzleDown() throws IOException {
         
+        List<Word> words = new ArrayList<>();
+        Word firstWord = new Word(0, 1, "hint", 1, "cat", "DOWN");
+        Word secondWord = new Word(0, 2, "hint", 1, "hi", "DOWN");
+        words.add(firstWord);
+        words.add(secondWord);
+        
+        List<Match> matches = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        
+        matches.add(currentMatch);
+        
+        final Server server = new Server(matches, 4949);
+        server.start();
+        
+        final URL valid = new URL("http://localhost:" + server.port() + "/connect/");
+        
+        // in this test, we will just assert correctness of the server's output
+        final InputStream input = valid.openStream();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
+        
+        String result = getResult(reader);
+        
+        String expected = "3x3\n" + 
+                "#??\n" + 
+                "#??\n" + 
+                "#?#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1\n" + 
+                "hint\n" + 
+                "0 2 DOWN 1\n" + 
+                "hint\n";
+        
+        assertEquals(expected, result);
+        input.close();
+        reader.close();
+        server.stop();
     }
     
     
