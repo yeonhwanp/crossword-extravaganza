@@ -216,56 +216,16 @@ public class Match {
                 }
                 else { // #2: check the point of intersection for words with different orientations
                     
-                    if (firstVertical) { //first is vertical, so second is horizontal
-                        
-                        final int firstLowerRow = firstWord.getRowLowerBound();
-                        final int firstHigherRow = firstWord.getRowUpperBound();
-                        final int potentialCol = firstWord.getColumnLowerBound();
-                        
-                        final int secondLowerCol = secondWord.getColumnLowerBound();
-                        final int secondHigherCol = secondWord.getColumnUpperBound();
-                        final int potentialRow = secondWord.getRowLowerBound();
-                        
-                        if (potentialCol <= secondHigherCol && potentialCol >= secondLowerCol &&
-                                potentialRow <= firstHigherRow && potentialRow >= firstLowerRow) { // we have an intersection
-                            
-                            final int firstIntersectionIndex = potentialRow - firstLowerRow;
-                            final int secondIntersectionIndex = potentialCol - secondLowerCol;
-                            final char firstChar = firstWord.getCorrectCharAt(firstIntersectionIndex);
-                            final char secondChar = secondWord.getCorrectCharAt(secondIntersectionIndex);
-                            
-                            if (firstChar != secondChar) {
-                                return false;
-                            }
-                                
+                    if (firstVertical) { // first word is vertical, so second is horizontal
+                        final boolean consistent = verticalHorizontalConsistent(firstWord, secondWord);
+                        if(!consistent) {
+                            return false;
                         }
-
-                    }
-                    
-                    else { //first is horizontal, so second is vertical
-                        
-                        final int firstLowerCol = firstWord.getColumnLowerBound();
-                        final int firstHigherCol = firstWord.getColumnUpperBound();
-                        final int potentialRow = firstWord.getRowLowerBound();
-                        
-                        final int secondLowerRow = secondWord.getRowLowerBound();
-                        final int secondHigherRow = secondWord.getRowUpperBound();
-                        final int potentialCol = secondWord.getColumnLowerBound();
-                        
-                        if (potentialRow <= secondHigherRow && potentialRow >= secondLowerRow &&
-                                potentialCol <= firstHigherCol && potentialCol >= firstLowerCol) { // we have an intersection
-                            
-                            final int firstIntersectionIndex = potentialCol - firstLowerCol;
-                            final int secondIntersectionIndex = potentialRow - secondLowerRow;
-                            final char firstChar = firstWord.getCorrectCharAt(firstIntersectionIndex);
-                            final char secondChar = secondWord.getCorrectCharAt(secondIntersectionIndex);
-                            
-                            if (firstChar != secondChar) {
-                                return false;
-                            }
-                                
+                    } else { // the second word is vertical, first word is horizontal
+                        final boolean consistent = verticalHorizontalConsistent(secondWord, firstWord);
+                        if(!consistent) {
+                            return false;
                         }
-
                     }
                     
                 }
@@ -278,5 +238,42 @@ public class Match {
     
     private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
+    }
+    
+    /**
+     * Check if two words (the first must be vertical and second must be horizontal) are consistent with each other.
+     * @param verticalWord the vertically aligned word
+     * @param horizontalWord the horizontally aligned word
+     * @return whether or not the two words (one vertical and one horizontal) are consistent with each other
+     */
+    private static boolean verticalHorizontalConsistent(Word verticalWord, Word horizontalWord) {
+        assert verticalWord.isVertical();
+        assert horizontalWord.isHorizontal();
+        
+        final int verticalLowerRow = verticalWord.getRowLowerBound(); // this refers to the vertical line's lower index boundary
+        final int verticalHigherRow = verticalWord.getRowUpperBound();
+        final int potentialCol = verticalWord.getColumnLowerBound(); // column of the potential intersection
+        
+        final int horizontalLowerCol = horizontalWord.getColumnLowerBound(); // horizontal line's left boundary
+        final int horizontalHigherCol = horizontalWord.getColumnUpperBound();
+        final int potentialRow = horizontalWord.getRowLowerBound(); // row of the potential intersection
+        
+        if (potentialCol <= horizontalHigherCol // lies in between the boundaries of the two words
+                && potentialCol >= horizontalLowerCol 
+                && potentialRow <= verticalHigherRow 
+                && potentialRow >= verticalLowerRow) { // we have an intersection
+            
+            final int verticalWordIndex = potentialRow - verticalLowerRow;
+            final int horizontalWordIndex = potentialCol - horizontalLowerCol;
+            
+            final char verticalWordChar = verticalWord.getCorrectCharAt(verticalWordIndex);
+            final char horizontalWordChar = horizontalWord.getCorrectCharAt(horizontalWordIndex);
+            
+            if (verticalWordChar != horizontalWordChar) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }
