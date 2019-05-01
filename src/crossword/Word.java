@@ -2,6 +2,8 @@ package crossword;
 
 import java.util.Optional;
 
+import crossword.Cell.Exist;
+
 public class Word {
     
     // Abstraction function:
@@ -98,6 +100,14 @@ public class Word {
     }
     
     /**
+     * Return the direction of the word
+     * @return the direction of the word
+     */
+    public Exist getDirection() {
+        return direction;
+    }
+    
+    /**
      * Get the smallest row index that the word covers (0-indexed)
      * @return the smallest row index
      */
@@ -157,7 +167,7 @@ public class Word {
     
     @Override
     public String toString() {
-        return this.id + ". " + this.correctValue + " at (" + this.startRow + "," + this.startCol + "), in the " + this.direction
+        return this.id + ". " + this.correctValue + " at (" + this.startRow + "," + this.startCol + "), in the " + this.direction.name()
                 + " direction, with the hint: " + this.hint;
     }
     
