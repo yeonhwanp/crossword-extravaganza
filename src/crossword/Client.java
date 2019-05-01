@@ -106,7 +106,6 @@ public class Client {
                 
                 // Wait until we get notified by enter button
                 try {
-                    System.out.println("booga monster");
                     this.wait();
                 }  catch (InterruptedException e) {
                     e.printStackTrace();
