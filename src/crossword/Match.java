@@ -29,7 +29,7 @@ public class Match {
     // These handlers should all return the updated board after completion
     
     private final List<Word> words;
-    private final Map<String, Word> idToWordMap;
+    private final Map<Integer, Word> idToWordMap;
     private final Cell[][] gameBoard;
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
@@ -145,7 +145,7 @@ public class Match {
          *    3. Check to make sure that the words are different (since all words must be unique)
          */
         
-        for(int i = 0; i < words.size(); i++) {
+        for(int i = 0; i < words.size(); i++) { // iterating on the first word
             
             final Word firstWord = words.get(i);
             final String firstValue = firstWord.getCorrectValue();
@@ -213,5 +213,7 @@ public class Match {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
     
-    
+    class Tuple {
+        
+    }
 }

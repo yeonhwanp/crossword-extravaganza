@@ -22,7 +22,7 @@ public class Cell {
     public Cell(int pRow, int pCol) {
         row = pRow;
         col = pCol;
-        value = ""; // empty character represents no character there
+        value = ""; // empty string represents no character there
         correspondingWords = new ArrayList<Word>();
         
         checkRep();
@@ -62,6 +62,10 @@ public class Cell {
     
     public String getValue() {
         return value;
+    }
+    
+    public boolean isEmpty() {
+        throw new RuntimeException("not done implementing");
     }
     
     public void addWord(Word word) {

@@ -1,8 +1,20 @@
 package crossword;
 
+import java.util.List;
+import java.util.Optional;
 
 public class Word {
 
+    private final List<Cell> involvedCells;
+    private Optional<Player> owner;
+    private boolean confirmed;
+    private final String hint;
+    private final int id;
+    private final String correctValue;
+    
+    public Word(int pRow, int pCol, String inputHint, int pID, String pValue) {
+        
+    }
     
     public String getCorrectValue() {
         throw new RuntimeException("not yet implemented!");
