@@ -217,6 +217,10 @@ public class Match {
             resultString += "\n";
         }
         
+        for(Word word : words) {
+            resultString += word.getRowLowerBound() + " " + word.getColumnLowerBound() + " " + word.getDirection().name() + " " + word.getID() + " " + word.getHint() + "\n";
+        }
+        
         return resultString;
     }
     
