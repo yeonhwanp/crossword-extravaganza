@@ -20,6 +20,11 @@ public class Word {
         throw new RuntimeException("not yet implemented!");
     }
     
+    public char getCorrectCharAt(int i) {
+        return correctValue.charAt(i);
+    }
+    
+    
     public boolean isVertical() {
         throw new RuntimeException("not yet implemented!");
     }

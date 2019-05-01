@@ -200,7 +200,58 @@ public class Match {
                 }
                 else { // #2: check the point of intersection for words with different orientations
                     
-                    throw new RuntimeException("not done implementing!");
+                    if (firstVertical) { //first is vertical, so second is horizontal
+                        
+                        final int firstLowerRow = firstWord.getRowLowerBound();
+                        final int firstHigherRow = firstWord.getRowUpperBound();
+                        final int potentialCol = firstWord.getColumnLowerBound();
+                        
+                        final int secondLowerCol = secondWord.getColumnLowerBound();
+                        final int secondHigherCol = secondWord.getColumnUpperBound();
+                        final int potentialRow = secondWord.getRowLowerBound();
+                        
+                        if (potentialCol <= secondHigherCol && potentialCol >= secondLowerCol &&
+                                potentialRow <= firstHigherRow && potentialRow >= firstLowerRow) { // we have an intersection
+                            
+                            final int firstIntersectionIndex = potentialRow - firstLowerRow;
+                            final int secondIntersectionIndex = potentialCol - secondLowerCol;
+                            final char firstChar = firstWord.getCorrectCharAt(firstIntersectionIndex);
+                            final char secondChar = secondWord.getCorrectCharAt(secondIntersectionIndex);
+                            
+                            if (firstChar != secondChar) {
+                                return false;
+                            }
+                                
+                        }
+
+                    }
+                    
+                    else { //first is horizontal, so second is vertical
+                        
+                        final int firstLowerCol = firstWord.getColumnLowerBound();
+                        final int firstHigherCol = firstWord.getColumnUpperBound();
+                        final int potentialRow = firstWord.getRowLowerBound();
+                        
+                        final int secondLowerRow = secondWord.getRowLowerBound();
+                        final int secondHigherRow = secondWord.getRowUpperBound();
+                        final int potentialCol = secondWord.getColumnLowerBound();
+                        
+                        if (potentialRow <= secondHigherRow && potentialRow >= secondLowerRow &&
+                                potentialCol <= firstHigherCol && potentialCol >= firstLowerCol) { // we have an intersection
+                            
+                            final int firstIntersectionIndex = potentialCol - firstLowerCol;
+                            final int secondIntersectionIndex = potentialRow - secondLowerRow;
+                            final char firstChar = firstWord.getCorrectCharAt(firstIntersectionIndex);
+                            final char secondChar = secondWord.getCorrectCharAt(secondIntersectionIndex);
+                            
+                            if (firstChar != secondChar) {
+                                return false;
+                            }
+                                
+                        }
+
+                    }
+                    
                 }
             }
             
