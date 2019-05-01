@@ -48,15 +48,14 @@ public class Client {
     /**
      * Start a Crossword Extravaganza client.
      * 
-     * ADDITIONS TO MAIN METHOD FOR BRIAN TO CODE:
      * Given the server address, connect to the server. The server will send over a client's view of a match (toString), which holds
      * length, position, and orientation of the words, as well as their associated hint.
      * 
      * Then, the client should display this information as a puzzle. The information is displayed via CrosswordCanvas
      * 
-     * @param args The command line arguments should include only the server address.
-     * @throws IOException 
-     * @throws UnknownHostException 
+     * @param args command line arguments that should include only the server address.
+     * @throws IOException if client cannot properly connect to the server.
+     * @throws UnknownHostException if the server is unknown host.
      */
     public static void main(String[] args) throws UnknownHostException, IOException {
         
@@ -67,6 +66,12 @@ public class Client {
 
     }
     
+    /**
+     * Connects to server, sends requests and receives responses from the server.
+     * @param args command line arguments that should include only the server address.
+     * @throws UnknownHostException if the server/socket is unknown host.
+     * @throws IOException if we cannot connect with URL, or by socket.
+     */
     private synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
         // Take the args and make it into a linked list
         final Queue<String> arguments = new LinkedList<>(List.of(args));
@@ -126,6 +131,7 @@ public class Client {
     }
     
     /**
+     * Reads and prints the board
      * @param in stream for reading a text-protocol RESPONSE, closed on end-of-stream
      * @param out stream for printing a formatted board
      * @param showRaw if true, include raw lines read from in
@@ -160,9 +166,9 @@ public class Client {
     }
     
     /**
-     * Some method lol
-     * @param text
-     * @return
+     * Counts the number of characters using locations of boundaries in the text
+     * @param text text to count the number of characters
+     * @return the number of characters using locations of boundaries in the text
      */
     private static int countCharacters(String text) {
         final BreakIterator it = BreakIterator.getCharacterInstance();
@@ -177,9 +183,6 @@ public class Client {
      * a text box to enter commands and an Enter button.
      * 
      * @param matchStr toString of client view of a match. Use this to display the puzzle, its hints, and any extra info.
-     * Brian - I think all you need to do for the warmup in client is simply display the puzzle and stuff. You shouldn't
-     * have to worry too much about input into the textbox, etc.
-     * 
      */
     private synchronized void launchGameWindow() {
         

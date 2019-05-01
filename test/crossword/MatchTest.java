@@ -27,7 +27,7 @@ public class MatchTest {
     //              Number of overlaps: 0, 1, >1
     //          
     //
-    //
+    // Testing strategy for toString():
     //
 
     
