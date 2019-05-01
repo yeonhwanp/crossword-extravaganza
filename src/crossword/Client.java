@@ -43,11 +43,16 @@ public class Client {
     /*
      * Abstraction Function
      * AF(sendString, canvas) = client object that uses canvas to display and take in information.
-     *      Information that is sent by the 
+     *      sendString represents the information that is sent in by the client
      * 
+     * Rep Invariant:
+     *  true (for now, until we implement the rest of the game)
      * 
-     * 
-     * 
+     * Safety from Rep Exposure:
+     *  TODO
+     *  
+     * Thread safety argument:
+     *  TODO
      * 
      * 
      * 
@@ -60,6 +65,15 @@ public class Client {
      * Make a client object 
      */
     public Client() {
+    }
+    
+    /**
+     * Check for valid Client rep
+     */
+    private void checkRep() {
+        assert sendString != null;
+        assert canvas != null;
+                
     }
 
     /**

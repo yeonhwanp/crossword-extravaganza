@@ -39,8 +39,28 @@ public class Server {
     private final HttpServer server;
     private final List<Match> allMatches;
     
-    // LoadBoard()/StartServer? - done
-    // Also need List<String> validFiles and List<Match> ActiveMatches;
+    
+    /*
+     * Abstraction Function:
+     * AF(server, allMatches) = Server that is playd on server, with allMatches being the possible matches that can be played
+     *      by players
+     * 
+     * Rep Invariant:
+     * true
+     * 
+     * Safety from rep exposure:
+     *  server and allMatches are both private and final
+     *      server is mutated in the Server constructor (parameter as well), start(), and stop(), but this is part of the expected behavior, so no rep exposure
+     *      allMatches TODO
+     * 
+     * 
+     * 
+     * 
+     */
+    
+    
+    
+    
     
     
     private static final int VALID = 200;
@@ -79,8 +99,13 @@ public class Server {
         }
     }
     
-    
-    public Server(List<Match> matches, int port) throws IOException {
+    /**
+     * Create a new server object that clients can connect to
+     * @param matches different matches that can be played by players on this server
+     * @param port server port number
+     * @throws IOException if an error occurs starting the server
+     */
+    private Server(List<Match> matches, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
         this.allMatches = matches;
         
@@ -106,7 +131,13 @@ public class Server {
         
     }
     
-    
+    /**
+     * Given a file, make a match object that contains match information given in puzzle, according to the grammar in the project handout
+     * @param puzzle file pathname leading to the puzzle to parse
+     * @return match object that contains match information given in puzzle
+     * @throws IOException if we cannot read the file passed in
+     * @throws UnableToParseException if we cannot parse the string of the puzzle
+     */
     private static Match loadMatch(File puzzle) throws IOException, UnableToParseException {
         BufferedReader reader = new BufferedReader(new FileReader(puzzle));
         String fullPuzzle = "";
@@ -123,7 +154,12 @@ public class Server {
     }
     
     
-    
+    /**
+     * Given a match, send a readable version of the match to the client.
+     * @param match match to send a readable version of
+     * @param exchange exchange used to connect with client
+     * @throws IOException if response headers cannot be sent
+     */
     private static void communicatePuzzle(Match match, HttpExchange exchange) throws IOException {
         
         final String response;
@@ -206,7 +242,11 @@ public class Server {
         return match;
     }
     
-    
+    /**
+     * Using a parseTree, construct a Match object 
+     * @param parseTree parse tree to parse through in order to find information needed to construct a match object
+     * @return Match object that is a parsed match based on information from the parseTree
+     */
     private static Match makeBoard(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
         ParseTree<PuzzleGrammar> nameTree = children.get(0);

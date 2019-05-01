@@ -28,7 +28,12 @@ public class MatchTest {
     //          
     //
     // Testing strategy for toString():
-    //  
+    //  Partition the input as follows:
+    //      Type of match name: empty string, non-empty string
+    //      Type of match description: empty string, non-empty string
+    //      Number of entries: 0, 1, >1
+    //      
+    //          
     //
 
     

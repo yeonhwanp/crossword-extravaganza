@@ -50,7 +50,7 @@ public class Match {
     
     private final String matchName;
     private final String matchDescription;
-    private final List<Word> words; // TODO Uhhh where's our Map for the words?
+    private final List<Word> words;
     private final Map<Integer, Word> idToWordMap;
     private final Cell[][] gameBoard;
     private final int rows;
