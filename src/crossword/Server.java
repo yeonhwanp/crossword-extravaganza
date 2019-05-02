@@ -115,7 +115,9 @@ public class Server {
      */
     protected Server(List<Match> matches, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
-        this.allMatches = matches;
+//        this.allMatches = matches;
+        this.allMatches = new ArrayList<>(); //TODO CHANGE THESE TWO 
+        this.waitingMatches = new ArrayList<>(); //TODO
         
         // handle concurrent requests with multiple threads
         server.setExecutor(Executors.newCachedThreadPool());
@@ -279,7 +281,7 @@ public class Server {
         System.out.println("puzzle description: " + description);
         System.out.println("");
 
-        List<Word> allWords = new ArrayList<>();
+        List<WordTuple> allWords = new ArrayList<>();
         
         //initiate Board constructor here - putting in name of puzzle, and description of puzzle
         
@@ -296,7 +298,8 @@ public class Server {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
-            Word currentWord = new Word(row, col, hint, i - 1, wordname, direction);
+//            Word currentWord = new Word(row, col, hint, i - 1, wordname, direction);
+            WordTuple currentWord = new WordTuple(row, col, hint, i-1, wordname, direction);
             
             System.out.println("wordname: "+ wordname);
             System.out.println("hint: "+ hint);

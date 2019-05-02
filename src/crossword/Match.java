@@ -1,8 +1,10 @@
 package crossword;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import crossword.Cell.Exist;
 
 
@@ -76,10 +78,16 @@ public class Match {
      * @param matchDescription the description of the match
      * @param words the words associated with this match
      */
-    public Match(String matchName, String matchDescription, List<Word> words) {
+    public Match(String matchName, String matchDescription, List<WordTuple> wordTuples) {
         this.matchName = matchName;
         this.matchDescription = matchDescription;
-        this.words = words; // TODO: this is rep exposure, but we will change it later
+        this.words = new ArrayList<>();
+        for (WordTuple wordTuple : wordTuples) {
+            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), wordTuple.getID(),
+                    wordTuple.getWord(), wordTuple.getDirection());
+            this.words.add(newWord);
+        }
+        
         this.idToWordMap = new HashMap<Integer, Word>();
         
         int maxRow = 0;

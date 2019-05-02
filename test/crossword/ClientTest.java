@@ -8,6 +8,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for client
+ * @author christophercheung
+ *
+ */
 public class ClientTest {
 
     /*

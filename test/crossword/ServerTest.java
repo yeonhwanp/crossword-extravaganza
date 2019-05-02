@@ -15,6 +15,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for server
+ */
 public class ServerTest {
     
     /*
@@ -33,9 +36,9 @@ public class ServerTest {
     @Test
     public void testValidPuzzleSimple() throws IOException {
         
-        List<Word> words = new ArrayList<>();
-        Word firstWord = new Word(1, 2, "hint", 1, "cat", "ACROSS");
-        Word secondWord = new Word(2, 3, "hint", 1, "splat", "ACROSS");
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWord = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
+        WordTuple secondWord = new WordTuple(2, 3, "hint", 1, "splat", "ACROSS");
         words.add(firstWord);
         words.add(secondWord);
         
@@ -78,9 +81,9 @@ public class ServerTest {
     @Test
     public void testValidPuzzleDown() throws IOException {
         
-        List<Word> words = new ArrayList<>();
-        Word firstWord = new Word(0, 1, "hint", 1, "cat", "DOWN");
-        Word secondWord = new Word(0, 2, "hint", 1, "hi", "DOWN");
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWord = new WordTuple(0, 1, "hint", 1, "cat", "DOWN");
+        WordTuple secondWord = new WordTuple(0, 2, "hint", 1, "hi", "DOWN");
         words.add(firstWord);
         words.add(secondWord);
         
