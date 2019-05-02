@@ -391,4 +391,13 @@ public class Match {
         
         return true;
     }
+    
+    public String getMatchName() {
+        return matchName;
+    }
+    
+    public String getMatchDescription() {
+        return matchDescription;
+    }
+    
 }

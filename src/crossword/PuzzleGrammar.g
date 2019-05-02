@@ -1,5 +1,5 @@
-FILE ::= ">>" NAME DESCRIPTION "\n"* ENTRY*;
 @skip whitespace {
+    FILE ::= ">>" NAME DESCRIPTION NEWLINES ENTRY*;
     NAME ::= StringIdent;
     DESCRIPTION ::= String;
     ENTRY ::= "("  WORDNAME ","  CLUE "," DIRECTION "," ROW "," COL ")";
@@ -9,8 +9,10 @@ FILE ::= ">>" NAME DESCRIPTION "\n"* ENTRY*;
     ROW ::= Int;
     COL ::= Int;
 }
+NEWLINES ::= "\n"*;
+
 String::= '"' ([^"\r\n\\] | '\\' [\\nrt] )* '"';
 StringIdent ::= '"' [^"\r\n\t\\]* '"';
 Int ::= [0-9]+;
-spaces ::= [ ];
+spaces ::= [ ]*;
 whitespace ::= [ \t\r\n]+;
