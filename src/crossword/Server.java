@@ -31,14 +31,24 @@ import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
 import edu.mit.eecs.parserlib.UnableToParseException;
 
+/*
+ * TODO NOTES:
+ * - Multiple matches
+ * - Seeing all matches that work, seeing all the matches that can be connected to
+ * - Receive input from the client based on the state of the match
+ *      - Implement CHOOSE: PLAY, NEW, EXIT
+ *      - Implement PLAY: TRY, CHALLENGE, EXIT
+ * - TODO Go to OH and ask about changing the file midway
+ */
+
 /**
  * HTTP web puzzle server.
  */
 public class Server {
     
     private final HttpServer server;
-    private final List<Match> allMatches;
-    
+    private final List<String> allMatches;
+    private final List<Match> waitingMatches;
     
     /*
      * Abstraction Function:
@@ -91,10 +101,6 @@ public class Server {
                 final Server server = new Server(matches, 4949);
                 server.start();
             }
-            
-            
-            
-            
             
             //do we need to stop the server? I feel like we don't?
             break;

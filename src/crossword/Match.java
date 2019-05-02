@@ -88,17 +88,17 @@ public class Match {
         for(Word word : words) {
             maxRow = Math.max(maxRow, word.getRowUpperBound()+1);
             maxColumn = Math.max(maxColumn, word.getColumnUpperBound()+1);
-            idToWordMap.put(word.getID(), word);
+            this.idToWordMap.put(word.getID(), word);
         }
         
-        rows = maxRow;
-        columns = maxColumn;
+        this.rows = maxRow;
+        this.columns = maxColumn;
         
         this.gameBoard = new Cell[rows][columns];
         
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < columns; j++) {
-                gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
+                this.gameBoard[i][j] = new Cell(i, j, Exist.ABSENT);
             }
         }
         
@@ -110,7 +110,7 @@ public class Match {
             
             for(int i = rowLower; i <= rowHigher; i++) {
                 for(int j = colLower; j <= colHigher; j++) {
-                    gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
+                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
                 }
             }
         }

@@ -1,5 +1,7 @@
 package crossword;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Word {
@@ -26,7 +28,7 @@ public class Word {
     
     public enum Direction {ACROSS, DOWN}
 
-//    private final List<Cell> involvedCells; //can fix this later after warmup
+    private final List<Cell> involvedCells;
     private final int startRow;
     private final int startCol;
     private final int id;
@@ -43,17 +45,22 @@ public class Word {
      * @param inputHint the hint for the word
      * @param pID the ID of the word
      * @param pValue the correct value of the word
-     * @param pDirectionStr the direction of the word
+     * @param pDirection the direction of the word
      */
-    public Word(int pRow, int pCol, String inputHint, int pID, String pValue, String pDirectionStr) {
+    public Word(int pRow, int pCol, String inputHint, int pID, String pValue, String pDirection) {
         this.startRow = pRow;
         this.startCol = pCol;
         this.hint = inputHint;
         this.id = pID;
         this.correctValue = pValue;
-        this.direction = pDirectionStr.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this
+        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this
+        assert pDirection.equals("ACROSS") || pDirection.equals("DOWN");
+//        this.direction = pDirection;
+//        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN;
+        this.involvedCells = new ArrayList<>(); //change this later
         
         this.confirmed = false;
+        this.owner = Optional.empty();
     }
     
     /**
