@@ -517,4 +517,71 @@ public class Server {
         server.stop(0);
     }
     
+    /*
+     * TO STRING IMPLEMENTATION
+     * -> First line should always indicate what state we're in.
+     */
+    
+    /**
+     * RECEIVE: New connection request
+     * STATE: start
+     * SEND: state, "NEW GAME"
+     */
+    private void init(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * RECEIVE: a start request from the players with one parameter: "MY_PLAYER ID"
+     *  PRECONDITION: The ID must be unique (non-existing)
+     * STATE:
+     *  IF precondition: choose
+     *      SEND: STATE, "NEW"
+     *  ELSE: start
+     *      SEND: STATE, "TRY AGAIN"
+     */
+    private void start(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * RECIEVE: A new match request in the form of: "NEW match_ID puzzle_ID "Description"
+     *  PRECONDITION: matchID must be unique, puzzle_ID must exist, 
+     *      - matchID must be unique
+     *      - matchID must have no whitespace
+     *      - puzzle_ID must exist
+     *      - TODO ASSUMPTION that description comes from the .puzzle file
+     *  STATE:
+     *      - IF precondition: WAIT
+     *          SEND: STATE, "WAITING"
+     *      - ELSE: choose
+     *          SEND: STATE, "TRY AGAIN"
+     */
+    private void newMatch(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * RECEIVE: A play request in the form: "PLAY match_ID"
+     *  PRECONDITION: 
+     *      - matchID must exist
+     *  STATE:
+     *      - IF precondition: PLAY
+     *          - SEND: STATE, board
+     *      - ELSE:
+     *          - SEND: STATE, "TRY_AGAIN"
+     */
+    private void play(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * RECEIVE: An exist request in the form "EXIT"
+     *  PRECONDITION: 
+     *      - true
+     * SEND: CLOSE CONNECTION
+     */
+    private void exit(HttpExchange exchange) throws IOException {
+        
+    }
+    
+    
+    
+    
 }
