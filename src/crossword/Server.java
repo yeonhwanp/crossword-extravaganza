@@ -57,6 +57,8 @@ public class Server {
     private final Map<Integer, String> currentMatchesMap;
     private final Map<String, Player> allPlayers;
     
+    
+    
     /*
      * Abstraction Function:
      * AF(server, allMatches) = Server that is played on server, with allMatches being the possible matches that can be played
@@ -160,9 +162,6 @@ public class Server {
         // handle requests for paths that start with /choose/
         HttpContext choose = server.createContext("/choose/", new HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
-                System.out.println("hiiii");
-                
-                System.out.println("WHAT");
                 final Map<String, String> validMatchesMap;
                 
                 try {
