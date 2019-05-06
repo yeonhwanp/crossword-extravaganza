@@ -83,7 +83,6 @@ public class Client {
         // Create a new client object and have it connect
         Client thisClient = new Client();
         thisClient.connectToServer(args);
-        thisClient.launchGameWindow();
 
     }
     
@@ -113,7 +112,7 @@ public class Client {
             throw new IllegalArgumentException("missing or invalid PORT", e);
         }
         
-        final URL loadRequest = new URL("http://" + host + ":" + port + "/connect/");
+        final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
         
         // Create a new connection
         try (
