@@ -29,11 +29,11 @@ public class Cell {
 
     private final int row; // (0-indexed)
     private final int col; 
-    private String value;
+    private char value;
     private final List<Word> correspondingWords;
     private final Exist existState;
     
-    private static final String EMPTY_CELL = "?";
+    private static final char EMPTY_CELL = '?';
     
     /**
      * Constructor for a cell 
@@ -93,7 +93,7 @@ public class Cell {
     public boolean changeValue(char pValue, Player player) {
         if(canChangeValue(player))
         {
-            value = String.valueOf(pValue);
+            value = pValue;
             return true;
         }
         
@@ -118,7 +118,7 @@ public class Cell {
     /**
      * @return the value hosted in this cell
      */
-    public String getValue() {
+    public char getValue() {
         return value;
     }
     
@@ -138,12 +138,19 @@ public class Cell {
     }
     
     /**
-     * Checks the validity of changeability of this cell
+     * Checks the validity of changeability of this cell, so this can only be changed if the words it's part of are
+     * neither confirmed nor controlled by a different player
      * @param player the player that wants to change this cell's value
      * @return true if the cell's value is changeable in accordance with the final project handout
      */
     public boolean canChangeValue(Player player) {
-        throw new RuntimeException("not done implementing");
+        for(Word word : correspondingWords) {
+            if(word.isConfirmed() || (word.hasOwner() && !player.equals(word.getOwner()))) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     @Override
@@ -151,6 +158,6 @@ public class Cell {
         if(isAbsent()) {
             return "#";
         }
-        return getValue();
+        return String.valueOf(getValue());
     }
 }

@@ -53,7 +53,7 @@ public class Word {
         this.hint = inputHint;
         this.id = pID;
         this.correctValue = pValue;
-        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this
+        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this(???)
         assert pDirection.equals("ACROSS") || pDirection.equals("DOWN");
         this.involvedCells = new ArrayList<>(); //change this later
         
@@ -174,6 +174,25 @@ public class Word {
      */
     public boolean isConfirmed() {
         return confirmed;
+    }
+    
+    public void setOwner(Player newOwner) {
+        owner = Optional.of(newOwner);
+    }
+    
+    public boolean hasOwner() {
+        return owner.isPresent();
+    }
+    
+    public void clearOwner() {
+        owner = Optional.empty();
+    }
+    
+    public Player getOwner() {
+        if(!hasOwner()) {
+            throw new RuntimeException("Tried calling get owner on a word that isn't owned!");
+        }
+        return owner.get();
     }
     
     @Override
