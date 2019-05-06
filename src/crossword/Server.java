@@ -54,7 +54,7 @@ public class Server {
 //    private final List<String> validMatches;
 //    private final Map<String, String> validMatchesMap;
     private final List<Match> waitingMatches;
-    private final Map<Integer, String> currentMatchesMap;
+    private final Map<Integer, String> currentMatchesMap; // <STRING, MATCH>
     private final Map<String, Player> allPlayers;
     
     
@@ -550,6 +550,9 @@ public class Server {
      *  STATE:
      *      - IF precondition: WAIT
      *          SEND: STATE, "WAITING"
+     *          THEN: server.wait() until someone else connects to the board 
+     *          STATE: PLAY
+     *          SEND: STATE, board
      *      - ELSE: choose
      *          SEND: STATE, "TRY AGAIN"
      */
@@ -561,23 +564,67 @@ public class Server {
      *  PRECONDITION: 
      *      - matchID must exist
      *  STATE:
-     *      - IF precondition: PLAY
+     *      - IF precondition:
+     *          - STATE = PLAY
      *          - SEND: STATE, board
      *      - ELSE:
      *          - SEND: STATE, "TRY_AGAIN"
      */
     private void play(HttpExchange exchange) throws IOException {
     }
-    
+
     /**
-     * RECEIVE: An exist request in the form "EXIT"
-     *  PRECONDITION: 
-     *      - true
-     * SEND: CLOSE CONNECTION
+     * RECEIVE: An exist request in the form "EXIT GAME_STATE"
+     *   IF GAME_STATE == CHOOSE:
+     *      - CLOSE CONNECTION
+     *   ELSE IF GAME_STATE == WAIT:
+     *      - Terminate game
+     *      - SEND: NEW, "NEW_GAME"
+     *   ELSE IF GAME_STATE == PLAY:
+     *      - Terminate game
+     *      - SEND: SHOW_SCORE, score
+     *   ELSE IF GAME_STATE == SHOW_SCORE:
+     *      - Close connection
      */
     private void exit(HttpExchange exchange) throws IOException {
-        
     }
+    
+    /**
+     * RECEIVE: A try request in the form: "TRY PLAYER_ID MATCH_ID WORD_ID word"
+     * PRECONDITION:
+     *     - MATCH_ID must exist
+     *     - PLAYER_ID must be one of the players in the match
+     * IF VALID REQUEST -> Ongoing (game logic):
+     *     - SEND: PLAY, board, true
+     * IF VALID_REQUEST -> Finish (game logic):
+     *     - SEND: SHOW_SCORE, score
+     * IF INVLAID (game logic):
+     *     - SEND: PLAY, board, false
+     */
+    private void tryPlay(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * RECEIVE: A try request in the form: "CHALLENGE PLAYER_ID MATCH_ID WORD_ID word"
+     * PRECONDITION:
+     *     - MATCH_ID must exist
+     *     - PLAYER_ID must be one of the players in the match
+     * IF VALID CHALLENGE -> Ongoing (game logic):
+     *     - SEND: PLAY, board, true
+     * IF VALID_CHALLENGE -> Finish (game logic):
+     *     - SEND: SHOW_SCORE, score
+     * IF FAILED_CHALLENGE (game logic):
+     *     - SEND: PLAY, board, false
+     */
+    private void challenge(HttpExchange exchange) throws IOException {
+    }
+    
+    /**
+     * Send the score
+     */
+    private String sendSHOWSCORE() {    
+    }
+    
     
     
     
