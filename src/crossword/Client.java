@@ -139,6 +139,8 @@ public class Client {
 //            canvas.setCanvas(wholeString);
             // Creating the board
             
+            System.out.println("hello");
+            
             String state = socketIn.readLine();
             parseRequest(state, socketIn);
             
