@@ -303,7 +303,7 @@ public class Client {
     }
     
     /**
-     * SENDS: /choose/NEW/matchID/puzzleID/description
+     * SENDS: /choose/matchID/puzzleID/description
      */
     private void sendChoose() {
     }
