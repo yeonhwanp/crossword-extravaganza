@@ -547,7 +547,6 @@ public class Server {
      *      - matchID must be unique
      *      - matchID must have no whitespace
      *      - puzzle_ID must exist
-     *      - TODO ASSUMPTION that description comes from the .puzzle file
      *  STATE:
      *      - IF precondition: WAIT
      *          SEND: STATE, "WAITING"

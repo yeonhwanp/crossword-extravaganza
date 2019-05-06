@@ -113,7 +113,7 @@ public class Client {
             throw new IllegalArgumentException("missing or invalid PORT", e);
         }
         
-        final URL loadRequest = new URL("http://" + host + ":" + port + "/connect/");
+        final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
         
         // Create a new connection
         try (
@@ -124,20 +124,20 @@ public class Client {
                 BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             
-            // Creating the board
-            String wholeString = "";
-            String dimensions = socketIn.readLine();
-            wholeString += dimensions + "\n";
-            for (int i = 0; i < Integer.valueOf(dimensions.split("x")[0]); i++) {
-                wholeString += socketIn.readLine() + "\n";
-            }
-            String numWords = socketIn.readLine();
-            wholeString += numWords + "\n";
-            int numCount = 2 * Integer.valueOf(numWords);
-            for (int i = 0; i < numCount; i++) {
-                wholeString += socketIn.readLine() + "\n";
-            }
-            canvas.setCanvas(wholeString);
+//            // Creating the board
+//            String wholeString = "";
+//            String dimensions = socketIn.readLine();
+//            wholeString += dimensions + "\n";
+//            for (int i = 0; i < Integer.valueOf(dimensions.split("x")[0]); i++) {
+//                wholeString += socketIn.readLine() + "\n";
+//            }
+//            String numWords = socketIn.readLine();
+//            wholeString += numWords + "\n";
+//            int numCount = 2 * Integer.valueOf(numWords);
+//            for (int i = 0; i < numCount; i++) {
+//                wholeString += socketIn.readLine() + "\n";
+//            }
+//            canvas.setCanvas(wholeString);
             launchGameWindow();
             
             while ( ! socket.isClosed()) {
