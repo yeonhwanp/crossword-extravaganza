@@ -83,7 +83,6 @@ public class Client {
         // Create a new client object and have it connect
         Client thisClient = new Client();
         thisClient.connectToServer(args);
-        thisClient.launchGameWindow();
 
     }
     
