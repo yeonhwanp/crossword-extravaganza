@@ -53,7 +53,7 @@ public class Server {
 //    private final List<String> validMatches;
 //    private final Map<Integer, String> currentMatchesMap; // <STRING, MATCH>
 //    private final Map<String, Player> allPlayers;
-    
+    private Set<String> validPuzzleNames;
     private final Set<Player> allPlayers;
     
     
@@ -148,6 +148,7 @@ public class Server {
       // handle requests for paths that start with /init/
       HttpContext initRequest = server.createContext("/init/", new HttpHandler() {
           public void handle(HttpExchange exchange) throws IOException {
+
               init(exchange);
               
           }
@@ -157,8 +158,12 @@ public class Server {
       // handle requests for paths that start with /start/
       HttpContext startRequest = server.createContext("/start/", new HttpHandler() {
           public void handle(HttpExchange exchange) throws IOException {
-
-              start(exchange);
+              try {
+                validPuzzleNames = findValidPuzzles(folderPath);
+            } catch (UnableToParseException e) {
+                e.printStackTrace();
+            }
+              handleStart(exchange);
               
           }
       });
@@ -584,11 +589,11 @@ public class Server {
      *  PRECONDITION: The ID must be unique (non-existing)
      * STATE:
      *  IF precondition: choose
-     *      SEND: STATE, "NEW"
+     *      SEND: STATE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  ELSE: start
-     *      SEND: STATE, "TRY AGAIN"
+     *      SEND: STATE, "TRY AGAIN", allMatches
      */
-    private void start(HttpExchange exchange) throws IOException {
+    private void handleStart(HttpExchange exchange) throws IOException {
         
         // if you want to know the requested path:
         final String path = exchange.getRequestURI().getPath();
@@ -608,7 +613,9 @@ public class Server {
         }
         else {
             response = "start\n"
-                    + "TRY AGAIN";
+                    + "TRY AGAIN\n"
+                    + "All puzzles to start a new match from:\n"
+                    + validPuzzleNames;
         }
 
         System.out.println("START RESPONSE: " + response);
@@ -739,5 +746,28 @@ public class Server {
         }
         return true;
     }
+    
+    /**
+     * Find all the puzzles that are valid puzzles in a folder of possible puzzles
+     * @param folderPath path to folder that holds the puzzles to check
+     * @return all the puzzles that are valid puzzles
+     * @throws IOException if we cannot properly load the match
+     * @throws UnableToParseException if we for some reason cannot parse the file puzzle
+     */
+    private Set<String> findValidPuzzles(String folderPath) throws IOException, UnableToParseException {
+      File folder = new File(folderPath);
+      Set<String> puzzles = new HashSet<>();
+      for (File puzzle : folder.listFiles()) {
+          Match match = loadMatch(puzzle);
+          //need to check if this match is valid
+          if (match.checkConsistency()) {
+              puzzles.add(match.getMatchName());
+          }
+          
+      }
+      return puzzles;
+      
+    }
+    
     
 }
