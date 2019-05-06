@@ -530,7 +530,7 @@ public class Server {
     }
     
     /**
-     * RECEIVE: a start request from the players with one parameter: "MY_PLAYER ID"
+     * RECEIVE: a start request from the players with one parameter: "MY_PLAYER_ID"
      *  PRECONDITION: The ID must be unique (non-existing)
      * STATE:
      *  IF precondition: choose
@@ -579,7 +579,7 @@ public class Server {
      *      - CLOSE CONNECTION
      *   ELSE IF GAME_STATE == WAIT:
      *      - Terminate game
-     *      - SEND: NEW, "NEW_GAME"
+     *      - SEND: CHOOSE, "NEW"
      *   ELSE IF GAME_STATE == PLAY:
      *      - Terminate game
      *      - SEND: SHOW_SCORE, score

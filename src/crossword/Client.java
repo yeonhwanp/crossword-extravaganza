@@ -137,6 +137,7 @@ public class Client {
 //                wholeString += socketIn.readLine() + "\n";
 //            }
 //            canvas.setCanvas(wholeString);
+            // Creating the board
             launchGameWindow();
             
             while ( ! socket.isClosed()) {
@@ -259,4 +260,92 @@ public class Client {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setVisible(true);
     }
+    
+    /**
+     * parses the string and does something
+     */
+    private void parse(String state) {
+        switch (state) {
+        case "start":
+            break;
+        case "choose":
+            break;
+        case "wait":
+            break;
+        case "play":
+            break;
+        case "show_score":
+            break;
+        }
+    }
+    
+    /**
+     * RECEIVES: 
+     *  - START, "NEW GAME" 
+     *  - START, "TRY AGAIN"
+     */
+    private void receiveStart() {
+        
+    }
+    
+    /**
+     * SENDS: /start/playerID
+     */
+    private void sendStart() {  
+    } 
+    
+    /**
+     * RECEIVES: 
+     *  - CHOOSE, "NEW"
+     *  - CHOOSE, "TRY AGAIN"
+     */
+    private void receiveChoose() {
+    }
+    
+    /**
+     * SENDS: /choose/NEW/matchID/puzzleID/description
+     */
+    private void sendChoose() {
+    }
+    
+    /**
+     * RECEIVES:
+     *  - WAIT, "WAITING"
+     */
+    private void receiveWait() {
+    }
+    
+    /**
+     * SENDS: /EXIT/STATE
+     */
+    private void sendExit() {
+    }
+    
+    /**
+     * RECEIVES:
+     *  - PLAY, board, true
+     *  - PLAY, board, false
+     */
+    private void receivePlay() {
+    }
+    
+    /**
+     * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
+     */
+    private void sendTry() {
+    }
+    
+    /**
+     * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
+     */
+    private void sendChallenge() {
+    }
+    
+    /**
+     * RECEIVES: SHOW_SCORE
+     */
+    private void receiveEnd() {
+    }
+    
+    
 }
