@@ -19,7 +19,11 @@ import javax.swing.JComponent;
  */
 class CrosswordCanvas extends JComponent {
     
+    private enum ClientState {START, CHOOSE, PLAY, SHOW_SCORE}
+    
+    private ClientState state;
     private String currentBoard;
+    private String request;
 
     /**
      * Horizontal offset from corner for first cell.
@@ -167,6 +171,15 @@ class CrosswordCanvas extends JComponent {
     public void setCanvas(String input) {
         currentBoard = input;
     }
+    
+    /**
+     * Sets the canvas request string
+     * @param input
+     */
+    public void setRequest(String state, String input) {
+        if (state == "start") { this.state = ClientState.START; }
+        request = input;
+    }
 
     /**
      * Simple demo code just to illustrate how to paint cells in a crossword puzzle.
@@ -178,9 +191,17 @@ class CrosswordCanvas extends JComponent {
      */
     @Override
     public void paint(Graphics g) {
-        
-
-//        System.out.println(currentBoard); // Debugging
+        if (state == ClientState.PLAY) {
+            printBoard(g);
+        }
+        else if (state == ClientState.START) {
+            if (request == "NEW GAME") {
+                println("let's start a new game!", g);
+            }
+        }
+    }
+    
+    private void printBoard(Graphics g) {
         
         // First, split input string according to newlines
         String[] lines = currentBoard.split("\\n");

@@ -138,6 +138,10 @@ public class Client {
 //            }
 //            canvas.setCanvas(wholeString);
             // Creating the board
+            
+            String state = socketIn.readLine();
+            parseRequest(state, socketIn);
+            
             launchGameWindow();
             
             while ( ! socket.isClosed()) {
@@ -263,10 +267,12 @@ public class Client {
     
     /**
      * parses the string and does something
+     * @throws IOException 
      */
-    private void parse(String state) {
+    private void parseRequest(String state, BufferedReader socketIn) throws IOException {
         switch (state) {
         case "start":
+            receiveStart(socketIn);
             break;
         case "choose":
             break;
@@ -276,6 +282,8 @@ public class Client {
             break;
         case "show_score":
             break;
+        default:
+            throw new RuntimeException("WAT R U DOING");
         }
     }
     
@@ -283,9 +291,11 @@ public class Client {
      * RECEIVES: 
      *  - START, "NEW GAME" 
      *  - START, "TRY AGAIN"
+     * @throws IOException 
      */
-    private void receiveStart() {
-        
+    private void receiveStart(BufferedReader socketIn) throws IOException {
+        canvas.setRequest("start", socketIn.readLine());
+        canvas.repaint();
     }
     
     /**
@@ -299,7 +309,7 @@ public class Client {
      *  - CHOOSE, "NEW"
      *  - CHOOSE, "TRY AGAIN"
      */
-    private void receiveChoose() {
+    private void receiveChoose(BufferedReader socketIn) {
     }
     
     /**
@@ -312,7 +322,7 @@ public class Client {
      * RECEIVES:
      *  - WAIT, "WAITING"
      */
-    private void receiveWait() {
+    private void receiveWait(BufferedReader socketIn) {
     }
     
     /**
@@ -326,7 +336,8 @@ public class Client {
      *  - PLAY, board, true
      *  - PLAY, board, false
      */
-    private void receivePlay() {
+    private synchronized void receivePlay(BufferedReader socketIn) {
+        this.notifyAll();
     }
     
     /**
@@ -344,7 +355,7 @@ public class Client {
     /**
      * RECEIVES: SHOW_SCORE
      */
-    private void receiveEnd() {
+    private void receiveEnd(BufferedReader socketIn) {
     }
     
     
