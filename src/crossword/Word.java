@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import crossword.Cell.Exist;
+
 public class Word {
     
     // Abstraction function:
@@ -17,6 +19,7 @@ public class Word {
     //    startRow >= 0 && startCol >= 0
     //    id >= 0 && id should be unique
     //    direction == "DOWN" or direction == "ACROSS"
+    //    we must also have that the cells in involvedCells are sequential to the word, so involvedCells.get(0) + involvedCells.get(1) + .... forms the word
     //
     // Safety from rep exposure:
     //    startRow, startCol, id, hint, correctValue, and direction are all private and final
@@ -197,6 +200,37 @@ public class Word {
     
     public void setConfirmed() {
         confirmed = true;
+    }
+    
+//    public void addInvolvedCells(Match currentMatch) {
+//        final int rowLower = this.getRowLowerBound();
+//        final int rowHigher = this.getRowUpperBound();
+//        final int colLower = this.getColumnLowerBound();
+//        final int colHigher = this.getColumnUpperBound();
+//        
+//        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
+//            for(int j = colLower; j <= colHigher; j++) {
+//                if(this.gameBoard[i][j].isAbsent()) {
+//                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
+//                }
+////                word.addInvolvedCell(this.gameBoard[i][j]);
+//                this.gameBoard[i][j].addWord(word);
+//            }
+//        }
+//    }
+    
+    public void addInvolvedCell(Cell cell) {
+        involvedCells.add(cell);
+    }
+    
+    public String getCurrentValue() {
+        String wordValue = "";
+        
+        for(Cell cell : involvedCells) {
+            wordValue += cell.getValue();
+        }
+        
+        return wordValue;
     }
     
     @Override
