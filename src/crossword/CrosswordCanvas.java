@@ -19,10 +19,11 @@ import javax.swing.JComponent;
  */
 class CrosswordCanvas extends JComponent {
     
-    private enum ClientState {START, CHOOSE, PLAY, SHOW_SCORE}
+    private enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
     
     private ClientState state;
     private String currentBoard;
+    private String currentPuzzleMatches;
     private String request;
 
     /**
@@ -164,22 +165,53 @@ class CrosswordCanvas extends JComponent {
 
     private int x = 1;
     
+    // =============== MY METHODS =============== /
+    
+    /**
+     * Sets the state of the canvas as well as the parameters for the state.
+     * @param state the string representing the state that the match should be in
+     * @param input another string representing the parameters for the match.
+     */
+    public void setRequest(String state, String input) {
+        switch (state) {
+        case "start":
+            this.state = ClientState.START;
+            break;
+        case "choose":
+            this.state = ClientState.CHOOSE;
+            break;
+        case "wait":
+            this.state = ClientState.WAIT;
+            break;
+        case "play":
+            this.state = ClientState.PLAY;
+            break;
+        case "show_score":
+            this.state = ClientState.SHOW_SCORE;
+            break;
+        default:
+            throw new RuntimeException("uh oh");
+        }
+        request = input;
+    }
+    
     /**
      * Sets what the canvas should look like
      * @param input the inputted string
      */
-    public void setCanvas(String input) {
+    public void setBoard(String input) {
         currentBoard = input;
     }
     
     /**
-     * Sets the canvas request string
-     * @param input
+     * Sets the available puzzles to the string provided
+     * @param puzzleMatchString the string of available puzzles and matches
      */
-    public void setRequest(String state, String input) {
-        if (state == "start") { this.state = ClientState.START; }
-        request = input;
+    public void setList(String puzzleMatchString) {
+        currentPuzzleMatches = puzzleMatchString;
     }
+    
+    // =============== MY METHODS =============== //
 
     /**
      * Simple demo code just to illustrate how to paint cells in a crossword puzzle.
