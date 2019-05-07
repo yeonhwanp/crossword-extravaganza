@@ -133,70 +133,77 @@ public class Server {
      */
     protected Server(String folderPath, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
-//        this.allMatches = matches;
+        // this.allMatches = matches;
         this.folderPath = folderPath;
 
         this.allPlayers = new HashSet<>();
         this.mapIDToDescription = new HashMap<>();
         this.mapIDToMatch = new HashMap<>();
-        
-        
+
         // handle concurrent requests with multiple threads
         server.setExecutor(Executors.newCachedThreadPool());
-        
+
         HeadersFilter headers = new HeadersFilter(Map.of(
                 // allow requests from web pages hosted anywhere
                 "Access-Control-Allow-Origin", "*",
                 // all responses will be plain-text UTF-8
-                "Content-Type", "text/plain; charset=utf-8"
-                ));
+                "Content-Type", "text/plain; charset=utf-8"));
         List<Filter> filters = List.of(new ExceptionsFilter(), new LogFilter(), headers);
-        
-        
-      // handle requests for paths that start with /init/
-      HttpContext initRequest = server.createContext("/init/", new HttpHandler() {
-          public void handle(HttpExchange exchange) throws IOException {
 
-              init(exchange);
-              
-          }
-      });
-      initRequest.getFilters().addAll(filters);
-      
-      // handle requests for paths that start with /start/
-      HttpContext startRequest = server.createContext("/start/", new HttpHandler() {
-          public void handle(HttpExchange exchange) throws IOException {
-              try {
-                validPuzzleNames = findValidPuzzles(folderPath);
-            } catch (UnableToParseException e) {
-                e.printStackTrace();
+        // handle requests for paths that start with /init/
+        HttpContext initRequest = server.createContext("/init/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                init(exchange);
+
             }
-              handleStart(exchange);
-              
-          }
-      });
-      startRequest.getFilters().addAll(filters);
-      
-      // handle requests for paths that start with /choose/
+        });
+        initRequest.getFilters().addAll(filters);
+
+        // handle requests for paths that start with /start/
+        HttpContext startRequest = server.createContext("/start/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    validPuzzleNames = findValidPuzzles(folderPath);
+                } catch (UnableToParseException e) {
+                    e.printStackTrace();
+                }
+                handleStart(exchange);
+
+            }
+        });
+        startRequest.getFilters().addAll(filters);
+
+        // handle requests for paths that start with /choose/
         HttpContext chooseRequest = server.createContext("/choose/", new HttpHandler() {
+
             public void handle(HttpExchange exchange) throws IOException {
 
                 try {
-                    newMatch(exchange);
+                    chooseNewMatch(exchange);
                 } catch (UnableToParseException e) {
-                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
             }
-      });
-      chooseRequest.getFilters().addAll(filters);
+        });
+        chooseRequest.getFilters().addAll(filters);
         
-        
-        
+        // handle requests for paths that start with /play/
+        HttpContext playRequest = server.createContext("/play/", new HttpHandler() {
 
-        
-        
+            public void handle(HttpExchange exchange) throws IOException {
+
+                playMatch(exchange);   
+
+            }
+        });
+        playRequest.getFilters().addAll(filters);
+
         checkRep();
     }
     
@@ -229,41 +236,7 @@ public class Server {
         
         return parsedMatch;
     }
-    
 
-
-    
-//    /**
-//     * Given a match, send a readable version of the match to the client.
-//     * @param match match to send a readable version of
-//     * @param exchange exchange used to connect with client
-//     * @throws IOException if response headers cannot be sent
-//     */
-//    private static void communicatePuzzle(Match match, HttpExchange exchange) throws IOException {
-//        
-//        final String response;
-//        exchange.sendResponseHeaders(VALID, 0);
-//        
-//        response = match.toString(); //string of puzzle that the client should see
-//        
-//        System.out.println("RESPONSE: " + response);
-//        
-//        // write the response to the output stream using UTF-8 character encoding
-//        OutputStream body = exchange.getResponseBody();
-//        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-//        out.print(response);
-//        out.flush();
-//        
-//        // if you do not close the exchange, the response will not be sent!
-//        exchange.close();
-//        
-//        
-//    }
-
-
-
-
-    // ============ PARSING ============ //
 
 
 
@@ -498,8 +471,9 @@ public class Server {
      *      - ELSE: choose
      *          SEND: STATE, "TRY AGAIN", allMatches
      * @throws UnableToParseException 
+     * @throws InterruptedException 
      */
-    private void newMatch(HttpExchange exchange) throws IOException, UnableToParseException {
+    private synchronized void chooseNewMatch(HttpExchange exchange) throws IOException, UnableToParseException, InterruptedException {
         
         // if you want to know the requested path:
         final String path = exchange.getRequestURI().getPath();
@@ -527,7 +501,7 @@ public class Server {
             
             File puzzleFile = new File(folderPath + "/" +  puzzleID);
             Match puzzle = loadMatch(puzzleFile);
-//            puzzle.insertPlayer(existingPlayer);
+            puzzle.addPlayer(existingPlayer);
             
             mapIDToMatch.put(matchID, puzzle);
             
@@ -536,7 +510,10 @@ public class Server {
             out.print(waitResponse);
             out.flush();
             
-//            this.wait(); TODO IMPLEMENT SERVER WAITING
+            while(puzzle.getNumberPlayers() < 2) {
+                this.wait();
+            }
+            
             
             final String playResponse;
             String playResult = "PLAY\nnew\n";
@@ -561,7 +538,7 @@ public class Server {
     }
     
     /**
-     * RECEIVE: A play request in the form: "PLAY match_ID"
+     * RECEIVE: A play request in the form: "play match_ID"
      *  PRECONDITION: 
      *      - matchID must exist
      *  STATE:
@@ -569,9 +546,45 @@ public class Server {
      *          - STATE = PLAY
      *          - SEND: STATE, new, board
      *      - ELSE:
-     *          - SEND: STATE, "TRY_AGAIN"
+     *          - STATE = choose
+     *          - SEND: STATE, "TRY AGAIN", allMatches
      */
-    private void play(HttpExchange exchange) throws IOException {
+    private void playMatch(HttpExchange exchange) throws IOException {
+        
+        // if you want to know the requested path:
+        final String path = exchange.getRequestURI().getPath();
+        
+        // it will always start with the base path from server.createContext():
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        final String matchID = path.substring(base.length());
+        
+        exchange.sendResponseHeaders(VALID, 0);
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+        
+        if (mapIDToMatch.containsKey(matchID)) { // valid precondition, so play an existing match
+            
+            String validTemporary = "PLAY\n"
+                    + "new\n";
+            
+            Match matchToPlay = mapIDToMatch.get(matchID);
+            validTemporary += matchToPlay.toString();
+            
+            final String validResponse = validTemporary;
+            out.print(validResponse);
+            out.flush();
+
+        }
+        else {
+            
+            final String invalidResponse = getChooseResponse("TRY AGAIN");
+            out.print(invalidResponse);
+            out.flush();
+        }
+ 
+        exchange.close();
+ 
     }
 
     /**
@@ -620,11 +633,13 @@ public class Server {
     private void challenge(HttpExchange exchange) throws IOException {
     }
     
-//    /**
-//     * Send the score
-//     */
-//    private String sendSHOWSCORE() {    
-//    }
+    
+    
+    /**
+     * Send the score
+     */
+    private void sendShowScore() {    
+    }
     
     
     
@@ -644,7 +659,7 @@ public class Server {
     }
     
     /**
-     * Parses choose responses
+     * Parses choose responses, which includes allMatches (all the matches that can be either played or began)
      * @param state state that client should switch to
      * @return parsed choose response
      */

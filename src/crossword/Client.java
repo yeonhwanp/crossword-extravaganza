@@ -363,6 +363,13 @@ public class Client {
     }
     
     /**
+     * SENDS: /play/playerID/matchID
+     */
+    private void sendPlay() {
+        
+    }
+    
+    /**
      * RECEIVES:
      *  - PLAY, new, board
      *  - PLAY, true, board

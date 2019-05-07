@@ -142,10 +142,22 @@ public class Match {
         checkRep();
     }
     
+    /**
+     * Add a player to this match
+     * @param player player to add
+     */
     public void addPlayer(Player player) {
         players.add(player);
         scores.put(player, 0);
         challengePts.put(player, 0);
+    }
+    
+    /**
+     * Find the number of players currently playing this match.
+     * @return number of current players.
+     */
+    public int getNumberPlayers() {
+        return players.size();
     }
     
     /**
