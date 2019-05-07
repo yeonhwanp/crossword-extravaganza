@@ -115,18 +115,22 @@ public class Cell {
         return false;
     }
     
+    public boolean canClearValue() {
+        
+    }
+    
     /**
      * @return the value hosted in this cell
      */
-    public char getValue() {
+    public char getCurrentValue() {
         return value;
     }
     
     /**
      * @return true if the cell doesn't contain value and is part of the gameboard, false otherwise
      */
-    public boolean isEmpty() {
-        throw new RuntimeException("not done implementing");
+    public boolean isBlank() {
+        return isPresent() && getCurrentValue() == EMPTY_CELL;
     }
     
     /**
@@ -158,6 +162,6 @@ public class Cell {
         if(isAbsent()) {
             return "#";
         }
-        return String.valueOf(getValue());
+        return String.valueOf(this.getCurrentValue());
     }
 }

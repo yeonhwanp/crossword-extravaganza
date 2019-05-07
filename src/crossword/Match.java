@@ -123,7 +123,8 @@ public class Match {
             final int colLower = word.getColumnLowerBound();
             final int colHigher = word.getColumnUpperBound();
             
-            for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
+            // CAUTION CAUTION CAUTION: DO *NOT* CHANGE THIS
+            for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant, CANNOT CHANGE THIS
                 for(int j = colLower; j <= colHigher; j++) {
                     if(this.gameBoard[i][j].isAbsent()) {
                         this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
@@ -222,15 +223,18 @@ public class Match {
 //    }
     
     /**
-     * Checks if an attempted word is valid according to the final project handout
+     * Checks if an attempted word is consistent according to the final project handout
      * @param player the player attempting the word
-     * @param wordID the id of the word being attempted
-     * @param wordString the actual word inserted by the player
+     * @param word the word being attempted to insert
+     * @param tryWord the actual word inserted by the player
      * @return if the insert is valid or not
      */
-    private boolean checkValidInsert(Player player, int wordID, String wordString) {
-        final Word insertWord = idToWordMap.get(wordID);
+    private boolean checkConsistentInsert(Player player, Word insertWord, String tryWord) {
         if(insertWord.isConfirmed() || (insertWord.hasOwner() && !player.equals(insertWord.getOwner()))) {
+            return false;
+        }
+        
+        if(insertWord.getLength() != tryWord.length()) {
             return false;
         }
         
@@ -241,9 +245,9 @@ public class Match {
      * Inserts an attempt at a given location.
      * @param player the player attempting the insert
      * @param wordID the word being attempted
-     * @param wordString the guessed word
+     * @param tryWord the guessed word
      */
-    public boolean tryInsert(Player player, int wordID, String wordString) {
+    public boolean tryInsert(Player player, int wordID, String tryWord) {
         throw new RuntimeException("not done implementing!");
         
         // TODO: check consistency of the guess first
@@ -253,10 +257,10 @@ public class Match {
      * Checks if an attempted challenge is valid according to the final project handout
      * @param player the player attempting the word
      * @param wordID the id of the word being attempted
-     * @param wordString the actual word used to challenge the other player's guess
+     * @param challengeGuess the actual word used to challenge the other player's guess
      * @return if the challenge is valid or not
      */
-    private boolean checkValidChallenge(Player player, int wordID, String wordString) {
+    private boolean checkValidChallenge(Player player, int wordID, String challengeGuess) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -264,9 +268,9 @@ public class Match {
      * Challenges the other player's guess and increments/decrements challengepoints accordingly.
      * @param player the player doing the challenging
      * @param wordID the id of the word being challenged
-     * @param wordString the actual word used to challenge the other player's guesses
+     * @param challengeGuess the actual word used to challenge the other player's guesses
      */
-    public boolean challenge(Player player, int wordID, String wordString) {
+    public boolean challenge(Player player, int wordID, String challengeGuess) {
         throw new RuntimeException("not done implementing!");
     }
     

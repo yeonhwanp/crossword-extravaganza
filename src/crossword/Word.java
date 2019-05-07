@@ -164,8 +164,8 @@ public class Word {
     }
     
     /**
-     * Get the length of the word
-     * @return the length
+     * Get the length of the correct word
+     * @return the length of the correct word
      */
     public int getLength() {
         return correctValue.length();
@@ -227,10 +227,62 @@ public class Word {
         String wordValue = "";
         
         for(Cell cell : involvedCells) {
-            wordValue += cell.getValue();
+            wordValue += cell.getCurrentValue();
         }
         
         return wordValue;
+    }
+    
+    /**
+     * Checks if an attempted word is consistent according to the final project handout
+     * @param player the player attempting the word
+     * @param tryWord the actual word inserted by the player
+     * @return if the insert is valid or not
+     */
+    public boolean checkConsistentInsert(Player player, String tryWord) {
+        if(this.isConfirmed() || (this.hasOwner() && !player.equals(this.getOwner()))) { // check if it's already confirmed or has a different owner
+            return false;
+        }
+        
+        if(this.getLength() != tryWord.length()) { // if the guess does not have the same length as this word, reject
+            return false;
+        }
+        
+        assert this.involvedCells.size() == this.getLength(); // just to check make sure that the sizes match up, we also need to check the ordering
+        
+        for(int i = 0; i < this.involvedCells.size(); i++) { // check that if the tried word has conflicts with words already on the board, that the player can change
+            final Cell currentCell = this.involvedCells.get(i);
+            
+            if(currentCell.getCurrentValue() != tryWord.charAt(i) && !currentCell.canChangeValue(player)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * BE VERY CAREFUL WHEN IMPLEMENTING THIS METHOD, DON'T CLEAR CELLS PART OF OTHER WORDS
+     */
+    public void clearWord() {
+        
+    }
+    
+    /**
+     * BE VERY CAREFUL WHEN IMPLEMENTING THIS METHOD, DON'T CLEAR CELLS PART OF OTHER WORDS
+     */
+    public boolean tryInsertNewWord(Player player, String tryWord) {
+        if(!checkConsistentInsert(player, tryWord)) {
+            return false;
+        }
+        
+        for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to put in the new word
+            final Cell currentCell = this.involvedCells.get(i);
+            
+            if(currentCell.getCurrentValue() != tryWord.charAt(i)) {
+                // TODO
+            }
+        }
     }
     
     @Override
