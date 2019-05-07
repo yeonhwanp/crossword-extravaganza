@@ -195,6 +195,10 @@ public class Word {
         return owner.get();
     }
     
+    public void setConfirmed() {
+        confirmed = true;
+    }
+    
     @Override
     public String toString() {
         return this.id + ". " + this.correctValue + " at (" + this.startRow + "," + this.startCol + "), in the " + this.direction.name()

@@ -9,8 +9,13 @@ import crossword.Cell.Exist;
 
 
 /*
- * NOTES/TODOs:
+ * NOTES/TODO:
  *  - fix the rep exposure
+ *  - fix the toString() 
+ *  - implement checking for whether or not match is over
+ *  - check whether or not a guess is consistent
+ *  - implement challenge rules
+ *  - 
  */
 
 
@@ -70,13 +75,13 @@ public class Match {
     private Map<String, Player> players;
     private Map<Player, Integer> scores;
     private Map<Player, Integer> challengePts;
-    private GameState state;
+//    private GameState state;
     
     /**
      * Constructor for the Match object
      * @param matchName the name of the match
      * @param matchDescription the description of the match
-     * @param words the words associated with this match
+     * @param wordTuples the words associated with this match
      */
     public Match(String matchName, String matchDescription, List<WordTuple> wordTuples) {
         this.matchName = matchName;
@@ -118,10 +123,16 @@ public class Match {
             
             for(int i = rowLower; i <= rowHigher; i++) {
                 for(int j = colLower; j <= colHigher; j++) {
-                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
+                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // this is problematic
                 }
             }
         }
+        
+        /*
+         * TODO:
+         * - link words to cells and vice versa
+         * 
+         */
         checkRep();
     }
     
@@ -398,6 +409,10 @@ public class Match {
     
     public String getMatchDescription() {
         return matchDescription;
+    }
+    
+    public void clearInconsistent(Word word, String newVal) {
+        
     }
     
 }
