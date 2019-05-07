@@ -205,7 +205,7 @@ public class Match {
      * @param wordString the actual word inserted by the player
      * @return if the insert is valid or not
      */
-    public boolean checkValidInsert(Player player, String wordID, String wordString) {
+    private boolean checkValidInsert(Player player, String wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -215,7 +215,7 @@ public class Match {
      * @param wordID the word being attempted
      * @param wordString the guessed word
      */
-    public void insertWord(Player player, String wordID, String wordString) {
+    public boolean tryInsert(Player player, String wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -226,7 +226,7 @@ public class Match {
      * @param wordString the actual word used to challenge the other player's guess
      * @return if the challenge is valid or not
      */
-    public boolean checkValidChallenge(Player player, String wordID, String wordString) {
+    private boolean checkValidChallenge(Player player, String wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -236,7 +236,7 @@ public class Match {
      * @param wordID the id of the word being challenged
      * @param wordString the actual word used to challenge the other player's guesses
      */
-    public void challenge(Player player, String wordID, String wordString) {
+    public boolean challenge(Player player, String wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
