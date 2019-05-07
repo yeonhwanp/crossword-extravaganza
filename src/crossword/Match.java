@@ -1,5 +1,6 @@
 package crossword;
 
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +10,13 @@ import crossword.Cell.Exist;
 
 
 /*
- * NOTES/TODOs:
+ * NOTES/TODO:
  *  - fix the rep exposure
+ *  - fix the toString() 
+ *  - implement checking for whether or not match is over
+ *  - check whether or not a guess is consistent
+ *  - implement challenge rules
+ *  - 
  */
 
 
@@ -67,36 +73,37 @@ public class Match {
     private final Cell[][] gameBoard;
     private final int rows;
     private final int columns;
-    private Map<String, Player> players;
-    private Map<Player, Integer> scores;
-    private Map<Player, Integer> challengePts;
-    private GameState state;
+//    private Map<String, Player> players;
+    private final List<Player> players;
+    private final Map<Player, Integer> scores;
+    private final Map<Player, Integer> challengePts;
+//    private GameState state;
     
     /**
      * Constructor for the Match object
      * @param matchName the name of the match
      * @param matchDescription the description of the match
-     * @param words the words associated with this match
+     * @param wordTuples the words associated with this match
      */
     public Match(String matchName, String matchDescription, List<WordTuple> wordTuples) {
         this.matchName = matchName;
         this.matchDescription = matchDescription;
         this.words = new ArrayList<>();
+        this.idToWordMap = new HashMap<Integer, Word>();
+
         for (WordTuple wordTuple : wordTuples) {
             Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), wordTuple.getID(),
                     wordTuple.getWord(), wordTuple.getDirection());
             this.words.add(newWord);
+            this.idToWordMap.put(newWord.getID(), newWord);
         }
-        
-        this.idToWordMap = new HashMap<Integer, Word>();
-        
+                
         int maxRow = 0;
         int maxColumn = 0;
         
         for(Word word : words) {
             maxRow = Math.max(maxRow, word.getRowUpperBound()+1);
             maxColumn = Math.max(maxColumn, word.getColumnUpperBound()+1);
-            this.idToWordMap.put(word.getID(), word);
         }
         
         this.rows = maxRow;
@@ -116,13 +123,28 @@ public class Match {
             final int colLower = word.getColumnLowerBound();
             final int colHigher = word.getColumnUpperBound();
             
-            for(int i = rowLower; i <= rowHigher; i++) {
+            for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
                 for(int j = colLower; j <= colHigher; j++) {
-                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT);
+                    if(this.gameBoard[i][j].isAbsent()) {
+                        this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
+                    }
+                    word.addInvolvedCell(this.gameBoard[i][j]);
+                    this.gameBoard[i][j].addWord(word);
                 }
             }
         }
+        
+        players = new ArrayList<>();
+        scores = new HashMap<>();
+        challengePts = new HashMap<>();
+        
         checkRep();
+    }
+    
+    public void addPlayer(Player player) {
+        players.add(player);
+        scores.put(player, 0);
+        challengePts.put(player, 0);
     }
     
     /**
@@ -141,19 +163,21 @@ public class Match {
     }
     
     
-    /**
-     * Used to start the game once two players join.
-     */
-    public void startGame() {
-        throw new RuntimeException("not done implementing!");
-    }
+//    /**
+//     * Used to start the game once two players join.
+//     */
+//    public void startGame() {
+//        throw new RuntimeException("not done implementing!");
+//    }
+//    
     
     /**
      * Decreases a player's challenge points
      * @param player the player to decrease challenge points for
      */
     private void decreaseChallenge(Player player) {
-        throw new RuntimeException("not done implementing!");
+        final int currentChallenge = challengePts.get(player);
+        challengePts.put(player, currentChallenge-1);
     }
     
     /**
@@ -161,7 +185,8 @@ public class Match {
      * @param player the player to increase challenge points for
      */
     private void incrementChallenge(Player player) {
-        throw new RuntimeException("not done implementing!");
+        final int currentChallenge = challengePts.get(player);
+        challengePts.put(player, currentChallenge+1);
     }
     
     /**
@@ -169,7 +194,8 @@ public class Match {
      * @param player the player to increase score for
      */
     public void incrementScore(Player player) {
-        throw new RuntimeException("not done implementing!");
+        final int currentScore = scores.get(player);
+        scores.put(player, currentScore+1);
     }
     
     /**
@@ -177,15 +203,23 @@ public class Match {
      * @return the score of the given player
      */
     public int getScore(Player player) {
-        throw new RuntimeException("not done implementing!");
+        return scores.get(player);
     }
     
     /**
-     * @return the current state of the game
+     * @param player the player we want to get the challenge points for
+     * @return the number of challenge points of the given player
      */
-    public GameState getState() {
-        throw new RuntimeException("not done implementing!");
+    public int getChallengePoints(Player player) {
+        return challengePts.get(player);
     }
+    
+//    /**
+//     * @return the current state of the game
+//     */
+//    public GameState getState() {
+//        throw new RuntimeException("not done implementing!");
+//    }
     
     /**
      * Checks if an attempted word is valid according to the final project handout
@@ -194,8 +228,13 @@ public class Match {
      * @param wordString the actual word inserted by the player
      * @return if the insert is valid or not
      */
-    public boolean checkValidInsert(Player player, String wordID, String wordString) {
-        throw new RuntimeException("not done implementing!");
+    private boolean checkValidInsert(Player player, int wordID, String wordString) {
+        final Word insertWord = idToWordMap.get(wordID);
+        if(insertWord.isConfirmed() || (insertWord.hasOwner() && !player.equals(insertWord.getOwner()))) {
+            return false;
+        }
+        
+        
     }
     
     /**
@@ -204,8 +243,10 @@ public class Match {
      * @param wordID the word being attempted
      * @param wordString the guessed word
      */
-    public void insertWord(Player player, String wordID, String wordString) {
+    public boolean tryInsert(Player player, int wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
+        
+        // TODO: check consistency of the guess first
     }
     
     /**
@@ -215,7 +256,7 @@ public class Match {
      * @param wordString the actual word used to challenge the other player's guess
      * @return if the challenge is valid or not
      */
-    public boolean checkValidChallenge(Player player, String wordID, String wordString) {
+    private boolean checkValidChallenge(Player player, int wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -225,7 +266,7 @@ public class Match {
      * @param wordID the id of the word being challenged
      * @param wordString the actual word used to challenge the other player's guesses
      */
-    public void challenge(Player player, String wordID, String wordString) {
+    public boolean challenge(Player player, int wordID, String wordString) {
         throw new RuntimeException("not done implementing!");
     }
     
@@ -399,5 +440,11 @@ public class Match {
     public String getMatchDescription() {
         return matchDescription;
     }
+    
+    public void clearInconsistent(Word word, String newVal) {
+        throw new RuntimeException("not done implementing!");
+    }
+    
+//    public Cell getCell(int )
     
 }

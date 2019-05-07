@@ -36,6 +36,7 @@ public class Client {
 
     private static final int CANVAS_WIDTH = 1200;
     private static final int CANVAS_HEIGHT = 900;
+    private static final int BOARD_PLAYER_LINES = 8;
     private String sendString;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
@@ -139,6 +140,7 @@ public class Client {
 //            canvas.setCanvas(wholeString);
             // Creating the board
             
+            // First line is always the state. Then, pass in the rest.
             String state = socketIn.readLine();
             parseRequest(state, socketIn);
             
@@ -275,6 +277,7 @@ public class Client {
             receiveStart(socketIn);
             break;
         case "choose":
+            receiveChoose();
             break;
         case "wait":
             break;
@@ -294,7 +297,8 @@ public class Client {
      * @throws IOException 
      */
     private void receiveStart(BufferedReader socketIn) throws IOException {
-        canvas.setRequest("start", socketIn.readLine());
+        String showState = socketIn.readLine();
+        canvas.setRequest("start", showState);
         canvas.repaint();
     }
     
@@ -308,12 +312,38 @@ public class Client {
      * RECEIVES: 
      *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  - CHOOSE, "TRY AGAIN", allMatches
+     * @throws IOException 
      */
-    private void receiveChoose(BufferedReader socketIn) {
+    private void receiveChoose(BufferedReader socketIn) throws IOException {
+        
+        // Set the state of the canvas
+        String chooseState = socketIn.readLine();
+        canvas.setRequest("choose", chooseState);
+        
+        String puzzleMatchString = "";
+        
+        // Parsing through available puzzles
+        String numberOfNew = socketIn.readLine();
+        for (int i = 0; i < Integer.valueOf(numberOfNew); i++) {
+            puzzleMatchString += socketIn.readLine() + "\n";
+        }
+        
+        // Parsing through available matches
+        String numberOfCurrent = socketIn.readLine();
+        for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
+            if (i != Integer.valueOf(numberOfCurrent)*2 - 1) {
+                puzzleMatchString += socketIn.readLine() + "\n";
+            }
+            else {
+                puzzleMatchString += socketIn.readLine();
+            }
+        }
+        
+        canvas.setList(puzzleMatchString);
     }
     
     /**
-     * SENDS: /choose/matchID/puzzleID/description
+     * SENDS: /choose/playerID/matchID/puzzleID/description
      */
     private void sendChoose() {
     }
@@ -323,6 +353,7 @@ public class Client {
      *  - WAIT, "WAITING"
      */
     private void receiveWait(BufferedReader socketIn) {
+        canvas.setRequest("wait", "");
     }
     
     /**
@@ -333,11 +364,22 @@ public class Client {
     
     /**
      * RECEIVES:
-     *  - PLAY, board, new
-     *  - PLAY, board, true
-     *  - PLAY, board, false
+     *  - PLAY, new, board
+     *  - PLAY, true, board
+     *  - PLAY, false, board
+     * @throws IOException 
      */
-    private synchronized void receivePlay(BufferedReader socketIn) {
+    private synchronized void receivePlay(BufferedReader socketIn) throws IOException {
+        
+        // Set the state of the canvas
+        String chooseState = socketIn.readLine();
+        chooseState += socketIn.readLine();
+        canvas.setRequest("play", chooseState);
+        
+        // Set the board of the game
+        String boardString = parseBoard(socketIn);
+        canvas.setBoard(boardString);
+        
         this.notifyAll();
     }
     
@@ -357,6 +399,33 @@ public class Client {
      * RECEIVES: SHOW_SCORE
      */
     private void receiveEnd(BufferedReader socketIn) {
+        canvas.setRequest("show_score", "");
+    }
+    
+    private static String parseBoard(BufferedReader socketIn) throws IOException {
+        
+        String boardString = "";
+        
+        String[] dimensions = socketIn.readLine().split("x");
+        for (int i = 0; i < Integer.valueOf(dimensions[0]); i++) {
+             boardString += socketIn.readLine() + "\n";
+        }
+        
+        String numberOfWords = socketIn.readLine();
+        for (int i = 0; i < Integer.valueOf(numberOfWords); i++) {
+            boardString += socketIn.readLine() + "\n";
+        }
+        
+        for (int i = 0; i < BOARD_PLAYER_LINES; i++) {
+            if (i != BOARD_PLAYER_LINES - 1) {
+                boardString += socketIn.readLine() + "\n";
+            }
+            else {
+                boardString += socketIn.readLine();
+            }
+        }
+        
+        return boardString;
     }
     
     
