@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import edu.mit.eecs.parserlib.UnableToParseException;
  *      - Implement PLAY: TRY, CHALLENGE, EXIT
  * - TODO Go to OH and ask about changing the file midway
  * - handle player ID's
+ * TODO define restrictions on "Description"
  */
 
 /**
@@ -53,8 +55,12 @@ public class Server {
 //    private final List<String> validMatches;
 //    private final Map<Integer, String> currentMatchesMap; // <STRING, MATCH>
 //    private final Map<String, Player> allPlayers;
+    private final String folderPath;
+    
     private Set<String> validPuzzleNames;
     private final Set<Player> allPlayers;
+    private final Map<String, String> mapIDToDescription;
+    private final Map<String, Match> mapIDToMatch;
     
     
     
@@ -128,9 +134,11 @@ public class Server {
     protected Server(String folderPath, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
 //        this.allMatches = matches;
-//        this.validMatchesMap = new HashMap<>(); //TODO CHANGE THESE TWO 
-        
+        this.folderPath = folderPath;
+
         this.allPlayers = new HashSet<>();
+        this.mapIDToDescription = new HashMap<>();
+        this.mapIDToMatch = new HashMap<>();
         
         
         // handle concurrent requests with multiple threads
@@ -170,49 +178,23 @@ public class Server {
       startRequest.getFilters().addAll(filters);
       
       // handle requests for paths that start with /choose/
-      HttpContext chooseRequest = server.createContext("/choose/", new HttpHandler() {
-          public void handle(HttpExchange exchange) throws IOException {
-              
-              newMatch(exchange);
-              
-          }
+        HttpContext chooseRequest = server.createContext("/choose/", new HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+
+                try {
+                    newMatch(exchange);
+                } catch (UnableToParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
       });
       chooseRequest.getFilters().addAll(filters);
         
         
         
-        
-//        // handle requests for paths that start with /connect/
-//        HttpContext look = server.createContext("/connect/", new HttpHandler() {
-//            public void handle(HttpExchange exchange) throws IOException {
-//                choosePlayerId(exchange);
-//                
-////                communicatePuzzle(matches.get(0), exchange);
-//                //for now we just use first match in matches, since only single puzzle
-//            }
-//        });
-//        look.getFilters().addAll(filters);
-//        
-//        
-//        // handle requests for paths that start with /choose/
-//        HttpContext choose = server.createContext("/choose/", new HttpHandler() {
-//            public void handle(HttpExchange exchange) throws IOException {
-//                final Map<String, String> validMatchesMap;
-//                
-//                try {
-//                    validMatchesMap = findValidMatches(folderPath);
-//                    showMatches(validMatchesMap, exchange);
-//  
-//                } catch (UnableToParseException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//                
-////                communicatePuzzle(matches.get(0), exchange);
-//                //for now we just use first match in matches, since only single puzzle
-//            }
-//        });
-//        choose.getFilters().addAll(filters);
+
         
         
         checkRep();
@@ -248,137 +230,8 @@ public class Server {
         return parsedMatch;
     }
     
-    ///////////////////////////////////////////////START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////START STATE///////////////////////////////////////////////////
-    
-    
-//    private void choosePlayerId(HttpExchange exchange) throws IOException {
-//        
-//        final String response;
-//        exchange.sendResponseHeaders(VALID, 0);
-//        
-//        String result = "";
-//        result += "Please enter your player ID:";
-//        
-//        response = result;
-//        
-//        System.out.println(response);
-//        
-//        
-//        
-//        // write the response to the output stream using UTF-8 character encoding
-//        OutputStream body = exchange.getResponseBody();
-//
-//        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-//        out.print(response);
-//        out.flush();
-//        
-//        
-//        InputStream input = exchange.getRequestBody();
-//        BufferedReader readFromClient = new BufferedReader(new InputStreamReader(input, UTF_8));
-//        
-//        String clientId = "";
-//        String clientLine = readFromClient.readLine();
-//        while (clientLine != null) {
-//            clientId += clientLine;
-//            clientLine = readFromClient.readLine();
-//        }
-//        
-//        if (allPlayers.containsKey(clientId)) { //player already exists
-//            final String chooseAnother = "Sorry, that ID is already in use. Choose another:";
-//            out.print(chooseAnother);
-//            out.flush();
-//        }
-//        else { //player doesn't exist yet, so make a new player and put it into the map
-//            Player newPlayer = new Player(clientId);
-//            allPlayers.put(clientId, newPlayer);
-//            
-//            //TODO MAKE NEW MATCH FOR PLAYERS, LET THEM PLAY IT!!!
-//            
-//        }
-//
-//        
-//        
-//        // if you do not close the exchange, the response will not be sent!
-//        exchange.close();
-//        
-//    }
-    
-    
-    
-    ///////////////////////////////////////////////END START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END START STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END START STATE///////////////////////////////////////////////////
-    
-    
-    
-    
-    ///////////////////////////////////////////////CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////CHOOSE STATE///////////////////////////////////////////////////
-    
-//    private static Map<String, String> findValidMatches(String folderPath) throws IOException, UnableToParseException {
-//        
-//        File folder = new File(folderPath);
-//        Map<String, String> valids = new HashMap<>();
-//        
-//        for (File puzzle : folder.listFiles()) {
-//            Match match = loadMatch(puzzle);
-//            if (match.checkConsistency()) {
-//                valids.put(match.getMatchName(), match.getMatchDescription());
-//            }         
-//                    
-//        }
-//        return valids;
-//        
-//        
-//    }
-//    
-//    
-//    private void showMatches(Map<String, String> validMatches, HttpExchange exchange) throws IOException {
-//        
-//        final String response;
-//        exchange.sendResponseHeaders(VALID, 0);
-//        
-//        String result = "";
-//        for (int id : currentMatchesMap.keySet()) {
-//            result += "PLAY " + currentMatchesMap.get(id);
-//        }
-//        result += "\n";
-//        
-//        
-//        int nextMatchId = currentMatchesMap.size();
-//        for (String puzzleId : validMatches.keySet()) {
-//            result += "NEW " + nextMatchId + " " + puzzleId + " " + validMatches.get(puzzleId);
-//        }
-//        
-//        result += "\n";
-//        result += "EXIT";
-//        
-//        response = result;
-//        
-//        System.out.println("RESPONSE::: " + response);
-//        
-//        // write the response to the output stream using UTF-8 character encoding
-//        OutputStream body = exchange.getResponseBody();
-//        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-//        out.print(response);
-//        out.flush();
-//        
-//        // if you do not close the exchange, the response will not be sent!
-//        exchange.close();
-//    }
-    
-    
-    ///////////////////////////////////////////////END CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END CHOOSE STATE///////////////////////////////////////////////////
-    ///////////////////////////////////////////////END CHOOSE STATE///////////////////////////////////////////////////
+
+
     
 //    /**
 //     * Given a match, send a readable version of the match to the client.
@@ -591,7 +444,7 @@ public class Server {
      *  IF precondition: choose
      *      SEND: STATE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  ELSE: start
-     *      SEND: STATE, "TRY AGAIN", allMatches
+     *      SEND: STATE, "TRY AGAIN"
      */
     private void handleStart(HttpExchange exchange) throws IOException {
         
@@ -608,14 +461,14 @@ public class Server {
         
         Player potentialPlayer = new Player(playerStr);
         if (isUniquePlayer(potentialPlayer)) {
-            response = "choose\n"
-                    + "NEW";
+            
+            allPlayers.add(potentialPlayer);
+            response = getChooseResponse("NEW");
         }
         else {
             response = "start\n"
-                    + "TRY AGAIN\n"
-                    + "All puzzles to start a new match from:\n"
-                    + validPuzzleNames;
+                    + "TRY AGAIN";
+
         }
 
         System.out.println("START RESPONSE: " + response);
@@ -632,21 +485,21 @@ public class Server {
     }
     
     /**
-     * RECIEVE: A new match request in the form of: "match_ID puzzle_ID "Description"
+     * RECIEVE: A new match request in the form of: "player_ID match_ID puzzle_ID "Description"
      *  PRECONDITION: matchID must be unique, puzzle_ID must exist, 
      *      - matchID must be unique
-     *      - matchID must have no whitespace
      *      - puzzle_ID must exist
      *  STATE:
      *      - IF precondition: WAIT
      *          SEND: STATE, "WAITING"
      *          THEN: server.wait() until someone else connects to the board 
      *          STATE: PLAY
-     *          SEND: STATE, board
+     *          SEND: STATE, new, board
      *      - ELSE: choose
-     *          SEND: STATE, "TRY AGAIN"
+     *          SEND: STATE, "TRY AGAIN", allMatches
+     * @throws UnableToParseException 
      */
-    private void newMatch(HttpExchange exchange) throws IOException {
+    private void newMatch(HttpExchange exchange) throws IOException, UnableToParseException {
         
         // if you want to know the requested path:
         final String path = exchange.getRequestURI().getPath();
@@ -656,11 +509,54 @@ public class Server {
         assert path.startsWith(base);
         final String idsAndDescription = path.substring(base.length());
         
-        String[] names = idsAndDescription.split("/");
-        String matchID = names[0];
-        String playerID = names[1];
-        String description = names[2];
         
+        exchange.sendResponseHeaders(VALID, 0);
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+        
+        String[] names = idsAndDescription.split("/");
+        String playerID = names[0];
+        String matchID = names[1];
+        String puzzleID = names[2];
+        String description = names[3];
+        
+        if (!mapIDToDescription.containsKey(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
+            
+            mapIDToDescription.put(matchID, description);
+            Player existingPlayer = getPlayer(playerID);
+            
+            File puzzleFile = new File(folderPath + "/" +  puzzleID);
+            Match puzzle = loadMatch(puzzleFile);
+//            puzzle.insertPlayer(existingPlayer);
+            
+            mapIDToMatch.put(matchID, puzzle);
+            
+            final String waitResponse = "WAIT\nWAITING";
+            
+            out.print(waitResponse);
+            out.flush();
+            
+//            this.wait(); TODO IMPLEMENT SERVER WAITING
+            
+            final String playResponse;
+            String playResult = "PLAY\nnew\n";
+            playResult += puzzle.toString();
+            playResponse = playResult;
+            out.print(playResponse);
+            out.flush();
+            
+        }
+        else {
+            
+            final String response;
+            response = getChooseResponse("TRY AGAIN");
+            
+            out.print(response);
+            out.flush();
+        }
+        
+        // if you do not close the exchange, the response will not be sent!
+        exchange.close();
         
     }
     
@@ -671,7 +567,7 @@ public class Server {
      *  STATE:
      *      - IF precondition:
      *          - STATE = PLAY
-     *          - SEND: STATE, board
+     *          - SEND: STATE, new, board
      *      - ELSE:
      *          - SEND: STATE, "TRY_AGAIN"
      */
@@ -700,11 +596,11 @@ public class Server {
      *     - MATCH_ID must exist
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - SEND: PLAY, board, true
+     *     - SEND: PLAY, true, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: SHOW_SCORE, score
      * IF INVLAID (game logic):
-     *     - SEND: PLAY, board, false
+     *     - SEND: PLAY, false, board
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
     }
@@ -748,13 +644,58 @@ public class Server {
     }
     
     /**
+     * Parses choose responses
+     * @param state state that client should switch to
+     * @return parsed choose response
+     */
+    private String getChooseResponse(String state) {
+        
+        String visualOfPuzzles = "";
+        for (String onePuzzle : validPuzzleNames) {
+            visualOfPuzzles += onePuzzle + "\n";
+        }
+        
+        String visualOfMatches = "";
+        for (String matchID : mapIDToDescription.keySet()) {
+            visualOfMatches += matchID + "\n";
+            visualOfMatches += mapIDToDescription.get(matchID) + "\n";
+        }
+
+        String response = "choose\n"
+                + state + "\n"
+                + validPuzzleNames.size() + "\n"
+                + visualOfPuzzles
+                + mapIDToDescription.size() + "\n"
+                + visualOfMatches;
+        
+        return response;
+    }
+    
+    /**
+     * Get the player that is currently playing using this server, that corresponds to a given player identifier
+     * @param playerStr player identifier to match player to
+     * @return player that matches playerStr
+     */
+    public Player getPlayer(String playerStr) {
+        //TODO Is this rep exposure?
+        
+        for (Player player : allPlayers) {
+            if (player.getID().equals(playerStr)) {
+                return player;
+            }
+        }
+        return new Player("");
+    }
+    
+    
+    /**
      * Find all the puzzles that are valid puzzles in a folder of possible puzzles
      * @param folderPath path to folder that holds the puzzles to check
      * @return all the puzzles that are valid puzzles
      * @throws IOException if we cannot properly load the match
      * @throws UnableToParseException if we for some reason cannot parse the file puzzle
      */
-    private Set<String> findValidPuzzles(String folderPath) throws IOException, UnableToParseException {
+    private static Set<String> findValidPuzzles(String folderPath) throws IOException, UnableToParseException {
       File folder = new File(folderPath);
       Set<String> puzzles = new HashSet<>();
       for (File puzzle : folder.listFiles()) {

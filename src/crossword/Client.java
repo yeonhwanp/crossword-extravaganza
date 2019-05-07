@@ -333,6 +333,7 @@ public class Client {
     
     /**
      * RECEIVES:
+     *  - PLAY, board, new
      *  - PLAY, board, true
      *  - PLAY, board, false
      */

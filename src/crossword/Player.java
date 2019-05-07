@@ -2,6 +2,7 @@ package crossword;
 
 /**
  * An immutable player of memory scramble.
+ * Threadsafe.
  *
  */
 public class Player {
