@@ -219,6 +219,10 @@ public class Word {
 //        }
 //    }
     
+    /**
+     * Add a cell that corresponds to this given word.
+     * @param cell the cell to include with this word
+     */
     public void addInvolvedCell(Cell cell) {
         involvedCells.add(cell);
     }
