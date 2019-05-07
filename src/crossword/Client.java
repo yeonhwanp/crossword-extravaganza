@@ -306,8 +306,8 @@ public class Client {
     
     /**
      * RECEIVES: 
-     *  - CHOOSE, "NEW"
-     *  - CHOOSE, "TRY AGAIN"
+     *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     *  - CHOOSE, "TRY AGAIN", allMatches
      */
     private void receiveChoose(BufferedReader socketIn) {
     }
