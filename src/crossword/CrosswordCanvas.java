@@ -195,7 +195,7 @@ class CrosswordCanvas extends JComponent {
             printBoard(g);
         }
         else if (state == ClientState.START) {
-            if (request == "NEW GAME") {
+            if (request.equals("NEW GAME")) {
                 println("let's start a new game!", g);
             }
         }
