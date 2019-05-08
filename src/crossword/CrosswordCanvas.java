@@ -218,6 +218,14 @@ class CrosswordCanvas extends JComponent {
         return state.toString();
     }
     
+    public String getCurrentBoard() {
+        
+    }
+    
+    public String getListOfMatches() {
+        
+    }
+    
     // =============== MY METHODS =============== //
 
     /**

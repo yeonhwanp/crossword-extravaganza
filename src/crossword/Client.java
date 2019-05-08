@@ -184,7 +184,7 @@ public class Client {
                         else {
                             paintInvalidInput(); 
                         }
-                        
+
                         canvas.repaint();
 
                     } catch (IOException e) {
@@ -195,22 +195,38 @@ public class Client {
         }).start();
 
         // Thread to handle watches
-        //            new Thread(() -> {
-        //                try {
-        //                    while (!socket.isClosed()) {
-        //
-        //                        // Parse the state and then pass it into some handler
-        //                        String newState = socketIn.readLine();
-        //                        parseRequest(newState, socketIn);
-        //
-        //                        // Break out of the loop if the connection is closed
-        //                        if (socket.isClosed()) {break;}
-        //                    }
-        //                    System.out.println("connection closed");
-        //                } catch (IOException e) {
-        //                    e.printStackTrace();
-        //                }
-        //            }).start();
+        new Thread(() -> {
+            try {
+                while (!socket.isClosed()) {
+
+                    // Parse the state and then pass it into some handler
+                    String newState = socketIn.readLine();
+                    parseRequest(newState, socketIn);
+
+                    // Break out of the loop if the connection is closed
+                    if (socket.isClosed()) {break;}
+                }
+                System.out.println("connection closed");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    
+    public String getPlayerID() {
+        
+    }
+    
+    public String getMatchID() {
+        
+    }
+    
+    public String getUserInput() {
+        
+    }
+    
+    public String getSendString() {
+        
     }
 
     private void handleInputs(BufferedReader socketIn) {
@@ -312,14 +328,14 @@ public class Client {
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
         canvas.setRequest("choose", chooseState);
-        
+
         System.out.println(userInput);
-        
+
         // Set the player ID
         if (chooseState.equals("NEW")) {
             playerID = userInput;
         }
-        
+
         String puzzleMatchString = "";
 
         // Parsing through available puzzles
@@ -348,6 +364,7 @@ public class Client {
      */
     private void receiveWait(BufferedReader socketIn) {
         canvas.setRequest("wait", "");
+        matchID = userInput;
     }
 
     /**
@@ -363,6 +380,10 @@ public class Client {
         String chooseState = socketIn.readLine();
         chooseState += socketIn.readLine();
         canvas.setRequest("play", chooseState);
+
+        if (chooseState.equals("new")) {
+            matchID = userInput;
+        }
 
         // Set the board of the game
         String boardString = parseBoard(socketIn);
@@ -403,8 +424,6 @@ public class Client {
             validInput = true;
         }
     }
-
-
 
     /**
      * if current client state is in the wait or play state:
@@ -460,7 +479,9 @@ public class Client {
     }
 
 
-
+    /**
+     * Tells the user that there is an invalid input. 
+     */
     private void paintInvalidInput() {
     }
 
