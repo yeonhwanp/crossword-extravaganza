@@ -139,7 +139,7 @@ public class Server {
     
     /**
      * Create a new server object that clients can connect to
-     * @param matches different matches that can be played by players on this server
+     * @param folderPath path to folder that contains all of the possible puzzles to play
      * @param port server port number
      * @throws IOException if an error occurs starting the server
      */
@@ -238,6 +238,17 @@ public class Server {
             }
         });
         tryRequest.getFilters().addAll(filters);
+        
+        // handle requests for paths that start with /watch/
+        HttpContext watchRequest = server.createContext("/watch/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                watch(exchange);   
+
+            }
+        });
+        watchRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -412,6 +423,7 @@ public class Server {
      * RECEIVE: New connection request
      * STATE: start
      * SEND: state, "NEW GAME"
+     * @param exchange exchange to communicate with client
      */
     private static void init(HttpExchange exchange) throws IOException {
         
@@ -443,6 +455,7 @@ public class Server {
      *      SEND: STATE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  ELSE: start
      *      SEND: STATE, "TRY AGAIN"
+     * @param exchange exchange to communicate with client
      */
     private void handleStart(HttpExchange exchange) throws IOException {
         
@@ -485,7 +498,7 @@ public class Server {
     }
     
     /**
-     * RECIEVE: A new match request in the form of: "player_ID match_ID puzzle_ID "Description"
+     * RECIEVE: A new match request in the form of: "new player_ID match_ID puzzle_ID "Description"
      *  PRECONDITION: matchID must be unique, puzzle_ID must exist, 
      *      - matchID must be unique
      *      - puzzle_ID must exist
@@ -497,6 +510,7 @@ public class Server {
      *          SEND: STATE, new, board
      *      - ELSE: choose
      *          SEND: STATE, "TRY AGAIN", allMatches
+     * @param exchange exchange to communicate with client
      * @throws UnableToParseException 
      * @throws InterruptedException 
      */
@@ -588,6 +602,7 @@ public class Server {
      *      - ELSE:
      *          - STATE = choose
      *          - SEND: STATE, "TRY AGAIN", allMatches
+     *  @param exchange exchange to communicate with client
      */
     private void playMatch(HttpExchange exchange) throws IOException {
         
@@ -658,6 +673,7 @@ public class Server {
      *      - SEND: SHOW_SCORE, score
      *   ELSE IF gameState == showScore:
      *      - Close connection
+     * @param exchange exchange to communicate with client
      */
     private void exit(HttpExchange exchange) throws IOException {
         
@@ -724,7 +740,7 @@ public class Server {
      *     - SEND: SHOW_SCORE, score
      * IF INVALID (game logic):
      *     - SEND: PLAY, false, board
-
+     * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
         
@@ -796,6 +812,7 @@ public class Server {
      *     - SEND: SHOW_SCORE, score
      * IF FAILED_CHALLENGE (game logic):
      *     - SEND: PLAY, false, board
+     * @param exchange exchange to communicate with client
      */
     private void challenge(HttpExchange exchange) throws IOException {
         
@@ -859,7 +876,21 @@ public class Server {
     /**
      * Send the score of the match to the client
      */
-    private void sendShowScore() {    
+    private void sendShowScore(HttpExchange exchange) { 
+        throw new RuntimeException("not done implementing!");
+    }
+    
+    
+    
+    
+    /**
+     * Wait until the board changes, and when it does, show the newly changed board to the client
+     * @param exchange exchange to communicate with client
+     */
+    private void watch(HttpExchange exchange) {
+        
+        
+        throw new RuntimeException("not done implementing!");
     }
     
     
