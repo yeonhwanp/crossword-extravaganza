@@ -61,8 +61,8 @@ public class ParserGrammerTest {
 
     }
     
-    //covers comments in description
-    @Test public void testParserCommentDescription() throws UnableToParseException, IOException {
+    //covers backslash in description
+    @Test public void testParserBackslashDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/comments.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
         final String name = getName(parseTree);
