@@ -1,6 +1,5 @@
 package crossword;
 
-import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

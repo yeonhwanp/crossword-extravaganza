@@ -36,6 +36,46 @@ public class MatchTest {
     //      
     //          
     //
+    /*
+     * Test addPlayer()
+     * 
+     * Test getNumberPlayers()
+     *  0 players, 1 player, 2 players
+     * 
+     * Test decreaseChallenge
+     * 
+     * Test incrementChallengeByTwo
+     * 
+     * Test incrementScore()
+     * 
+     * Test getScore()
+     * 
+     * Test getChallengePoints
+     * 
+     * Test tryInsert()
+     *  valid insert, invalid insert
+     * 
+     * Test challenge()
+     *  valid challenge, invalid challenge
+     *  Original word incorrect, challenge correct
+     *  original word correct, challenge incorrect
+     *  original word incorrect, challenge incorrect
+     *  
+     * Test getMatchName()
+     * 
+     * Test getMatchDescription()
+     * 
+     * 
+     * Test isFinished()
+     *  finished, not finished
+     * 
+     * Test containsPlayer()
+     *  contains player, does not contain
+     * 
+     * 
+     * 
+     * 
+     */
 
     
     //covers size of words: 0
