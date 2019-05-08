@@ -5,6 +5,10 @@ import java.util.List;
 
 import javax.management.RuntimeErrorException;
 
+/**
+ * Cell, or space of a board to represent a letter of a word.
+ *
+ */
 public class Cell {
     
     // Abstraction function:

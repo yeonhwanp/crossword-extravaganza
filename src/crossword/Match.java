@@ -18,7 +18,10 @@ import crossword.Cell.Exist;
  *  - 
  */
 
-
+/**
+ * Ongoing match of Crossword Extravaganza to be played by two players.
+ *
+ */
 public class Match {
     
     // Rep: Map<String ID, Player player>
