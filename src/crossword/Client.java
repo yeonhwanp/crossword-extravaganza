@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -37,6 +38,10 @@ public class Client {
     private static final int CANVAS_WIDTH = 1200;
     private static final int CANVAS_HEIGHT = 900;
     private static final int BOARD_PLAYER_LINES = 8;
+    private boolean validInput = false;
+    private String playerID;
+    private String matchID;
+    private String userInput;
     private String sendString;
     private CrosswordCanvas canvas = new CrosswordCanvas();
 
@@ -113,42 +118,18 @@ public class Client {
         }
 
         final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
+        BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
 
-        // Create a new connection
-        try (
-                Socket socket = new Socket(host, port);
-                InputStream stream = loadRequest.openStream();
-                BufferedReader socketIn = new BufferedReader(new InputStreamReader(stream, UTF_8));
-                PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
-                BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
-                ) {
+        // Parse initial GET request
+        String state = socketIn.readLine();
+        parseRequest(state, socketIn);
+        socketIn.close();
+        launchGameWindow();
 
-            String state = socketIn.readLine();
-            parseRequest(state, socketIn);
-            launchGameWindow();
-
-            // Thread to handle incoming messages
-            new Thread(() -> {
-                try {
-                    while (!socket.isClosed()) {
-
-                        // Parse the state and then pass it into some handler
-                        String newState = socketIn.readLine();
-                        parseRequest(newState, socketIn);
-
-                        // Break out of the loop if the connection is closed
-                        if (socket.isClosed()) {break;}
-                    }
-                    System.out.println("connection closed");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            // Thread to handle outgoing messages
-            new Thread(() -> {
-                while (!socket.isClosed()) {
-
+        // Thread to handle outgoing messages
+        new Thread(() -> {
+            while (true) {
+                synchronized(this) {
                     // Waiting for button press to send message
                     try {
                         this.wait();
@@ -156,14 +137,79 @@ public class Client {
                         e.printStackTrace();
                     }
 
-                    if (socket.isClosed()) {break;}
+                    // Sending URL stuffs
+                    try {
+                        
+                        // Splitting up the input provided by the user.
+                        String[] inputStrings = userInput.split(" ");
+                        
+                        // Using the appropriate methods to send the request.
+                        switch (inputStrings[0]) {
+                            case "PLAY":
+                                sendPlay(inputStrings);
+                                break;
+                            case "NEW":
+                                sendChoose(inputStrings);
+                                break;
+                            case "TRY":
+                                sendTry(inputStrings);
+                                break;
+                            case "CHALLENGE":
+                                sendChallenge(inputStrings);
+                            case "EXIT":
+                                if (inputStrings.length == 1) {
+                                    sendExit();
+                                    validInput = true;
+                                }
+                                else {
+                                    validInput = false;
+                                    paintInvalidInput();
+                                }
+                            // New connect state
+                            default:
+                                sendStart();
+                                break;
+                        }
+                        
+                        if (validInput) {
+                            // Send GET request
+                            URL test = new URL("http://" + host + ":" + port + sendString);
+                            BufferedReader response = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
 
-                    // Sending message
-                    socketOut.println(sendString);
+                            // Parse response then close stream
+                            String newState = response.readLine();
+                            parseRequest(newState, response);
+                            response.close();
+                        }
+                        
+                        else {
+                           paintInvalidInput(); 
+                        }
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-                System.out.println("connection closed");
-            });
-        }
+            }
+        }).start();
+
+        // Thread to handle watches
+        //            new Thread(() -> {
+        //                try {
+        //                    while (!socket.isClosed()) {
+        //
+        //                        // Parse the state and then pass it into some handler
+        //                        String newState = socketIn.readLine();
+        //                        parseRequest(newState, socketIn);
+        //
+        //                        // Break out of the loop if the connection is closed
+        //                        if (socket.isClosed()) {break;}
+        //                    }
+        //                    System.out.println("connection closed");
+        //                } catch (IOException e) {
+        //                    e.printStackTrace();
+        //                }
+        //            }).start();
     }
 
     private void handleInputs(BufferedReader socketIn) {
@@ -192,8 +238,8 @@ public class Client {
             // Event Dispatch Thread, which is different from the main
             // thread.
             synchronized (this) {
-                sendString = textbox.getText();
-                System.out.println(sendString);
+                userInput = textbox.getText();
+                textbox.setText("");
                 canvas.repaint();
                 this.notifyAll();
             }
@@ -262,6 +308,13 @@ public class Client {
      * SENDS: /start/playerID
      */
     private void sendStart() {  
+        if (canvas.getState() == "START" && !userInput.equals("")) {
+            sendString = "/start/" + userInput;
+            validInput = true;
+        }
+        else {
+            validInput = false;
+        }
     } 
 
     /**
@@ -301,7 +354,14 @@ public class Client {
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
-    private void sendChoose() {
+    private void sendChoose(String[] inputStrings) {
+        if (canvas.getState() == "CHOOSE" && inputStrings.length == 4) {
+            sendString = "/new/" + playerID + "/" + inputStrings[1] + "/" + inputStrings[2] + "/" + inputStrings[3];
+            validInput = false;
+        }
+        else {
+            validInput = true;
+        }
     }
 
     /**
@@ -319,13 +379,24 @@ public class Client {
      *  SENDS: /exit/state
      */
     private void sendExit() {
+        if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
+            sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
+        }
+        else {
+            sendString = "/exit/" + canvas.getState().toLowerCase();
+        }
     }
 
     /**
      * SENDS: /play/playerID/matchID
      */
-    private void sendPlay() {
-
+    private void sendPlay(String[] inputStrings) {
+        if (canvas.getState() == "PLAY" && inputStrings.length == 2) {
+            sendString = "/play/" + playerID + "/" + inputStrings[1];
+        }
+        else {
+            validInput = false;
+        }
     }
 
     /**
@@ -352,13 +423,25 @@ public class Client {
     /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
-    private void sendTry() {
+    private void sendTry(String[] inputStrings) {
+        if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
+            sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
+        }
+        else {
+            validInput = false;
+        }
     }
 
     /**
      * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
      */
-    private void sendChallenge() {
+    private void sendChallenge(String[] inputStrings) {
+        if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
+            sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
+        }
+        else {
+            validInput = false;
+        }
     }
 
     /**
@@ -367,7 +450,17 @@ public class Client {
     private void receiveEnd(BufferedReader socketIn) {
         canvas.setRequest("show_score", "");
     }
+    
+    private void paintInvalidInput() {
+    }
 
+    
+    /**
+     * Parses the board
+     * @param socketIn
+     * @return
+     * @throws IOException
+     */
     private static String parseBoard(BufferedReader socketIn) throws IOException {
 
         String boardString = "";

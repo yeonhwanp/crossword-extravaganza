@@ -211,6 +211,13 @@ class CrosswordCanvas extends JComponent {
         currentPuzzleMatches = puzzleMatchString;
     }
     
+    /**
+     * @return The state of the client gameside
+     */
+    public String getState() {
+        return state.toString();
+    }
+    
     // =============== MY METHODS =============== //
 
     /**
