@@ -48,6 +48,10 @@ public class ClientTest {
                 "make sure assertions are enabled with VM argument '-ea'");
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (0, 0)
+     */
     @Test
     public void testNew00() throws IOException {
         final Client testClient = new Client();
@@ -64,6 +68,10 @@ public class ClientTest {
         assertEquals(expected, response);
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (1, 0)
+     */
     @Test
     public void testNew10() throws IOException {
         final Client testClient = new Client();
@@ -80,6 +88,10 @@ public class ClientTest {
         assertEquals(expected, response);
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (>1, 0)
+     */
     @Test
     public void testNewG10() throws IOException {
         final Client testClient = new Client();
@@ -96,6 +108,10 @@ public class ClientTest {
         assertEquals(expected, response);
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (0, 1)
+     */
     @Test
     public void testNew01() throws IOException {
         final Client testClient = new Client();
@@ -112,6 +128,10 @@ public class ClientTest {
         assertEquals(expected, response);
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (0, >1)
+     */
     @Test
     public void testNew0G1() throws IOException {
         final Client testClient = new Client();
@@ -128,6 +148,10 @@ public class ClientTest {
         assertEquals(expected, response);
     }
     
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (>1, >1)
+     */
     @Test
     public void testNewG1G1() throws IOException {
         final Client testClient = new Client();
@@ -144,4 +168,27 @@ public class ClientTest {
         
         assertEquals(expected, response);
     }
+    
+    /*
+     * Partitions covered:
+     * receiveChoose: NEW (>1, >1)
+     */
+    @Test
+    public void testChooseTryAgainG1G1() throws IOException {
+        final Client testClient = new Client();
+        
+        final String input = "NEW\n3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img";
+        final String expected = "3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img\n";
+        
+        final Reader inputReader = new StringReader(input);
+        
+        final BufferedReader reader = new BufferedReader(inputReader);
+        
+        testClient.receiveChoose(reader);
+        final String response = testClient.getMatchList();
+        
+        assertEquals(expected, response);
+    }
+    
+    // more tests for receiveChoose's TRY AGAIN
 }
