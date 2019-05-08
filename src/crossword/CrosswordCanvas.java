@@ -218,6 +218,14 @@ class CrosswordCanvas extends JComponent {
         return state.toString();
     }
     
+    public String getCurrentBoard() {
+        
+    }
+    
+    public String getListOfMatches() {
+        
+    }
+    
     // =============== MY METHODS =============== //
 
     /**
@@ -227,16 +235,26 @@ class CrosswordCanvas extends JComponent {
      * We added some state just to allow you to see when the class gets repainted,
      * although in general you wouldn't want to be mutating state inside the paint
      * method.
+     * 
+     * TODO different UI updates for different game states
      */
     @Override
     public void paint(Graphics g) {
-        if (state == ClientState.PLAY) {
-            printBoard(g);
-        }
-        else if (state == ClientState.START) {
+        
+        // This is for the START state
+        if (state == ClientState.START) {
             if (request.equals("NEW GAME")) {
                 println("let's start a new game!", g);
             }
+            else if (request.equals("TRY AGAIN")) {
+                println("That was an invalid request or the ID already exists. Try again!", g);
+            }
+        }
+        else if (state == ClientState.CHOOSE) {
+            System.out.println(currentPuzzleMatches);
+        }
+        else if (state == ClientState.PLAY) {
+            printBoard(g);
         }
     }
     

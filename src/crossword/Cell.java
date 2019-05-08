@@ -54,7 +54,6 @@ public class Cell {
     private void checkRep() {
         assert row >= 0;
         assert col >= 0;
-        assert correspondingWords.size() >= 1;
         assert correspondingWords.size() <= 2;
         assert existState != null;
     }
