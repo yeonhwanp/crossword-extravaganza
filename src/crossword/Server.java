@@ -447,40 +447,41 @@ public class Server {
      */
     private void handleStart(HttpExchange exchange) throws IOException {
         
-        // if you want to know the requested path:
-        final String path = exchange.getRequestURI().getPath();
-        
-        // it will always start with the base path from server.createContext():
-        final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
-        final String playerStr = path.substring(base.length());
-        
-        final String response;
-        exchange.sendResponseHeaders(VALID, 0);
-        
-        Player potentialPlayer = new Player(playerStr);
-        if (isUniquePlayer(potentialPlayer)) {
-            
-            allPlayers.add(potentialPlayer);
-            response = getChooseResponse("NEW");
-        }
-        else {
-            response = "start\n"
-                    + "TRY AGAIN";
+        synchronized (folderPath) {
+
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String playerStr = path.substring(base.length());
+
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+
+            Player potentialPlayer = new Player(playerStr);
+            if (isUniquePlayer(potentialPlayer)) {
+
+                allPlayers.add(potentialPlayer);
+                response = getChooseResponse("NEW");
+            } else {
+                response = "start\n" + "TRY AGAIN";
+
+            }
+
+            System.out.println("START RESPONSE: " + response);
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            // if you do not close the exchange, the response will not be sent!
+            exchange.close();
 
         }
-
-        System.out.println("START RESPONSE: " + response);
-
-        // write the response to the output stream using UTF-8 character encoding
-        OutputStream body = exchange.getResponseBody();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-        out.print(response);
-        out.flush();
-
-        // if you do not close the exchange, the response will not be sent!
-        exchange.close();
-        
     }
     
     /**
@@ -660,56 +661,55 @@ public class Server {
      */
     private void exit(HttpExchange exchange) throws IOException {
         
-        // if you want to know the requested path:
-        final String path = exchange.getRequestURI().getPath();
-        
-        // it will always start with the base path from server.createContext():
-        final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
-        final String stateAndID = path.substring(base.length());
-        
-        String[] states = stateAndID.split("/");
-        String gameState = states[0];
-        
-        exchange.sendResponseHeaders(VALID, 0);
-        OutputStream body = exchange.getResponseBody();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-        
-        if (gameState.equals("choose")) {
-            exchange.close();
-        }
-        else if (gameState.equals("wait")) {
-            
-            String matchID = states[1];
-            mapIDToDescription.remove(matchID);
-            mapIDToMatch.remove(matchID);
-            
-            final String response = "CHOOSE\nNEW";
-            out.print(response);
-            out.flush();
-            exchange.close();
+        synchronized (folderPath) {
+
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String stateAndID = path.substring(base.length());
+
+            String[] states = stateAndID.split("/");
+            String gameState = states[0];
+
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
+            if (gameState.equals("choose")) {
+                exchange.close();
+            } else if (gameState.equals("wait")) {
+
+                String matchID = states[1];
+                mapIDToDescription.remove(matchID);
+                mapIDToMatch.remove(matchID);
+
+                final String response = "CHOOSE\nNEW";
+                out.print(response);
+                out.flush();
+                exchange.close();
+
+            } else if (gameState.equals("play")) {
+
+                String matchID = states[1];
+                twoPlayerMatches.remove(matchID);
+                final String response;
+                String temporaryResponse = "SHOW_SCORE\n";
+                Match currentMatch = mapIDToMatch.get(matchID);
+                // temporaryResponse += currentMatch.getMatchScore();
+                response = temporaryResponse;
+
+                out.print(response);
+                out.flush();
+                exchange.close();
+
+            } else if (gameState.equals("showScore")) {
+                exchange.close();
+            }
 
         }
-        else if (gameState.equals("play")) {
-            
-            String matchID = states[1];
-            twoPlayerMatches.remove(matchID);
-            final String response;
-            String temporaryResponse = "SHOW_SCORE\n";
-            Match currentMatch = mapIDToMatch.get(matchID);
-//            temporaryResponse += currentMatch.getMatchScore();
-            response = temporaryResponse;
-            
-            out.print(response);
-            out.flush();
-            exchange.close();
-            
-        }
-        else if (gameState.equals("showScore")) {
-            exchange.close();
-        }
-        
-        
         
     }
     
@@ -728,58 +728,59 @@ public class Server {
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
         
-        // if you want to know the requested path:
-        final String path = exchange.getRequestURI().getPath();
-        
-        // it will always start with the base path from server.createContext():
-        final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
-        final String tryRequest = path.substring(base.length());
-        
-        exchange.sendResponseHeaders(VALID, 0);
-        OutputStream body = exchange.getResponseBody();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-        
-        
-        String[] ids = tryRequest.split("/");
-        String playerID = ids[0];
-        String matchID = ids[1];
-        String wordID = ids[2];
-        String word = ids[3];
-        
-        if (twoPlayerMatches.containsKey(matchID)) {
-            Match currentMatch = twoPlayerMatches.get(matchID);
-            Player currentPlayer = getPlayer(playerID);
-            if (currentMatch.containsPlayer(currentPlayer)) {
-                
-                boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
-                boolean matchFinished = currentMatch.isFinished();
-                
-                if (validTry && matchFinished) {
-                    String finishedResponse = "SHOW_SCORE\n";
-                    // finishedResponse += currentMatch.getMatchScore();
-                    final String finished = finishedResponse;
+        synchronized (folderPath) {
 
-                    out.print(finished);
-                    out.flush();
-                    exchange.close();
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String tryRequest = path.substring(base.length());
+
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
+            String[] ids = tryRequest.split("/");
+            String playerID = ids[0];
+            String matchID = ids[1];
+            String wordID = ids[2];
+            String word = ids[3];
+
+            if (twoPlayerMatches.containsKey(matchID)) {
+                Match currentMatch = twoPlayerMatches.get(matchID);
+                Player currentPlayer = getPlayer(playerID);
+                if (currentMatch.containsPlayer(currentPlayer)) {
+
+                    boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
+                    boolean matchFinished = currentMatch.isFinished();
+
+                    if (validTry && matchFinished) {
+                        String finishedResponse = "SHOW_SCORE\n";
+                        // finishedResponse += currentMatch.getMatchScore();
+                        final String finished = finishedResponse;
+
+                        out.print(finished);
+                        out.flush();
+                        exchange.close();
+
+                    } else {
+
+                        String ongoingResponse = "PLAY\n";
+                        ongoingResponse += String.valueOf(validTry) + "\n" + currentMatch.toString();
+                        final String ongoing = ongoingResponse;
+
+                        out.print(ongoing);
+                        out.flush();
+                        exchange.close();
+
+                    }
 
                 }
-                else {
-
-                    String ongoingResponse = "PLAY\n";
-                    ongoingResponse += String.valueOf(validTry) + "\n" + currentMatch.toString();
-                    final String ongoing = ongoingResponse;
-
-                    out.print(ongoing);
-                    out.flush();
-                    exchange.close();
-
-                }
-
-
             }
         }
+        
         
         
     }
@@ -798,59 +799,58 @@ public class Server {
      */
     private void challenge(HttpExchange exchange) throws IOException {
         
-        // if you want to know the requested path:
-        final String path = exchange.getRequestURI().getPath();
-        
-        // it will always start with the base path from server.createContext():
-        final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
-        final String tryRequest = path.substring(base.length());
-        
-        exchange.sendResponseHeaders(VALID, 0);
-        OutputStream body = exchange.getResponseBody();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-        
-        
-        String[] ids = tryRequest.split("/");
-        String playerID = ids[0];
-        String matchID = ids[1];
-        String wordID = ids[2];
-        String word = ids[3];
-        
-        if (twoPlayerMatches.containsKey(matchID)) {
-            Match currentMatch = twoPlayerMatches.get(matchID);
-            Player currentPlayer = getPlayer(playerID);
-            if (currentMatch.containsPlayer(currentPlayer)) {
-                
-                boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
-                boolean matchFinished = currentMatch.isFinished();
-                
-                if (validChallenge && matchFinished) {
-                    String finishedResponse = "SHOW_SCORE\n";
-                    // finishedResponse += currentMatch.getMatchScore();
-                    final String finished = finishedResponse;
+        synchronized (folderPath) {
 
-                    out.print(finished);
-                    out.flush();
-                    exchange.close();
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String tryRequest = path.substring(base.length());
+
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+
+            String[] ids = tryRequest.split("/");
+            String playerID = ids[0];
+            String matchID = ids[1];
+            String wordID = ids[2];
+            String word = ids[3];
+
+            if (twoPlayerMatches.containsKey(matchID)) {
+                Match currentMatch = twoPlayerMatches.get(matchID);
+                Player currentPlayer = getPlayer(playerID);
+                if (currentMatch.containsPlayer(currentPlayer)) {
+
+                    boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
+                    boolean matchFinished = currentMatch.isFinished();
+
+                    if (validChallenge && matchFinished) {
+                        String finishedResponse = "SHOW_SCORE\n";
+                        // finishedResponse += currentMatch.getMatchScore();
+                        final String finished = finishedResponse;
+
+                        out.print(finished);
+                        out.flush();
+                        exchange.close();
+
+                    } else {
+
+                        String ongoingResponse = "PLAY\n";
+                        ongoingResponse += String.valueOf(validChallenge) + "\n" + currentMatch.toString();
+                        final String ongoing = ongoingResponse;
+
+                        out.print(ongoing);
+                        out.flush();
+                        exchange.close();
+
+                    }
 
                 }
-                else {
-
-                    String ongoingResponse = "PLAY\n";
-                    ongoingResponse += String.valueOf(validChallenge) + "\n" + currentMatch.toString();
-                    final String ongoing = ongoingResponse;
-
-                    out.print(ongoing);
-                    out.flush();
-                    exchange.close();
-
-                }
-
-
             }
         }
-        
         
     }
     
@@ -871,12 +871,16 @@ public class Server {
      * @return if the passed in player already is an existing player
      */
     private boolean isUniquePlayer(Player player) {
-        for (Player existingPlayer : allPlayers) {
-            if (player.getID().equals(existingPlayer.getID())) {
-                return false;
+        
+        synchronized (folderPath) {
+
+            for (Player existingPlayer : allPlayers) {
+                if (player.getID().equals(existingPlayer.getID())) {
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
     }
     
     /**
@@ -885,26 +889,25 @@ public class Server {
      * @return parsed choose response
      */
     private String getChooseResponse(String state) {
-        
-        String visualOfPuzzles = "";
-        for (String onePuzzle : validPuzzleNames) {
-            visualOfPuzzles += onePuzzle + "\n";
-        }
-        
-        String visualOfMatches = "";
-        for (String matchID : mapIDToDescription.keySet()) {
-            visualOfMatches += matchID + "\n";
-            visualOfMatches += mapIDToDescription.get(matchID) + "\n";
-        }
 
-        String response = "choose\n"
-                + state + "\n"
-                + validPuzzleNames.size() + "\n"
-                + visualOfPuzzles
-                + mapIDToDescription.size() + "\n"
-                + visualOfMatches;
-        
-        return response;
+        synchronized (folderPath) {
+
+            String visualOfPuzzles = "";
+            for (String onePuzzle : validPuzzleNames) {
+                visualOfPuzzles += onePuzzle + "\n";
+            }
+
+            String visualOfMatches = "";
+            for (String matchID : mapIDToDescription.keySet()) {
+                visualOfMatches += matchID + "\n";
+                visualOfMatches += mapIDToDescription.get(matchID) + "\n";
+            }
+
+            String response = "choose\n" + state + "\n" + validPuzzleNames.size() + "\n" + visualOfPuzzles
+                    + mapIDToDescription.size() + "\n" + visualOfMatches;
+
+            return response;
+        }
     }
     
     /**
@@ -913,14 +916,15 @@ public class Server {
      * @return player that matches playerStr
      */
     public Player getPlayer(String playerStr) {
-        //TODO Is this rep exposure?
-        
-        for (Player player : allPlayers) {
-            if (player.getID().equals(playerStr)) {
-                return player;
+
+        synchronized (folderPath) {
+            for (Player player : allPlayers) {
+                if (player.getID().equals(playerStr)) {
+                    return player;
+                }
             }
+            return new Player("");
         }
-        return new Player("");
     }
     
     
