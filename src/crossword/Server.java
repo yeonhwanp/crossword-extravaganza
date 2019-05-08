@@ -342,11 +342,6 @@ public class Server {
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.children().get(0).text();
         
-        
-        System.out.println("");
-        System.out.println("puzzle name: " + name);
-        System.out.println("puzzle description: " + description);
-        System.out.println("");
 
         List<WordTuple> allWords = new ArrayList<>();
         
@@ -366,15 +361,7 @@ public class Server {
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
             WordTuple currentWord = new WordTuple(row, col, hint, i-2, wordname, direction);
-            
-            System.out.println("wordname: "+ wordname);
-            System.out.println("hint: "+ hint);
-            System.out.println("direction: "+ direction);
-            System.out.println("row: "+ row);
-            System.out.println("col: "+ col);
-            System.out.println("");
-            
-            
+          
             allWords.add(currentWord);
         }
         
@@ -436,7 +423,6 @@ public class Server {
         
         response = result;
 
-        System.out.println("INIT RESPONSE: " + response);
 
         // write the response to the output stream using UTF-8 character encoding
         OutputStream body = exchange.getResponseBody();
@@ -450,7 +436,7 @@ public class Server {
     }
     
     /**
-     * RECEIVE: a start request from the players with one parameter: "MY_PLAYER_ID"
+     * RECEIVE: a start request from the players with one parameter: "start playerID"
      *  PRECONDITION: The ID must be unique (non-existing)
      * STATE:
      *  IF precondition: choose
@@ -462,6 +448,8 @@ public class Server {
         
         synchronized (folderPath) {
 
+ 
+            
             // if you want to know the requested path:
             final String path = exchange.getRequestURI().getPath();
 
@@ -483,7 +471,6 @@ public class Server {
 
             }
 
-            System.out.println("START RESPONSE: " + response);
 
             // write the response to the output stream using UTF-8 character encoding
             OutputStream body = exchange.getResponseBody();
@@ -711,7 +698,7 @@ public class Server {
                 final String response;
                 String temporaryResponse = "SHOW_SCORE\n";
                 Match currentMatch = mapIDToMatch.get(matchID);
-                // temporaryResponse += currentMatch.getMatchScore();
+//                 temporaryResponse += currentMatch.getMatchScore();
                 response = temporaryResponse;
 
                 out.print(response);
@@ -955,7 +942,7 @@ public class Server {
           Match match = loadMatch(puzzle);
           //need to check if this match is valid
           if (match.checkConsistency()) {
-              puzzles.add(match.getMatchName());
+              puzzles.add(puzzle.getName());
           }
           
       }
