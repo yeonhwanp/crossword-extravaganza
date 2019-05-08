@@ -55,10 +55,13 @@ public class Client {
      *                                                        and the current GET request by sendString.
      * 
      * Rep Invariant:
-     *  true
+     *  playerID alphanumeric
+     *  matchID only contains alphanumeric
      * 
      * Safety from Rep Exposure:
-     *  TODO
+     *  All variables except canvas are private and immutable
+     *  Methods take in mutable objects but do not copy them to the rep
+     *  Methods never return mutable objects or references to such mutable objects
      *  
      * Thread safety argument:
      *  TODO
@@ -70,8 +73,8 @@ public class Client {
      * Check for valid Client rep
      */
     private void checkRep() {
-        assert sendString != null;
-        assert canvas != null;
+        assert playerID.matches("^[a-zA-Z0-9]+$");
+        assert matchID.matches("^[a-zA-Z0-9]+$");
 
     }
 
@@ -368,12 +371,14 @@ public class Client {
 
         // Parsing through available puzzles
         String numberOfNew = socketIn.readLine();
+        puzzleMatchString += numberOfNew + "\n";
         for (int i = 0; i < Integer.valueOf(numberOfNew); i++) {
             puzzleMatchString += socketIn.readLine() + "\n";
         }
 
         // Parsing through available matches
         String numberOfCurrent = socketIn.readLine();
+        puzzleMatchString += numberOfNew + "\n";
         for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
             if (i != Integer.valueOf(numberOfCurrent)*2 - 1) {
                 puzzleMatchString += socketIn.readLine() + "\n";
