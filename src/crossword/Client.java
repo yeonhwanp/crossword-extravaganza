@@ -52,10 +52,10 @@ public class Client {
      *                                                        that is playing on the game represented by matchID
      *                                                        on the game GUI canvas that and has just
      *                                                        inputed a string into the GUI represented by userInput
-     *                                                        and the current GET request by sendString -- 
+     *                                                        and the current GET request by sendString.
      * 
      * Rep Invariant:
-     *  true (for now, until we implement the rest of the game)
+     *  true
      * 
      * Safety from Rep Exposure:
      *  TODO
