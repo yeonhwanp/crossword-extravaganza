@@ -227,6 +227,8 @@ class CrosswordCanvas extends JComponent {
      * We added some state just to allow you to see when the class gets repainted,
      * although in general you wouldn't want to be mutating state inside the paint
      * method.
+     * 
+     * TODO different UI updates for different game states
      */
     @Override
     public void paint(Graphics g) {
