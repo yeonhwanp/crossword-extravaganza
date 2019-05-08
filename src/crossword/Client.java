@@ -64,7 +64,10 @@ public class Client {
      *  Methods never return mutable objects or references to such mutable objects
      *  
      * Thread safety argument:
-     *  TODO
+     *  All of the variables within the class are ever only touched by one thread
+     *  playerID, matchID, userInput, sendString, validInput, are handled by thread one
+     *  canvas is touched by both threads but the methods that touch it are synchornized to an internal rep
+     *      such that two threads cannot get or modify the canvas at the same time.
      * 
      */
 
@@ -132,7 +135,7 @@ public class Client {
 
         // Thread to handle outgoing messages. Never want this to end until someone does end
         new Thread(() -> {
-            while (ongoingGame) {
+            while (true) {
                 synchronized(this) {
                     // Waiting for button press to send message
                     try {
@@ -202,7 +205,7 @@ public class Client {
 
         // Thread to handle watches
         new Thread(() -> {
-            while (ongoingGame) { 
+            while (true) { 
                 URL test;
                 try {
                     test = new URL("http://" + host + ":" + port + sendString);
@@ -249,7 +252,7 @@ public class Client {
     /**
      * @return the list of all legitimate puzzle IDs as well as ongoing matchIDs that only have one player
      */
-    public String getMatchList() {
+    public synchronized String getMatchList() {
         return canvas.getListOfMatches();
     }
 
@@ -307,7 +310,7 @@ public class Client {
     /**
      * parses the string and does something
      */
-    private void parseRequest(String state, BufferedReader socketIn) throws IOException {
+    private synchronized void parseRequest(String state, BufferedReader socketIn) throws IOException {
         switch (state) {
         case "start":
             receiveStart(socketIn);
@@ -339,7 +342,7 @@ public class Client {
      * @param socketIn The input stream from the server
      * @throws IOException 
      */
-    public void receiveStart(BufferedReader socketIn) throws IOException {
+    public synchronized void receiveStart(BufferedReader socketIn) throws IOException {
         String showState = socketIn.readLine();
         canvas.setRequest("start", showState);
     }
@@ -354,7 +357,7 @@ public class Client {
      * @param socketIn The input stream from the server
      * @throws IOException 
      */
-    public void receiveChoose(BufferedReader socketIn) throws IOException {
+    public synchronized void receiveChoose(BufferedReader socketIn) throws IOException {
 
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
@@ -395,7 +398,7 @@ public class Client {
      * RECEIVES:
      *  - WAIT, "WAITING"
      */
-    public void receiveWait(BufferedReader socketIn) {
+    public synchronized void receiveWait(BufferedReader socketIn) {
         canvas.setRequest("wait", "");
         matchID = userInput;
     }
@@ -428,14 +431,14 @@ public class Client {
     /**
      * RECEIVES: SHOW_SCORE
      */
-    public void receiveEnd(BufferedReader socketIn) {
+    public synchronized void receiveEnd(BufferedReader socketIn) {
         canvas.setRequest("show_score", "");
     }
 
     /**
      * SENDS: /start/playerID
      */
-    public void sendStart() {  
+    public synchronized void sendStart() {  
         if (canvas.getState() == "START" && !userInput.equals("")) {
             sendString = "/start/" + userInput;
             validInput = true;
@@ -448,7 +451,7 @@ public class Client {
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
-    public void sendChoose(String[] inputStrings) {
+    public synchronized void sendChoose(String[] inputStrings) {
         if (canvas.getState() == "CHOOSE" && inputStrings.length == 4) {
             sendString = "/new/" + playerID + "/" + inputStrings[1] + "/" + inputStrings[2] + "/" + inputStrings[3];
             validInput = false;
@@ -464,7 +467,7 @@ public class Client {
      * else:
      *  SENDS: /exit/state
      */
-    public void sendExit() {
+    public synchronized void sendExit() {
         if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
             sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
         }
@@ -476,7 +479,7 @@ public class Client {
     /**
      * SENDS: /play/playerID/matchID
      */
-    public void sendPlay(String[] inputStrings) {
+    public synchronized void sendPlay(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 2) {
             sendString = "/play/" + playerID + "/" + inputStrings[1];
         }
@@ -490,7 +493,7 @@ public class Client {
     /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
-    public void sendTry(String[] inputStrings) {
+    public synchronized void sendTry(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
@@ -502,7 +505,7 @@ public class Client {
     /**
      * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
      */
-    public void sendChallenge(String[] inputStrings) {
+    public synchronized void sendChallenge(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
@@ -515,7 +518,7 @@ public class Client {
     /**
      * Tells the user that there is an invalid input. 
      */
-    private void paintInvalidInput() {
+    private synchronized void paintInvalidInput() {
     }
 
 
