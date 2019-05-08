@@ -227,6 +227,10 @@ public class Word {
         involvedCells.add(cell);
     }
     
+    /**
+     * Get the current value stored within the cells of this word, even if nobody owns it
+     * @return the value of the string stored within the cells
+     */
     public String getCurrentValue() {
         String wordValue = "";
         
@@ -266,28 +270,100 @@ public class Word {
     }
     
     /**
-     * BE VERY CAREFUL WHEN IMPLEMENTING THIS METHOD, DON'T CLEAR CELLS PART OF OTHER WORDS
+     * BE VERY CAREFUL WHEN IMPLEMENTING THIS METHOD, DON'T CLEAR CELLS PART OF OTHER WORDS!
+     * Clears the cells of the word that do not belong to other inserted words on the board. This word will ONLY be
+     * cleared if it has an owner. Then, it will set the word to have no owner.
      */
-    public void clearWord() {
+    public void clearThisInsertedWord() {
+        if(!hasOwner()) {
+            return;
+        }
         
+        clearOwner();
+        
+        for(Cell cell : involvedCells) {
+            if(!cell.isOwned()) {
+                cell.clearValue();
+            }
+        }
+    }
+    
+    private void byPassInsert(Player player, String insertValue) {
+        for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to clear out the inconsistencies
+            final Cell currentCell = this.involvedCells.get(i);
+
+            if(!currentCell.isBlank() && currentCell.getCurrentValue() != insertValue.charAt(i)) {
+                currentCell.clearCorrespondingWords();
+            }
+        }
+        
+        for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to put in the new word
+            final Cell currentCell = this.involvedCells.get(i);
+
+            currentCell.changeValue(insertValue.charAt(i), player);
+        }
+        
+        setOwner(player);
     }
     
     /**
-     * BE VERY CAREFUL WHEN IMPLEMENTING THIS METHOD, DON'T CLEAR CELLS PART OF OTHER WORDS
+     * TODO
      */
     public boolean tryInsertNewWord(Player player, String tryWord) {
         if(!checkConsistentInsert(player, tryWord)) {
             return false;
         }
         
-        for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to put in the new word
-            final Cell currentCell = this.involvedCells.get(i);
-            
-            if(currentCell.getCurrentValue() != tryWord.charAt(i)) {
-                // TODO
-            }
-        }
+        byPassInsert(player, tryWord);
+        return true;
     }
+    
+    public boolean checkConsistentChallenge(Player player, String challengeWord) {
+        if(!this.hasOwner() || player.equals(this.getOwner())) {
+            return false;
+        }
+        
+        if(this.isConfirmed()) {
+            return false;
+        }
+        
+        if(challengeWord.length() != this.getLength() || challengeWord.equals(this.getCurrentValue())) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * TODO
+     */
+    public boolean tryChallenge(Player player, String challengeWord, Match currentMatch) {
+        if(!checkConsistentChallenge(player, challengeWord)) {
+            return false;
+        }
+        
+        final String currentValue = this.getCurrentValue();
+        final String correct = this.getCorrectValue();
+        
+        if(correct.equals(currentValue)) { // original player was correct
+            currentMatch.incrementScore(this.getOwner());
+            currentMatch.decreaseChallenge(player);
+            this.setConfirmed();
+        }
+        else if(correct.equals(challengeWord)) {
+            byPassInsert(player, challengeWord);
+            currentMatch.incrementScore(player);
+            currentMatch.incrementChallengeByTwo(player);
+            this.setConfirmed();
+        }
+        else {
+            this.clearThisInsertedWord();
+            currentMatch.decreaseChallenge(player);
+        }
+        
+        return true;
+    }
+    
     
     @Override
     public String toString() {

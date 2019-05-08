@@ -313,7 +313,10 @@ public class Client {
     }
 
     /**
-     * SENDS: /EXIT/STATE
+     * if current client state is in the wait or play state:
+     *  SENDS: /exit/state/matchID
+     * else:
+     *  SENDS: /exit/state
      */
     private void sendExit() {
     }

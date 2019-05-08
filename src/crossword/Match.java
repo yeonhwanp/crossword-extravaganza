@@ -146,7 +146,7 @@ public class Match {
      * Add a player to this match
      * @param player player to add
      */
-    public void addPlayer(Player player) {
+    public synchronized void addPlayer(Player player) {
         players.add(player);
         scores.put(player, 0);
         challengePts.put(player, 0);
@@ -156,14 +156,14 @@ public class Match {
      * Find the number of players currently playing this match.
      * @return number of current players.
      */
-    public int getNumberPlayers() {
+    public synchronized int getNumberPlayers() {
         return players.size();
     }
     
     /**
      * Check for valid match rep
      */
-    private void checkRep() {
+    private synchronized void checkRep() {
 //        assert matchName.matches("\" [^\"\r\n\t\\]* \"");
         assert rows >= 0;
         assert columns >= 0;
@@ -188,25 +188,25 @@ public class Match {
      * Decreases a player's challenge points
      * @param player the player to decrease challenge points for
      */
-    private void decreaseChallenge(Player player) {
+    public synchronized void decreaseChallenge(Player player) {
         final int currentChallenge = challengePts.get(player);
         challengePts.put(player, currentChallenge-1);
     }
     
     /**
-     * Increments a player's challenge points
-     * @param player the player to increase challenge points for
+     * Increments a player's challenge points by 2
+     * @param player the player to increase challenge points for by 2
      */
-    private void incrementChallenge(Player player) {
+    public synchronized void incrementChallengeByTwo(Player player) {
         final int currentChallenge = challengePts.get(player);
-        challengePts.put(player, currentChallenge+1);
+        challengePts.put(player, currentChallenge+2);
     }
     
     /**
      * Increase a player's score count
      * @param player the player to increase score for
      */
-    public void incrementScore(Player player) {
+    public synchronized void incrementScore(Player player) {
         final int currentScore = scores.get(player);
         scores.put(player, currentScore+1);
     }
@@ -215,7 +215,7 @@ public class Match {
      * @param player the player we want to get the score for
      * @return the score of the given player
      */
-    public int getScore(Player player) {
+    public synchronized int getScore(Player player) {
         return scores.get(player);
     }
     
@@ -223,7 +223,7 @@ public class Match {
      * @param player the player we want to get the challenge points for
      * @return the number of challenge points of the given player
      */
-    public int getChallengePoints(Player player) {
+    public synchronized int getChallengePoints(Player player) {
         return challengePts.get(player);
     }
     
@@ -234,47 +234,47 @@ public class Match {
 //        throw new RuntimeException("not done implementing!");
 //    }
     
-    /**
-     * Checks if an attempted word is consistent according to the final project handout
-     * @param player the player attempting the word
-     * @param word the word being attempted to insert
-     * @param tryWord the actual word inserted by the player
-     * @return if the insert is valid or not
-     */
-    private boolean checkConsistentInsert(Player player, Word insertWord, String tryWord) {
-        if(insertWord.isConfirmed() || (insertWord.hasOwner() && !player.equals(insertWord.getOwner()))) {
-            return false;
-        }
-        
-        if(insertWord.getLength() != tryWord.length()) {
-            return false;
-        }
-        
-        
-    }
+//    /**
+//     * Checks if an attempted word is consistent according to the final project handout
+//     * @param player the player attempting the word
+//     * @param word the word being attempted to insert
+//     * @param tryWord the actual word inserted by the player
+//     * @return if the insert is valid or not
+//     */
+//    private boolean checkConsistentInsert(Player player, Word insertWord, String tryWord) {
+//        if(insertWord.isConfirmed() || (insertWord.hasOwner() && !player.equals(insertWord.getOwner()))) {
+//            return false;
+//        }
+//        
+//        if(insertWord.getLength() != tryWord.length()) {
+//            return false;
+//        }
+//        
+//        
+//    }
     
     /**
      * Inserts an attempt at a given location.
      * @param player the player attempting the insert
-     * @param wordID the word being attempted
+     * @param wordID the ID of the word being attempted
      * @param tryWord the guessed word
+     * @return true iff the insert succeeded, false if the consistency check failed
      */
-    public boolean tryInsert(Player player, int wordID, String tryWord) {
-        throw new RuntimeException("not done implementing!");
-        
-        // TODO: check consistency of the guess first
+    public synchronized boolean tryInsert(Player player, int wordID, String tryWord) {
+        final Word word = idToWordMap.get(wordID);
+        return word.tryInsertNewWord(player, tryWord);
     }
     
-    /**
-     * Checks if an attempted challenge is valid according to the final project handout
-     * @param player the player attempting the word
-     * @param wordID the id of the word being attempted
-     * @param challengeGuess the actual word used to challenge the other player's guess
-     * @return if the challenge is valid or not
-     */
-    private boolean checkValidChallenge(Player player, int wordID, String challengeGuess) {
-        throw new RuntimeException("not done implementing!");
-    }
+//    /**
+//     * Checks if an attempted challenge is valid according to the final project handout
+//     * @param player the player attempting the word
+//     * @param wordID the id of the word being attempted
+//     * @param challengeGuess the actual word used to challenge the other player's guess
+//     * @return if the challenge is valid or not
+//     */
+//    private synchronized boolean checkValidChallenge(Player player, int wordID, String challengeGuess) {
+//        throw new RuntimeException("not done implementing!");
+//    }
     
     /**
      * Challenges the other player's guess and increments/decrements challengepoints accordingly.
@@ -282,12 +282,13 @@ public class Match {
      * @param wordID the id of the word being challenged
      * @param challengeGuess the actual word used to challenge the other player's guesses
      */
-    public boolean challenge(Player player, int wordID, String challengeGuess) {
-        throw new RuntimeException("not done implementing!");
+    public synchronized boolean challenge(Player player, int wordID, String challengeGuess) {
+        final Word word = idToWordMap.get(wordID);
+        return word.tryChallenge(player, challengeGuess, this);
     }
     
     @Override
-    public String toString() {
+    public synchronized String toString() {
         String resultString = "";
         resultString += rows + "x" + columns + "\n";
         
@@ -312,7 +313,7 @@ public class Match {
      * Checks if this board is consistent with regards to the specifications laid out in the Final Project handout
      * @return true if the board is consistent with regards to the Final Project handout
      */
-    public boolean checkConsistency() {
+    public synchronized boolean checkConsistency() {
         /*
          * IMPLEMENTATION IDEA
          * 
@@ -408,7 +409,7 @@ public class Match {
      * @param secondHigh the end of the second range
      * @return true iff the ranges overlap
      */
-    private static boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
+    private synchronized boolean oneDimensionOverlap(int firstLow, int firstHigh, int secondLow, int secondHigh) {
         return firstLow <= secondHigh && secondLow <= firstHigh; // returns true iff [firstLow, firstHigh] and [secondLow, secondHigh] overlap
     }
     
@@ -418,7 +419,7 @@ public class Match {
      * @param horizontalWord the horizontally aligned word
      * @return whether or not the two words (one vertical and one horizontal) are consistent with each other
      */
-    private static boolean verticalHorizontalConsistent(Word verticalWord, Word horizontalWord) {
+    private synchronized boolean verticalHorizontalConsistent(Word verticalWord, Word horizontalWord) {
         assert verticalWord.isVertical();
         assert horizontalWord.isHorizontal();
         
@@ -449,17 +450,39 @@ public class Match {
         return true;
     }
     
-    public String getMatchName() {
+    public synchronized String getMatchName() {
         return matchName;
     }
     
-    public String getMatchDescription() {
+
+    
+    
+    public synchronized String getMatchDescription() {
         return matchDescription;
     }
     
-    public void clearInconsistent(Word word, String newVal) {
+    
+    /**
+     * Determines if this current match is finished, where finished is defined by project handout rules
+     * @return if match is finished
+     */
+    public synchronized boolean isFinished() {
         throw new RuntimeException("not done implementing!");
     }
+    
+    
+    /**
+     * Determines if this match contains given player
+     * @param player player to check existence of
+     * @return if match contains given player
+     */
+    public synchronized boolean containsPlayer(Player player) {
+        return players.contains(player);
+    }
+    
+//    public void clearInconsistent(Word word, String newVal) {
+//        throw new RuntimeException("not done implementing!");
+//    }
     
 //    public Cell getCell(int )
     
