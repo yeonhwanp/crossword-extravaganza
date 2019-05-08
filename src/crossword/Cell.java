@@ -100,23 +100,48 @@ public class Cell {
         return false;
     }
     
+//    /**
+//     * Clears the cell of its value
+//     * @param player the player implementing the change
+//     * @return true if the cell's value has been changed, false otherwise
+//     */
+//    public boolean clearValue(Player player) {
+//        if(canChangeValue(player))
+//        {
+//            value = EMPTY_CELL;
+//            return true;
+//        }
+//        
+//        return false;
+//    }
+    
     /**
      * Clears the cell of its value
-     * @param player the player implementing the change
-     * @return true if the cell's value has been changed, false otherwise
      */
-    public boolean clearValue(Player player) {
-        if(canChangeValue(player))
-        {
-            value = EMPTY_CELL;
-            return true;
+    public void clearValue() {
+        value = EMPTY_CELL;
+    }
+    
+    /**
+     * Checks if the cell is owned 
+     * @return true iff one of the words corresponding to this cell has an owner
+     */
+    public boolean isOwned() {
+        for(Word word : correspondingWords) {
+            if(word.hasOwner()) {
+                return true;
+            }
         }
-        
         return false;
     }
     
-    public boolean canClearValue() {
-        
+    /**
+     * Clear all of the words that this cell maps to
+     */
+    public void clearCorrespondingWords() {
+        for(Word word : correspondingWords) {
+            word.clearThisInsertedWord();
+        }
     }
     
     /**
