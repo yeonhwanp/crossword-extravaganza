@@ -54,6 +54,9 @@ public class Cell {
     private void checkRep() {
         assert row >= 0;
         assert col >= 0;
+        assert correspondingWords.size() >= 1;
+        assert correspondingWords.size() <= 2;
+        assert existState != null;
     }
     
     /**
@@ -94,36 +97,31 @@ public class Cell {
         if(canChangeValue(player))
         {
             value = pValue;
+            
+            checkRep();
             return true;
         }
         
+        checkRep();
         return false;
     }
     
-//    /**
-//     * Clears the cell of its value
-//     * @param player the player implementing the change
-//     * @return true if the cell's value has been changed, false otherwise
-//     */
-//    public boolean clearValue(Player player) {
-//        if(canChangeValue(player))
-//        {
-//            value = EMPTY_CELL;
-//            return true;
-//        }
-//        
-//        return false;
-//    }
-    
     /**
-     * Clears the cell of its value
+     * Clears the cell of its value, only if none of the words that host this cell are controlled by a player
+     * @return true iff the clear went through (so none of the corresponding words has an owner)
      */
-    public void clearValue() {
+    public boolean clearValue() {
+        if(this.isOwned()) {
+            return false;
+        }
+        
         value = EMPTY_CELL;
+        checkRep();
+        return true;
     }
     
     /**
-     * Checks if the cell is owned 
+     * Checks if the cell is owned (so that one of the corresponding words that hosts this cell is controlled by someone)
      * @return true iff one of the words corresponding to this cell has an owner
      */
     public boolean isOwned() {

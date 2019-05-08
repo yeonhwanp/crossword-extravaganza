@@ -46,4 +46,47 @@ public class WordTuple {
     public int getID() {
         return id;
     }
+    
+    @Override
+    /**
+     * Checks equality of word tuple objects
+     * @param that other object to check
+     * @return if word tuples are equal
+     */
+    public boolean equals(Object that) {
+        return that instanceof WordTuple &&
+                (((WordTuple) that).getWord().equals(this.getWord())) &&
+                (((WordTuple) that).getHint().equals(this.getHint())) &&
+                (((WordTuple) that).getDirection().equals(this.getDirection())) &&
+                (((WordTuple) that).getRow() == this.getRow()) &&
+                (((WordTuple) that).getCol() == this.getCol()) &&
+                (((WordTuple) that).getID() == this.getID());
+    }
+    
+    @Override
+    /**
+     * Get hashcode of this word tuple
+     * @return haschode of word tuple
+     */
+    public int hashCode() {
+        return getAscii(getWord())*21 + getAscii(getHint())*11 + getAscii(getDirection())*9
+                + getRow()*7 + getCol()*8 + getID()*6;
+    }
+    
+    
+    /**
+     * Get ascii value of string
+     * @param str string to get value of
+     * @return ascii value of string
+     */
+    private static int getAscii(String str) {
+        int count = 0;
+        //add ascii value times (index + 1) for total sum
+        for (int i = 0; i < str.length(); i++) {
+            char character = str.charAt(i);
+            int ascii = (int) character;
+            count += (i+1) * ascii;
+        }
+        return count;
+    }
 }
