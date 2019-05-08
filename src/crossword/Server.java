@@ -47,43 +47,58 @@ import edu.mit.eecs.parserlib.UnableToParseException;
  */
 
 /**
- * HTTP web puzzle server.
+ * HTTP web puzzle server, that handles all matches being played on this server.
  */
 public class Server {
     
     private final HttpServer server;
-//    private final List<String> validMatches;
-//    private final Map<Integer, String> currentMatchesMap; // <STRING, MATCH>
-//    private final Map<String, Player> allPlayers;
     private final String folderPath;
-    
     private Set<String> validPuzzleNames;
     private final Set<Player> allPlayers;
     private final Map<String, String> mapIDToDescription;
     private final Map<String, Match> mapIDToMatch;
-    
     private final Map<String, Match> twoPlayerMatches;
     
     
     
     /*
      * Abstraction Function:
-     * AF(server, allMatches) = Server that is played on server, with allMatches being the possible matches that can be played
-     *      by players
+     * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches) =
+     *  Server that is played on server, using path folderPath to the folder to read puzzles from. Puzzles that are valid
+     *  puzzles (according to project handout) have IDs in validPuzzleNames. All the players that are playing on this server
+     *  have their identifiers stored in allPlayers. The server contains a map mapIDToDescription mapping match ID's to the match description,
+     *  where these matches only have one player and are waiting for another. The server also has a map mapIDToMatch
+     *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
+     *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
      * 
      * Rep Invariant:
-     * true
+     * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
+     *  a value of twoPlayerMatches (again as a player of that match).
+     * Every key in mapIDToDescription should exist in mapIDToMatch, and vice versa.
+     * Every key in twoPlayerMatches should not be in mapIDToDescription
      * 
      * Safety from rep exposure:
-     *  server and allMatches are both private and final
+     *  All fields, except validPuzzleNames, are private and final.
      *      server is mutated in the Server constructor (parameter as well), start(), and stop(), but this is part of the expected behavior, so no rep exposure
-     *      allMatches allMatches is taken in as a parameter only to the constructor, but since our constructor is private,
-     *          no rep exposure here. Though the constructor calls on other methods, these methods that have access to matches
-     *          are private, so no rep exposure.
-     *          
-     *          
+     *      validPuzzleNames is mutated only in our constructor, but this is okay because it is part of the expected behavior.
+     *          validPuzzleNames is never returned or taken in as a method to any method, so we do not keep references of it
+     *      folderPath is also immutable, so we have no rep exposure here, even when it is taken in as a parameter to other methods,
+     *      allPlayers is mutated in handleStart, but this is part of expected behavior. It is not mutated, taken in as a parameter,
+     *          or returned in any other method.
+     *      mapIDToDescription is mutated in chooseNewMatch, playMatch, and exit, but this is expected client behavior, so it is not rep exposure.
+     *          It is not mutated, taken in as a parameter, or returned in any other method.
+     *      mapIDToMatch is mutated in chooseNewMatch, playMatch, and exit, but this is expected client behavior, so it is not rep exposure.
+     *          It is not mutated, taken in as a parameter, or returned in any other method.
+     *      twoPlayerMatches is mutated in playMatch and exit, but this is expected client behavior, so it is not rep exposure.
+     *          It is not mutated, taken in as a parameter, or returned in any other method.
+     *        
      * Thread safety argument:
-     *  TODO
+     *  Every method that is non-static is locked by the rep folderPath. Therefore, all accesses to our rep are guarded by
+     *  the lock on folderPath, which is an instance variable. This means that only one thread can access/change our rep
+     *  at a time. This is essentially the same as monitor pattern, except we do not want to give access to this.
+     *  All of our static methods are threadsafe because:
+     *    The static methods only used local variables that are confined, so there is no behavior that is not threadsafe
+     *  
      */
     
     
@@ -107,24 +122,6 @@ public class Server {
         final Server server = new Server(folderPath, 4949);
         server.start();
         
-//        File folder = new File(folderPath);
-//        for (File puzzle : folder.listFiles()) {
-//            Match match = loadMatch(puzzle);
-//            
-//            List<Match> matches = new ArrayList<>();
-//            
-//            
-//            //need to check if this match is valid
-//            if (match.checkConsistency()) {
-//                matches.add(match);
-//                
-//                final Server server = new Server(matches, 4949);
-//                server.start();
-//            }
-//            
-//            //do we need to stop the server? I feel like we don't?
-//            break;
-//        }
     }
     
     /**
@@ -135,9 +132,7 @@ public class Server {
      */
     protected Server(String folderPath, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
-        // this.allMatches = matches;
         this.folderPath = folderPath;
-
         this.allPlayers = new HashSet<>();
         this.mapIDToDescription = new HashMap<>();
         this.mapIDToMatch = new HashMap<>();
@@ -384,23 +379,29 @@ public class Server {
      * @return the port on which this server is listening for connections
      */
     public int port() {
-        return server.getAddress().getPort();
+        synchronized (folderPath) {
+            return server.getAddress().getPort();
+        }
     }
     
     /**
      * Start this server in a new background thread.
      */
     public void start() {
-        System.err.println("Server will listen on " + server.getAddress());
-        server.start();
+        synchronized (folderPath) {
+            System.err.println("Server will listen on " + server.getAddress());
+            server.start();
+        }
     }
     
     /**
      * Stop this server. Once stopped, this server cannot be restarted.
      */
     public void stop() {
-        System.err.println("Server will stop");
-        server.stop(0);
+        synchronized (folderPath) {
+            System.err.println("Server will stop");
+            server.stop(0);
+        }
     }
     
     /*
@@ -857,7 +858,7 @@ public class Server {
     
     
     /**
-     * Send the score
+     * Send the score of the match to the client
      */
     private void sendShowScore() {    
     }
