@@ -1,6 +1,5 @@
 package crossword;
 
-import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,10 @@ import crossword.Cell.Exist;
  *  - 
  */
 
-
+/**
+ * Ongoing match of Crossword Extravaganza to be played by two players.
+ *
+ */
 public class Match {
     
     // Rep: Map<String ID, Player player>

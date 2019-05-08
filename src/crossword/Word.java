@@ -6,6 +6,10 @@ import java.util.Optional;
 
 import crossword.Cell.Exist;
 
+/**
+ * Word of a crossword puzzle, that can be guessed or challenged
+ *
+ */
 public class Word {
     
     // Abstraction function:
