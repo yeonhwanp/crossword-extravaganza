@@ -20,6 +20,8 @@ public class Word {
     //    id >= 0 && id should be unique
     //    direction == "DOWN" or direction == "ACROSS"
     //    we must also have that the cells in involvedCells are sequential to the word, so involvedCells.get(0) + involvedCells.get(1) + .... forms the word
+    //          in other words, we must have that 
+    //    involvedCells.size() == correctValue.length()
     //
     // Safety from rep exposure:
     //    startRow, startCol, id, hint, correctValue, and direction are all private and final
@@ -27,7 +29,7 @@ public class Word {
     //    All methods take in and return immutable types
     //   
     // Thread safety argument:
-    //   TODO: Later
+    //   This class is not threadsafe, but it's OK because only Match accesses Word methods, and Match is threadsafe.
     
     public enum Direction {ACROSS, DOWN}
 
@@ -366,9 +368,9 @@ public class Word {
     /**
      * Try a challenge by player player on this word with challengeWord, under the condition that this is on the Match currentMatch
      * @param player must be a player within currentMatch
-     * @param challengeWord
-     * @param currentMatch
-     * @return
+     * @param challengeWord the new challenge word
+     * @param currentMatch the current match that this word and player are on
+     * @return true iff the challenge was accepted (if it was consistent)
      */
     public boolean tryChallenge(Player player, String challengeWord, Match currentMatch) {
         if(!checkConsistentChallenge(player, challengeWord)) {

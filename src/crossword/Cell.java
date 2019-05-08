@@ -23,7 +23,7 @@ public class Cell {
     //        because each word occupies multiple cells
     //   
     // Thread safety argument:
-    //   TODO: Later
+    //   This class is not threadsafe, but it's OK because only Match accesses Cell methods, and Match is threadsafe.
     
     public enum Exist {PRESENT, ABSENT}
 
