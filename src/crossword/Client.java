@@ -195,38 +195,38 @@ public class Client {
         }).start();
 
         // Thread to handle watches
-        new Thread(() -> {
-            try {
-                while (!socket.isClosed()) {
-
-                    // Parse the state and then pass it into some handler
-                    String newState = socketIn.readLine();
-                    parseRequest(newState, socketIn);
-
-                    // Break out of the loop if the connection is closed
-                    if (socket.isClosed()) {break;}
-                }
-                System.out.println("connection closed");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+//        new Thread(() -> {
+//            try {
+//                while (!socket.isClosed()) {
+//
+//                    // Parse the state and then pass it into some handler
+//                    String newState = socketIn.readLine();
+//                    parseRequest(newState, socketIn);
+//
+//                    // Break out of the loop if the connection is closed
+//                    if (socket.isClosed()) {break;}
+//                }
+//                System.out.println("connection closed");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
     }
     
     public String getPlayerID() {
-        
+        throw new RuntimeException("Not implemented yet!");
     }
     
     public String getMatchID() {
-        
+        throw new RuntimeException("Not implemented yet!");
     }
     
     public String getUserInput() {
-        
+        throw new RuntimeException("Not implemented yet!");  
     }
     
     public String getSendString() {
-        
+        throw new RuntimeException("Not implemented yet!");
     }
 
     private void handleInputs(BufferedReader socketIn) {
@@ -282,7 +282,6 @@ public class Client {
 
     /**
      * parses the string and does something
-     * @throws IOException 
      */
     private void parseRequest(String state, BufferedReader socketIn) throws IOException {
         switch (state) {
@@ -302,28 +301,36 @@ public class Client {
             receiveEnd(socketIn);
             break;
         default:
-            throw new RuntimeException("WAT R U DOING");
+            throw new RuntimeException("Should never reach here");
         }
     }
 
     /**
+     * Receives a start response from the server and parses it into the canvas.
+     * 
      * RECEIVES: 
      *  - START, "NEW GAME" 
      *  - START, "TRY AGAIN"
+     *  
+     * @param socketIn The input stream from the server
      * @throws IOException 
      */
-    private void receiveStart(BufferedReader socketIn) throws IOException {
+    public void receiveStart(BufferedReader socketIn) throws IOException {
         String showState = socketIn.readLine();
         canvas.setRequest("start", showState);
     }
 
     /**
+     * Receives a choose response from the server and parses it into the canvas.
+     * 
      * RECEIVES: 
      *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  - CHOOSE, "TRY AGAIN", allMatches
+     *  
+     * @param socketIn The input stream from the server
      * @throws IOException 
      */
-    private void receiveChoose(BufferedReader socketIn) throws IOException {
+    public void receiveChoose(BufferedReader socketIn) throws IOException {
 
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
@@ -362,7 +369,7 @@ public class Client {
      * RECEIVES:
      *  - WAIT, "WAITING"
      */
-    private void receiveWait(BufferedReader socketIn) {
+    public void receiveWait(BufferedReader socketIn) {
         canvas.setRequest("wait", "");
         matchID = userInput;
     }
@@ -374,7 +381,7 @@ public class Client {
      *  - PLAY, false, board
      * @throws IOException 
      */
-    private synchronized void receivePlay(BufferedReader socketIn) throws IOException {
+    public synchronized void receivePlay(BufferedReader socketIn) throws IOException {
 
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
@@ -395,14 +402,14 @@ public class Client {
     /**
      * RECEIVES: SHOW_SCORE
      */
-    private void receiveEnd(BufferedReader socketIn) {
+    public void receiveEnd(BufferedReader socketIn) {
         canvas.setRequest("show_score", "");
     }
 
     /**
      * SENDS: /start/playerID
      */
-    private void sendStart() {  
+    public void sendStart() {  
         if (canvas.getState() == "START" && !userInput.equals("")) {
             sendString = "/start/" + userInput;
             validInput = true;
@@ -415,7 +422,7 @@ public class Client {
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
-    private void sendChoose(String[] inputStrings) {
+    public void sendChoose(String[] inputStrings) {
         if (canvas.getState() == "CHOOSE" && inputStrings.length == 4) {
             sendString = "/new/" + playerID + "/" + inputStrings[1] + "/" + inputStrings[2] + "/" + inputStrings[3];
             validInput = false;
@@ -431,7 +438,7 @@ public class Client {
      * else:
      *  SENDS: /exit/state
      */
-    private void sendExit() {
+    public void sendExit() {
         if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
             sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
         }
@@ -443,7 +450,7 @@ public class Client {
     /**
      * SENDS: /play/playerID/matchID
      */
-    private void sendPlay(String[] inputStrings) {
+    public void sendPlay(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 2) {
             sendString = "/play/" + playerID + "/" + inputStrings[1];
         }
@@ -457,7 +464,7 @@ public class Client {
     /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
-    private void sendTry(String[] inputStrings) {
+    public void sendTry(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
@@ -469,7 +476,7 @@ public class Client {
     /**
      * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
      */
-    private void sendChallenge(String[] inputStrings) {
+    public void sendChallenge(String[] inputStrings) {
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }

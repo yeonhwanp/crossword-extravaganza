@@ -219,11 +219,11 @@ class CrosswordCanvas extends JComponent {
     }
     
     public String getCurrentBoard() {
-        
+        throw new RuntimeException("Not implemented yet!");
     }
     
     public String getListOfMatches() {
-        
+        throw new RuntimeException("Not implemented yet!");
     }
     
     // =============== MY METHODS =============== //
