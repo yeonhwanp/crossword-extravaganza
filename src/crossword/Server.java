@@ -219,6 +219,17 @@ public class Server {
             }
         });
         exitRequest.getFilters().addAll(filters);
+        
+        // handle requests for paths that start with /try/
+        HttpContext tryRequest = server.createContext("/try/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                tryPlay(exchange);   
+
+            }
+        });
+        tryRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -703,33 +714,144 @@ public class Server {
     }
     
     /**
-     * RECEIVE: A try request in the form: "TRY PLAYER_ID MATCH_ID WORD_ID word"
+     * RECEIVE: A try request in the form: "try playerID matchID wordID word"
      * PRECONDITION:
-     *     - MATCH_ID must exist
+     *     - MATCH_ID must exist in currently playing matches
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
      *     - SEND: PLAY, true, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: SHOW_SCORE, score
-     * IF INVLAID (game logic):
+     * IF INVALID (game logic):
      *     - SEND: PLAY, false, board
+
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
+        
+        // if you want to know the requested path:
+        final String path = exchange.getRequestURI().getPath();
+        
+        // it will always start with the base path from server.createContext():
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        final String tryRequest = path.substring(base.length());
+        
+        exchange.sendResponseHeaders(VALID, 0);
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+        
+        
+        String[] ids = tryRequest.split("/");
+        String playerID = ids[0];
+        String matchID = ids[1];
+        String wordID = ids[2];
+        String word = ids[3];
+        
+        if (twoPlayerMatches.containsKey(matchID)) {
+            Match currentMatch = twoPlayerMatches.get(matchID);
+            Player currentPlayer = getPlayer(playerID);
+            if (currentMatch.containsPlayer(currentPlayer)) {
+                
+                boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
+                boolean matchFinished = currentMatch.isFinished();
+                
+                if (validTry && matchFinished) {
+                    String finishedResponse = "SHOW_SCORE\n";
+                    // finishedResponse += currentMatch.getMatchScore();
+                    final String finished = finishedResponse;
+
+                    out.print(finished);
+                    out.flush();
+                    exchange.close();
+
+                }
+                else {
+
+                    String ongoingResponse = "PLAY\n";
+                    ongoingResponse += String.valueOf(validTry) + "\n" + currentMatch.toString();
+                    final String ongoing = ongoingResponse;
+
+                    out.print(ongoing);
+                    out.flush();
+                    exchange.close();
+
+                }
+
+
+            }
+        }
+        
+        
     }
     
     /**
-     * RECEIVE: A try request in the form: "CHALLENGE PLAYER_ID MATCH_ID WORD_ID word"
+     * RECEIVE: A try request in the form: "challenge playerID matchID wordID word"
      * PRECONDITION:
-     *     - MATCH_ID must exist
-     *     - PLAYER_ID must be one of the players in the match
+     *     - matchID must exist
+     *     - playerID must be one of the players in the match
      * IF VALID CHALLENGE -> Ongoing (game logic):
-     *     - SEND: PLAY, board, true
+     *     - SEND: PLAY, true, board
      * IF VALID_CHALLENGE -> Finish (game logic):
      *     - SEND: SHOW_SCORE, score
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: PLAY, board, false
+     *     - SEND: PLAY, false, board
      */
     private void challenge(HttpExchange exchange) throws IOException {
+        
+        // if you want to know the requested path:
+        final String path = exchange.getRequestURI().getPath();
+        
+        // it will always start with the base path from server.createContext():
+        final String base = exchange.getHttpContext().getPath();
+        assert path.startsWith(base);
+        final String tryRequest = path.substring(base.length());
+        
+        exchange.sendResponseHeaders(VALID, 0);
+        OutputStream body = exchange.getResponseBody();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+        
+        
+        String[] ids = tryRequest.split("/");
+        String playerID = ids[0];
+        String matchID = ids[1];
+        String wordID = ids[2];
+        String word = ids[3];
+        
+        if (twoPlayerMatches.containsKey(matchID)) {
+            Match currentMatch = twoPlayerMatches.get(matchID);
+            Player currentPlayer = getPlayer(playerID);
+            if (currentMatch.containsPlayer(currentPlayer)) {
+                
+                boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
+                boolean matchFinished = currentMatch.isFinished();
+                
+                if (validChallenge && matchFinished) {
+                    String finishedResponse = "SHOW_SCORE\n";
+                    // finishedResponse += currentMatch.getMatchScore();
+                    final String finished = finishedResponse;
+
+                    out.print(finished);
+                    out.flush();
+                    exchange.close();
+
+                }
+                else {
+
+                    String ongoingResponse = "PLAY\n";
+                    ongoingResponse += String.valueOf(validChallenge) + "\n" + currentMatch.toString();
+                    final String ongoing = ongoingResponse;
+
+                    out.print(ongoing);
+                    out.flush();
+                    exchange.close();
+
+                }
+
+
+            }
+        }
+        
+        
     }
     
     
