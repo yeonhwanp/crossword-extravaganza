@@ -46,6 +46,19 @@ import edu.mit.eecs.parserlib.UnableToParseException;
  * TODO define restrictions on "Description"
  */
 
+
+
+/*
+ * Concurrency design:
+ * 
+ * Synchronize every non-static method on a lock of the Server rep. This way, only one thread can change/access our rep 
+ * data at a time. if we didn't do this, then there could be a lot of interleaving and potential overwriting of changed
+ * reps.
+ * 
+ * 
+ * 
+ */
+
 /**
  * HTTP web puzzle server, that handles all matches being played on this server.
  */
@@ -234,7 +247,7 @@ public class Server {
      */
     private void checkRep() {
         assert server != null;
-//        assert validMatchesMap != null;
+        //TODO FINISH CHECKREP
     }
     
     /**
@@ -352,7 +365,6 @@ public class Server {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
-//            Word currentWord = new Word(row, col, hint, i - 1, wordname, direction);
             WordTuple currentWord = new WordTuple(row, col, hint, i-1, wordname, direction);
             
             System.out.println("wordname: "+ wordname);
