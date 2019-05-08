@@ -363,6 +363,17 @@ public class MatchTest {
     }
     
     
+    //covers addPlayer()
+    @Test
+    public void testAddPlayer() {
+        
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        currentMatch.addPlayer(new Player("hi"));
+        assertTrue(currentMatch.containsPlayer(new Player("hi")));
+        
+    }
+    
     
     
     @Test
