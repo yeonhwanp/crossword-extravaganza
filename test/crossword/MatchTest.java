@@ -374,6 +374,36 @@ public class MatchTest {
         
     }
     
+    //covers getNumberPlayers
+    //  0 players
+    @Test
+    public void testGetNumberPlayers0() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        assertEquals(0, currentMatch.getNumberPlayers());
+    }
+    
+    //covers getNumberPlayers
+    //  1 players
+    @Test
+    public void testGetNumberPlayers1() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        currentMatch.addPlayer(new Player("yo"));
+        assertEquals(1, currentMatch.getNumberPlayers());
+    }
+    
+    //covers getNumberPlayers
+    //  2 players
+    @Test
+    public void testGetNumberPlayers2() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        currentMatch.addPlayer(new Player("yo"));
+        currentMatch.addPlayer(new Player("a"));
+        assertEquals(2, currentMatch.getNumberPlayers());
+    }
+    
     
     
     @Test
