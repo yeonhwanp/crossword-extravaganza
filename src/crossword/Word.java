@@ -179,18 +179,34 @@ public class Word {
         return confirmed;
     }
     
+    /**
+     * Set the owner of this word to be newOwner
+     * @param newOwner the new owner of this word
+     */
     public void setOwner(Player newOwner) {
         owner = Optional.of(newOwner);
     }
     
+    /**
+     * Check if the word has an owner (and therefore if the word has an inserted value).
+     * @return true iff the word has an owner
+     */
     public boolean hasOwner() {
         return owner.isPresent();
     }
     
+    /**
+     * Clear the word's owner.
+     */
     public void clearOwner() {
         owner = Optional.empty();
     }
     
+    /**
+     * Get the owner of this word
+     * PRECONDITION: this word must have an owner
+     * @return the owner of the word
+     */
     public Player getOwner() {
         if(!hasOwner()) {
             throw new RuntimeException("Tried calling get owner on a word that isn't owned!");
@@ -198,6 +214,9 @@ public class Word {
         return owner.get();
     }
     
+    /**
+     * Set this word to be confirmed
+     */
     public void setConfirmed() {
         confirmed = true;
     }
@@ -300,14 +319,18 @@ public class Word {
         for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to put in the new word
             final Cell currentCell = this.involvedCells.get(i);
 
-            currentCell.changeValue(insertValue.charAt(i), player);
+            final boolean changeValue = currentCell.changeValue(insertValue.charAt(i), player);
+            assert changeValue;
         }
         
         setOwner(player);
     }
     
     /**
-     * TODO
+     * Try to insert a new word tryWord into this word by player 
+     * @param player the player attempting to insert the word into this slot
+     * @param tryWord the word we are attempting
+     * @return true iff the word was inserted (and was consistent, so it returns false iff it was inconsistent)
      */
     public boolean tryInsertNewWord(Player player, String tryWord) {
         if(!checkConsistentInsert(player, tryWord)) {
@@ -318,6 +341,12 @@ public class Word {
         return true;
     }
     
+    /**
+     * Check if a word is a consistent challenge, following the rules as specified the problem set handout
+     * @param player the player that is making the challenge
+     * @param challengeWord the word inputted by the challenging player
+     * @return true iff it is a consistent challenge
+     */
     public boolean checkConsistentChallenge(Player player, String challengeWord) {
         if(!this.hasOwner() || player.equals(this.getOwner())) {
             return false;
@@ -335,7 +364,11 @@ public class Word {
     }
     
     /**
-     * TODO
+     * Try a challenge by player player on this word with challengeWord, under the condition that this is on the Match currentMatch
+     * @param player must be a player within currentMatch
+     * @param challengeWord
+     * @param currentMatch
+     * @return
      */
     public boolean tryChallenge(Player player, String challengeWord, Match currentMatch) {
         if(!checkConsistentChallenge(player, challengeWord)) {

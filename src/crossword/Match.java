@@ -175,15 +175,6 @@ public class Match {
         }
     }
     
-    
-//    /**
-//     * Used to start the game once two players join.
-//     */
-//    public void startGame() {
-//        throw new RuntimeException("not done implementing!");
-//    }
-//    
-    
     /**
      * Decreases a player's challenge points
      * @param player the player to decrease challenge points for
@@ -213,10 +204,10 @@ public class Match {
     
     /**
      * @param player the player we want to get the score for
-     * @return the score of the given player
+     * @return the score of the given player (which is number of words confirmed correct + challenge points)
      */
     public synchronized int getScore(Player player) {
-        return scores.get(player);
+        return scores.get(player) + challengePts.get(player);
     }
     
     /**
@@ -227,32 +218,6 @@ public class Match {
         return challengePts.get(player);
     }
     
-//    /**
-//     * @return the current state of the game
-//     */
-//    public GameState getState() {
-//        throw new RuntimeException("not done implementing!");
-//    }
-    
-//    /**
-//     * Checks if an attempted word is consistent according to the final project handout
-//     * @param player the player attempting the word
-//     * @param word the word being attempted to insert
-//     * @param tryWord the actual word inserted by the player
-//     * @return if the insert is valid or not
-//     */
-//    private boolean checkConsistentInsert(Player player, Word insertWord, String tryWord) {
-//        if(insertWord.isConfirmed() || (insertWord.hasOwner() && !player.equals(insertWord.getOwner()))) {
-//            return false;
-//        }
-//        
-//        if(insertWord.getLength() != tryWord.length()) {
-//            return false;
-//        }
-//        
-//        
-//    }
-    
     /**
      * Inserts an attempt at a given location.
      * @param player the player attempting the insert
@@ -261,28 +226,22 @@ public class Match {
      * @return true iff the insert succeeded, false if the consistency check failed
      */
     public synchronized boolean tryInsert(Player player, int wordID, String tryWord) {
+        if(!idToWordMap.containsKey(wordID)) return false;
+        
         final Word word = idToWordMap.get(wordID);
         return word.tryInsertNewWord(player, tryWord);
     }
     
-//    /**
-//     * Checks if an attempted challenge is valid according to the final project handout
-//     * @param player the player attempting the word
-//     * @param wordID the id of the word being attempted
-//     * @param challengeGuess the actual word used to challenge the other player's guess
-//     * @return if the challenge is valid or not
-//     */
-//    private synchronized boolean checkValidChallenge(Player player, int wordID, String challengeGuess) {
-//        throw new RuntimeException("not done implementing!");
-//    }
-    
     /**
-     * Challenges the other player's guess and increments/decrements challengepoints accordingly.
+     * Challenges the other player's guess and increments/decrements challenge points accordingly.
      * @param player the player doing the challenging
      * @param wordID the id of the word being challenged
      * @param challengeGuess the actual word used to challenge the other player's guesses
+     * @return true iff the challenge was accepted by the server, false if the consistency check failed
      */
     public synchronized boolean challenge(Player player, int wordID, String challengeGuess) {
+        if(!idToWordMap.containsKey(wordID)) return false;
+
         final Word word = idToWordMap.get(wordID);
         return word.tryChallenge(player, challengeGuess, this);
     }
@@ -450,18 +409,20 @@ public class Match {
         return true;
     }
     
+    /**
+     * Get the name of the match
+     * @return the name of the match
+     */
     public synchronized String getMatchName() {
         return matchName;
     }
     
+    /**
+     * Get the description of the match
+     * @return the description of the match
+     */
     public synchronized String getMatchDescription() {
         return matchDescription;
     }
-    
-//    public void clearInconsistent(Word word, String newVal) {
-//        throw new RuntimeException("not done implementing!");
-//    }
-    
-//    public Cell getCell(int )
     
 }
