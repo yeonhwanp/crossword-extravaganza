@@ -62,6 +62,8 @@ public class Server {
     private final Map<String, String> mapIDToDescription;
     private final Map<String, Match> mapIDToMatch;
     
+    private final Map<String, Match> twoPlayerMatches;
+    
     
     
     /*
@@ -139,6 +141,8 @@ public class Server {
         this.allPlayers = new HashSet<>();
         this.mapIDToDescription = new HashMap<>();
         this.mapIDToMatch = new HashMap<>();
+        
+        this.twoPlayerMatches = new HashMap<>();
 
         // handle concurrent requests with multiple threads
         server.setExecutor(Executors.newCachedThreadPool());
@@ -203,6 +207,18 @@ public class Server {
             }
         });
         playRequest.getFilters().addAll(filters);
+        
+        
+        // handle requests for paths that start with /exit/
+        HttpContext exitRequest = server.createContext("/exit/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                exit(exchange);   
+
+            }
+        });
+        exitRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -349,7 +365,6 @@ public class Server {
         return currentMatch;
     }
     
-    // ============ END PARSING ============ //
     
     
     
@@ -473,72 +488,85 @@ public class Server {
      * @throws UnableToParseException 
      * @throws InterruptedException 
      */
-    private synchronized void chooseNewMatch(HttpExchange exchange) throws IOException, UnableToParseException, InterruptedException {
+    private void chooseNewMatch(HttpExchange exchange) throws IOException, UnableToParseException, InterruptedException {
         
-        // if you want to know the requested path:
-        final String path = exchange.getRequestURI().getPath();
+        synchronized(folderPath) {
         
-        // it will always start with the base path from server.createContext():
-        final String base = exchange.getHttpContext().getPath();
-        assert path.startsWith(base);
-        final String idsAndDescription = path.substring(base.length());
-        
-        
-        exchange.sendResponseHeaders(VALID, 0);
-        OutputStream body = exchange.getResponseBody();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-        
-        String[] names = idsAndDescription.split("/");
-        String playerID = names[0];
-        String matchID = names[1];
-        String puzzleID = names[2];
-        String description = names[3];
-        
-        if (!mapIDToDescription.containsKey(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
             
-            mapIDToDescription.put(matchID, description);
-            Player existingPlayer = getPlayer(playerID);
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String idsAndDescription = path.substring(base.length());
             
-            File puzzleFile = new File(folderPath + "/" +  puzzleID);
-            Match puzzle = loadMatch(puzzleFile);
-            puzzle.addPlayer(existingPlayer);
             
-            mapIDToMatch.put(matchID, puzzle);
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             
-            final String waitResponse = "WAIT\nWAITING";
+            String[] names = idsAndDescription.split("/");
+            String playerID = names[0];
+            String matchID = names[1];
+            String puzzleID = names[2];
+            String description = names[3];
             
-            out.print(waitResponse);
-            out.flush();
-            
-            while(puzzle.getNumberPlayers() < 2) {
-                this.wait();
+            if (!mapIDToDescription.containsKey(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
+                
+                
+                Player existingPlayer = getPlayer(playerID);
+                
+                File puzzleFile = new File(folderPath + "/" +  puzzleID);
+                Match puzzle = loadMatch(puzzleFile);
+                puzzle.addPlayer(existingPlayer);
+                
+                mapIDToDescription.put(matchID, description);
+                mapIDToMatch.put(matchID, puzzle);
+
+                
+                final String waitResponse = "WAIT\nWAITING";
+                
+                out.print(waitResponse);
+                out.flush();
+                exchange.close();
+                
+                
+                while(puzzle.getNumberPlayers() < 2) {
+                    folderPath.wait();
+                }
+                
+                exchange.sendResponseHeaders(VALID, 0);
+                OutputStream bodyAgain = exchange.getResponseBody();
+                PrintWriter outAgain = new PrintWriter(new OutputStreamWriter(bodyAgain, UTF_8), true);
+                
+                
+                final String playResponse;
+                String playResult = "PLAY\nnew\n";
+                playResult += puzzle.toString();
+                playResponse = playResult;
+                outAgain.print(playResponse);
+                outAgain.flush();
+                
+                exchange.close();
+                
+            }
+            else {
+                
+                final String response;
+                response = getChooseResponse("TRY AGAIN");
+                
+                out.print(response);
+                out.flush();
+                exchange.close();
             }
             
             
-            final String playResponse;
-            String playResult = "PLAY\nnew\n";
-            playResult += puzzle.toString();
-            playResponse = playResult;
-            out.print(playResponse);
-            out.flush();
-            
-        }
-        else {
-            
-            final String response;
-            response = getChooseResponse("TRY AGAIN");
-            
-            out.print(response);
-            out.flush();
-        }
         
-        // if you do not close the exchange, the response will not be sent!
-        exchange.close();
-        
+        }
     }
     
     /**
-     * RECEIVE: A play request in the form: "play match_ID"
+     * RECEIVE: A play request in the form: "play playerID matchID"
      *  PRECONDITION: 
      *      - matchID must exist
      *  STATE:
@@ -551,56 +579,127 @@ public class Server {
      */
     private void playMatch(HttpExchange exchange) throws IOException {
         
+        synchronized (folderPath) {
+            
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+            
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String playerAndMatch = path.substring(base.length());
+            
+            String[] playerAndMatchArray = playerAndMatch.split("/");
+            String playerID = playerAndMatchArray[0];
+            String matchID = playerAndMatchArray[1];
+            
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            
+            if (mapIDToMatch.containsKey(matchID)) { // valid precondition, so play an existing match
+                
+                Player secondPlayer = getPlayer(playerID);
+                Match matchToPlay = mapIDToMatch.get(matchID);
+                
+                matchToPlay.addPlayer(secondPlayer);
+                
+                mapIDToDescription.remove(matchID);
+                mapIDToMatch.remove(matchID);
+                
+                twoPlayerMatches.put(matchID, matchToPlay);
+                
+                String validTemporary = "PLAY\n"
+                        + "new\n";
+                validTemporary += matchToPlay.toString();
+                
+                final String validResponse = validTemporary;
+                out.print(validResponse);
+                out.flush();
+                
+                folderPath.notifyAll();
+    
+            }
+            else {
+                
+                final String invalidResponse = getChooseResponse("TRY AGAIN");
+                out.print(invalidResponse);
+                out.flush();
+            }
+     
+            exchange.close();
+        
+        }
+ 
+    }
+
+    /**
+     * RECEIVE: An exist request in the form "exit gameState (matchID)", where matchID only is in the request if state
+     * is wait or play
+     *   IF gameState == choose:
+     *      - Close connection
+     *   ELSE IF gameState == wait:
+     *      - Terminate game
+     *      - SEND: CHOOSE, "NEW"
+     *   ELSE IF gameState == play:
+     *      - Terminate game
+     *      - SEND: SHOW_SCORE, score
+     *   ELSE IF gameState == showScore:
+     *      - Close connection
+     */
+    private void exit(HttpExchange exchange) throws IOException {
+        
         // if you want to know the requested path:
         final String path = exchange.getRequestURI().getPath();
         
         // it will always start with the base path from server.createContext():
         final String base = exchange.getHttpContext().getPath();
         assert path.startsWith(base);
-        final String matchID = path.substring(base.length());
+        final String stateAndID = path.substring(base.length());
+        
+        String[] states = stateAndID.split("/");
+        String gameState = states[0];
         
         exchange.sendResponseHeaders(VALID, 0);
         OutputStream body = exchange.getResponseBody();
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         
-        if (mapIDToMatch.containsKey(matchID)) { // valid precondition, so play an existing match
+        if (gameState.equals("choose")) {
+            exchange.close();
+        }
+        else if (gameState.equals("wait")) {
             
-            String validTemporary = "PLAY\n"
-                    + "new\n";
+            String matchID = states[1];
+            mapIDToDescription.remove(matchID);
+            mapIDToMatch.remove(matchID);
             
-            Match matchToPlay = mapIDToMatch.get(matchID);
-            validTemporary += matchToPlay.toString();
-            
-            final String validResponse = validTemporary;
-            out.print(validResponse);
+            final String response = "CHOOSE\nNEW";
+            out.print(response);
             out.flush();
+            exchange.close();
 
         }
-        else {
+        else if (gameState.equals("play")) {
             
-            final String invalidResponse = getChooseResponse("TRY AGAIN");
-            out.print(invalidResponse);
+            String matchID = states[1];
+            twoPlayerMatches.remove(matchID);
+            final String response;
+            String temporaryResponse = "SHOW_SCORE\n";
+            Match currentMatch = mapIDToMatch.get(matchID);
+//            temporaryResponse += currentMatch.getMatchScore();
+            response = temporaryResponse;
+            
+            out.print(response);
             out.flush();
+            exchange.close();
+            
         }
- 
-        exchange.close();
- 
-    }
-
-    /**
-     * RECEIVE: An exist request in the form "EXIT GAME_STATE"
-     *   IF GAME_STATE == CHOOSE:
-     *      - CLOSE CONNECTION
-     *   ELSE IF GAME_STATE == WAIT:
-     *      - Terminate game
-     *      - SEND: CHOOSE, "NEW"
-     *   ELSE IF GAME_STATE == PLAY:
-     *      - Terminate game
-     *      - SEND: SHOW_SCORE, score
-     *   ELSE IF GAME_STATE == SHOW_SCORE:
-     *      - Close connection
-     */
-    private void exit(HttpExchange exchange) throws IOException {
+        else if (gameState.equals("showScore")) {
+            exchange.close();
+        }
+        
+        
+        
     }
     
     /**
