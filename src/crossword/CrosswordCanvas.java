@@ -230,13 +230,21 @@ class CrosswordCanvas extends JComponent {
      */
     @Override
     public void paint(Graphics g) {
-        if (state == ClientState.PLAY) {
-            printBoard(g);
-        }
-        else if (state == ClientState.START) {
+        
+        // This is for the START state
+        if (state == ClientState.START) {
             if (request.equals("NEW GAME")) {
                 println("let's start a new game!", g);
             }
+            else if (request.equals("TRY AGAIN")) {
+                println("That was an invalid request or the ID already exists. Try again!", g);
+            }
+        }
+        else if (state == ClientState.CHOOSE) {
+            System.out.println(currentPuzzleMatches);
+        }
+        else if (state == ClientState.PLAY) {
+            printBoard(g);
         }
     }
     
