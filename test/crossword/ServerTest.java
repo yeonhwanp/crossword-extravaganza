@@ -20,7 +20,6 @@ public class ServerTest {
     /*
      * Testing strategy for Server:
      * 
-     * 
      * Test init()
      * 
      * Test handleStart()
