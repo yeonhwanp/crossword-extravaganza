@@ -136,7 +136,7 @@ public class Client {
         // Thread to handle outgoing messages. Never want this to end until someone does end
         new Thread(() -> {
             while (true) {
-                synchronized(this) {
+                synchronized(this) { //TODO THIS IS WRONG, use outer class instead
                     // Waiting for button press to send message
                     try {
                         this.wait();
