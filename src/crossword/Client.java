@@ -39,8 +39,7 @@ public class Client {
     private static final int BOARD_PLAYER_LINES = 8;
     private String sendString;
     private CrosswordCanvas canvas = new CrosswordCanvas();
-    
-    
+
     /*
      * Abstraction Function
      * AF(sendString, canvas) = client object that uses canvas to display and take in information.
@@ -56,7 +55,7 @@ public class Client {
      *  TODO
      * 
      */
-    
+
 
     /**
      * Check for valid Client rep
@@ -64,7 +63,7 @@ public class Client {
     private void checkRep() {
         assert sendString != null;
         assert canvas != null;
-                
+
     }
 
     /**
@@ -80,13 +79,13 @@ public class Client {
      * @throws UnknownHostException if the server is unknown host.
      */
     public static void main(String[] args) throws UnknownHostException, IOException {
-        
+
         // Create a new client object and have it connect
         Client thisClient = new Client();
         thisClient.connectToServer(args);
 
     }
-    
+
     /**
      * Connects to server, sends requests and receives responses from the server.
      * @param args command line arguments that should include only the server address.
@@ -96,11 +95,11 @@ public class Client {
     private synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
         // Take the args and make it into a linked list
         final Queue<String> arguments = new LinkedList<>(List.of(args));
-        
+
         // Stuff that we need
         final String host;
         final int port;
-        
+
         // Create host/port by using try/except blocks
         try {
             host = arguments.remove();
@@ -112,9 +111,9 @@ public class Client {
         } catch (NoSuchElementException | NumberFormatException e) {
             throw new IllegalArgumentException("missing or invalid PORT", e);
         }
-        
+
         final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
-        
+
         // Create a new connection
         try (
                 Socket socket = new Socket(host, port);
@@ -122,101 +121,55 @@ public class Client {
                 BufferedReader socketIn = new BufferedReader(new InputStreamReader(stream, UTF_8));
                 PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), UTF_8), true);
                 BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
-        ) {
-            
-//            // Creating the board
-//            String wholeString = "";
-//            String dimensions = socketIn.readLine();
-//            wholeString += dimensions + "\n";
-//            for (int i = 0; i < Integer.valueOf(dimensions.split("x")[0]); i++) {
-//                wholeString += socketIn.readLine() + "\n";
-//            }
-//            String numWords = socketIn.readLine();
-//            wholeString += numWords + "\n";
-//            int numCount = 2 * Integer.valueOf(numWords);
-//            for (int i = 0; i < numCount; i++) {
-//                wholeString += socketIn.readLine() + "\n";
-//            }
-//            canvas.setCanvas(wholeString);
-            // Creating the board
-            
-            // First line is always the state. Then, pass in the rest.
+                ) {
+
             String state = socketIn.readLine();
             parseRequest(state, socketIn);
-            
             launchGameWindow();
-            
-            while ( ! socket.isClosed()) {
-                
-                // Wait until we get notified by enter button
+
+            // Thread to handle incoming messages
+            new Thread(() -> {
                 try {
-                    this.wait();
-                }  catch (InterruptedException e) {
+                    while (!socket.isClosed()) {
+
+                        // Parse the state and then pass it into some handler
+                        String newState = socketIn.readLine();
+                        parseRequest(newState, socketIn);
+
+                        // Break out of the loop if the connection is closed
+                        if (socket.isClosed()) {break;}
+                    }
+                    System.out.println("connection closed");
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-                
-                // If the socket is closed then break because we don't have a connection
-                if (socket.isClosed()) {
-                    break;
+            });
+
+            // Thread to handle outgoing messages
+            new Thread(() -> {
+                while (!socket.isClosed()) {
+
+                    // Waiting for button press to send message
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (socket.isClosed()) {break;}
+
+                    // Sending message
+                    socketOut.println(sendString);
                 }
-                
-                // Send the input
-                socketOut.println(sendString);
-                readAndPrintBoard(socketIn, System.out);
-            }
-            System.out.println("connection closed");
+                System.out.println("connection closed");
+            });
         }
+    }
+
+    private void handleInputs(BufferedReader socketIn) {
 
     }
-    
-    /**
-     * Reads and prints the board
-     * @param in stream for reading a text-protocol RESPONSE, closed on end-of-stream
-     * @param out stream for printing a formatted board
-     * @param showRaw if true, include raw lines read from in
-     * @throws IOException if an error occurs communicating with the server
-     */
-    private static void readAndPrintBoard(BufferedReader in, PrintStream out) throws IOException {
-        
-        // If the response is null, connection was closed
-        final String message = in.readLine();
-        if (message == null) {
-            in.close();
-            return;
-        }
-        
-        // But if it's not, then we want to parse the board and display it.
-        final String[] sizeAndBoard = message.split(" ", 2);
-        final String[] size = sizeAndBoard[0].split("x");
-        final int rows = Integer.parseInt(size[0]);
-        final int cols = Integer.parseInt(size[1]);
-        final List<String> board = List.of(sizeAndBoard[1].split(" "));
-        
-        final int width = board.stream().mapToInt(Client::countCharacters)
-                                        .max().getAsInt() + 1;
-        for (int row = 0; row < rows; row++) {
-            out.print("|");
-            for (String spot : board.subList(row*cols, row*cols + cols)) {
-                out.format("%" + (width - countCharacters(spot)) + "s", " ");
-                out.print(spot);
-            }
-            out.println();
-        }
-    }
-    
-    /**
-     * Counts the number of characters using locations of boundaries in the text
-     * @param text text to count the number of characters
-     * @return the number of characters using locations of boundaries in the text
-     */
-    private static int countCharacters(String text) {
-        final BreakIterator it = BreakIterator.getCharacterInstance();
-        it.setText(text);
-        int chars = 0;
-        while (it.next() != BreakIterator.DONE) { chars++; }
-        return chars;
-    }
-    
+
     /**
      * Starter code to display a window with a CrosswordCanvas,
      * a text box to enter commands and an Enter button.
@@ -224,16 +177,16 @@ public class Client {
      * @param matchStr toString of client view of a match. Use this to display the puzzle, its hints, and any extra info.
      */
     private synchronized void launchGameWindow() {
-        
+
         canvas.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
-        
+
         JTextField textbox = new JTextField(30);
         textbox.setFont(new Font("Arial", Font.BOLD, 20));
 
         // Upon enter, want to load into sendString and prompt the main thread to send to the server
         JButton enterButton = new JButton("Enter");
         enterButton.addActionListener((event) -> {
-            
+
             // This code executes every time the user presses the Enter
             // button. Recall from reading 24 that this code runs on the
             // Event Dispatch Thread, which is different from the main
@@ -244,7 +197,7 @@ public class Client {
                 canvas.repaint();
                 this.notifyAll();
             }
-            
+
         });
 
         enterButton.setSize(10, 10);
@@ -266,7 +219,7 @@ public class Client {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setVisible(true);
     }
-    
+
     /**
      * parses the string and does something
      * @throws IOException 
@@ -277,19 +230,22 @@ public class Client {
             receiveStart(socketIn);
             break;
         case "choose":
-            receiveChoose();
+            receiveChoose(socketIn);
             break;
         case "wait":
+            receiveWait(socketIn);
             break;
         case "play":
+            receivePlay(socketIn);
             break;
         case "show_score":
+            receiveEnd(socketIn);
             break;
         default:
             throw new RuntimeException("WAT R U DOING");
         }
     }
-    
+
     /**
      * RECEIVES: 
      *  - START, "NEW GAME" 
@@ -301,13 +257,13 @@ public class Client {
         canvas.setRequest("start", showState);
         canvas.repaint();
     }
-    
+
     /**
      * SENDS: /start/playerID
      */
     private void sendStart() {  
     } 
-    
+
     /**
      * RECEIVES: 
      *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
@@ -315,19 +271,19 @@ public class Client {
      * @throws IOException 
      */
     private void receiveChoose(BufferedReader socketIn) throws IOException {
-        
+
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
         canvas.setRequest("choose", chooseState);
-        
+
         String puzzleMatchString = "";
-        
+
         // Parsing through available puzzles
         String numberOfNew = socketIn.readLine();
         for (int i = 0; i < Integer.valueOf(numberOfNew); i++) {
             puzzleMatchString += socketIn.readLine() + "\n";
         }
-        
+
         // Parsing through available matches
         String numberOfCurrent = socketIn.readLine();
         for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
@@ -338,16 +294,16 @@ public class Client {
                 puzzleMatchString += socketIn.readLine();
             }
         }
-        
+
         canvas.setList(puzzleMatchString);
     }
-    
+
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
     private void sendChoose() {
     }
-    
+
     /**
      * RECEIVES:
      *  - WAIT, "WAITING"
@@ -355,9 +311,7 @@ public class Client {
     private void receiveWait(BufferedReader socketIn) {
         canvas.setRequest("wait", "");
     }
-    
-    
-    
+
     /**
      * if current client state is in the wait or play state:
      *  SENDS: /exit/state/matchID
@@ -366,14 +320,14 @@ public class Client {
      */
     private void sendExit() {
     }
-    
+
     /**
      * SENDS: /play/playerID/matchID
      */
     private void sendPlay() {
-        
+
     }
-    
+
     /**
      * RECEIVES:
      *  - PLAY, new, board
@@ -382,52 +336,52 @@ public class Client {
      * @throws IOException 
      */
     private synchronized void receivePlay(BufferedReader socketIn) throws IOException {
-        
+
         // Set the state of the canvas
         String chooseState = socketIn.readLine();
         chooseState += socketIn.readLine();
         canvas.setRequest("play", chooseState);
-        
+
         // Set the board of the game
         String boardString = parseBoard(socketIn);
         canvas.setBoard(boardString);
-        
+
         this.notifyAll();
     }
-    
+
     /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
     private void sendTry() {
     }
-    
+
     /**
      * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
      */
     private void sendChallenge() {
     }
-    
+
     /**
      * RECEIVES: SHOW_SCORE
      */
     private void receiveEnd(BufferedReader socketIn) {
         canvas.setRequest("show_score", "");
     }
-    
+
     private static String parseBoard(BufferedReader socketIn) throws IOException {
-        
+
         String boardString = "";
-        
+
         String[] dimensions = socketIn.readLine().split("x");
         for (int i = 0; i < Integer.valueOf(dimensions[0]); i++) {
-             boardString += socketIn.readLine() + "\n";
+            boardString += socketIn.readLine() + "\n";
         }
-        
+
         String numberOfWords = socketIn.readLine();
         for (int i = 0; i < Integer.valueOf(numberOfWords); i++) {
             boardString += socketIn.readLine() + "\n";
         }
-        
+
         for (int i = 0; i < BOARD_PLAYER_LINES; i++) {
             if (i != BOARD_PLAYER_LINES - 1) {
                 boardString += socketIn.readLine() + "\n";
@@ -436,9 +390,9 @@ public class Client {
                 boardString += socketIn.readLine();
             }
         }
-        
+
         return boardString;
     }
-    
-    
+
+
 }

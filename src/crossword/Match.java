@@ -425,4 +425,20 @@ public class Match {
         return matchDescription;
     }
     
+    /**
+     * Determines if this current match is finished, where finished is defined by project handout rules
+     * @return if match is finished
+     */
+    public synchronized boolean isFinished() {
+        throw new RuntimeException("not done implementing!");
+    }
+    
+    /**
+     * Determines if this match contains given player
+     * @param player player to check existence of
+     * @return if match contains given player
+     */
+    public synchronized boolean containsPlayer(Player player) {
+        return players.contains(player);
+    }
 }
