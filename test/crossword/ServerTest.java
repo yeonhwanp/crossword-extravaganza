@@ -28,6 +28,7 @@ public class ServerTest {
      *  
      * Test chooseNewMatch()
      *  fails precondition, passes precondition
+     *      failure: non-unique match ID, non-existing puzzle ID
      *  
      * Test playMatch()
      *  fails precondition, passes precondition
@@ -60,7 +61,6 @@ public class ServerTest {
         
         final URL valid = new URL("http://localhost:" + server.port() + "/init/");
 
-        // in this test, we will just assert correctness of the server's output
         final InputStream input = valid.openStream();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
 
@@ -114,6 +114,80 @@ public class ServerTest {
         
         assertEquals("choose\nNEW\n2\ncomments.puzzle\nwarmup.puzzle\n0", result);
         
+        
+    }
+    
+    //covers chooseNewMatch()
+    //      passes precondition
+    @Test 
+    public void testChooseNewMatchMultiple() throws IOException {
+        
+        final Server server = new Server("one-puzzle", 0);
+        server.start();
+        
+        new URL("http://localhost:" + server.port() + "/start/player1").openStream();
+        new URL("http://localhost:" + server.port() + "/start/player2").openStream();
+  
+        final URL valid = new URL("http://localhost:" + server.port() + "/choose/player1/thisMatch/warmup.puzzle/PlayWarmup");
+        
+        final InputStream input = valid.openStream();
+        
+        
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
+
+        String result = getResult(reader);
+        
+        assertEquals("WAIT\nWAITING", result);
+        
+    }
+    
+    //covers chooseNewMatch()
+    //      failed precondition - non-unique matchID
+    @Test 
+    public void testChooseNewMatchNonUniqueMatch() throws IOException {
+        
+        final Server server = new Server("one-puzzle", 0);
+        server.start();
+        
+        new URL("http://localhost:" + server.port() + "/start/player1").openStream();
+        new URL("http://localhost:" + server.port() + "/start/player2").openStream();
+  
+        new URL("http://localhost:" + server.port() + "/choose/player1/thisMatch/warmup.puzzle/PlayWarmup").openStream();
+        final URL valid = new URL("http://localhost:" + server.port() + "/choose/player2/thisMatch/warmup.puzzle/hi");
+        
+        
+        final InputStream input = valid.openStream();
+        
+        
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
+
+        String result = getResult(reader);
+        
+        assertEquals("choose\nTRY AGAIN\n2\ncomments.puzzle\nwarmup.puzzle\n1\nthisMatch\nPlayWarmup", result);
+        
+    }
+    
+    //covers chooseNewMatch()
+    //      failed precondition - non-existing puzzleID
+    @Test 
+    public void testChooseNewMatchNonExistingPuzzle() throws IOException {
+        
+        final Server server = new Server("one-puzzle", 0);
+        server.start();
+        
+        new URL("http://localhost:" + server.port() + "/start/player1").openStream();
+        new URL("http://localhost:" + server.port() + "/start/player2").openStream();
+  
+        final URL valid = new URL("http://localhost:" + server.port() + "/choose/player2/thisMatch/aaa.puzzle/hi");
+
+        final InputStream input = valid.openStream();
+        
+        
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
+
+        String result = getResult(reader);
+        
+        assertEquals("choose\nTRY AGAIN\n2\ncomments.puzzle\nwarmup.puzzle\n0", result);
         
     }
     
