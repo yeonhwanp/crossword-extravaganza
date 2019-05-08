@@ -48,8 +48,11 @@ public class Client {
 
     /*
      * Abstraction Function
-     * AF(sendString, canvas) = client object that uses canvas to display and take in information.
-     *      sendString represents the information that is sent in by the client
+     * AF(playerID, matchID, userInput, sendString, canvas) = client represented by the ID playerID
+     *                                                        that is playing on the game represented by matchID
+     *                                                        on the game GUI canvas that and has just
+     *                                                        inputed a string into the GUI represented by userInput
+     *                                                        and the current GET request by sendString -- 
      * 
      * Rep Invariant:
      *  true (for now, until we implement the rest of the game)
@@ -195,38 +198,56 @@ public class Client {
         }).start();
 
         // Thread to handle watches
-//        new Thread(() -> {
-//            try {
-//                while (!socket.isClosed()) {
-//
-//                    // Parse the state and then pass it into some handler
-//                    String newState = socketIn.readLine();
-//                    parseRequest(newState, socketIn);
-//
-//                    // Break out of the loop if the connection is closed
-//                    if (socket.isClosed()) {break;}
-//                }
-//                System.out.println("connection closed");
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }).start();
+        new Thread(() -> {
+            while (ongoingGame) { 
+                URL test;
+                try {
+                    test = new URL("http://" + host + ":" + port + sendString);
+                    BufferedReader response = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+                    
+                    String watchState = response.readLine();
+                    parseRequest(watchState, response);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                canvas.repaint();
+            }
+        }).start();
     }
     
+    /**
+     * @return the playerID
+     */
     public String getPlayerID() {
         throw new RuntimeException("Not implemented yet!");
     }
     
+    /**
+     * @return return the current match that the client is a part of
+     */
     public String getMatchID() {
         throw new RuntimeException("Not implemented yet!");
     }
     
+    /**
+     * @return the user's last input into the GUI
+     */
     public String getUserInput() {
         throw new RuntimeException("Not implemented yet!");  
     }
     
+    /**
+     * @return the extension to the URL (get request)
+     */
     public String getSendString() {
         throw new RuntimeException("Not implemented yet!");
+    }
+    
+    /**
+     * @return the list of all legitimate puzzle IDs as well as ongoing matchIDs that only have one player
+     */
+    public String getMatchList() {
+        return canvas.getListOfMatches();
     }
 
     private void handleInputs(BufferedReader socketIn) {

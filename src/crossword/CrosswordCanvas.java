@@ -223,7 +223,7 @@ class CrosswordCanvas extends JComponent {
     }
     
     public String getListOfMatches() {
-        throw new RuntimeException("Not implemented yet!");
+        return currentPuzzleMatches;
     }
     
     // =============== MY METHODS =============== //
