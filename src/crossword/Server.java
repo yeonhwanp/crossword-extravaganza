@@ -276,7 +276,7 @@ public class Server {
 
 
 
-    private static enum PuzzleGrammar {
+    public static enum PuzzleGrammar {
         FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES;
     }
     
@@ -290,7 +290,7 @@ public class Server {
      * @return parser for the grammar
      * @throws RuntimeException if grammar file can't be read or has syntax errors
      */
-    private static Parser<PuzzleGrammar> makeParser() {
+    public static Parser<PuzzleGrammar> makeParser() {
         try {
             // read the grammar as a file, relative to the project root.
             final File grammarFile = new File("src/crossword/PuzzleGrammar.g");
@@ -365,7 +365,7 @@ public class Server {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
-            WordTuple currentWord = new WordTuple(row, col, hint, i-1, wordname, direction);
+            WordTuple currentWord = new WordTuple(row, col, hint, i-2, wordname, direction);
             
             System.out.println("wordname: "+ wordname);
             System.out.println("hint: "+ hint);
