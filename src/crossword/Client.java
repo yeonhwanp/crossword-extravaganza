@@ -378,7 +378,7 @@ public class Client {
 
         // Parsing through available matches
         String numberOfCurrent = socketIn.readLine();
-        puzzleMatchString += numberOfNew + "\n";
+        puzzleMatchString += numberOfCurrent + "\n";
         for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
             if (i != Integer.valueOf(numberOfCurrent)*2 - 1) {
                 puzzleMatchString += socketIn.readLine() + "\n";
