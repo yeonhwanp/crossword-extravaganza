@@ -63,7 +63,8 @@ public class Match {
     //    Other public methods only take in and return immutable types
     //   
     // Thread safety argument:
-    //   TODO: Later
+    //   We use the monitor pattern and synchronize every method with a lock on this object, which ensures thread safety 
+    //   because only one thread can be in a given method at any given time. 
     
     
     private final String matchName;
@@ -427,10 +428,18 @@ public class Match {
     
     /**
      * Determines if this current match is finished, where finished is defined by project handout rules
-     * @return if match is finished
+     * @return true iff match is finished
      */
     public synchronized boolean isFinished() {
-        throw new RuntimeException("not done implementing!");
+        for(Word word : this.words) {
+            final String currentValue = word.getCurrentValue();
+            final String correctValue = word.getCorrectValue();
+            if(!currentValue.equals(correctValue)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**
