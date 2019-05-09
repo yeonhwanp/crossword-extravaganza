@@ -1,15 +1,13 @@
-@skip Commment {
-	@skip whitespace {
-	    FILE ::= ">>" NAME (Comment)* DESCRIPTION (Comment)* NEWLINES (Comment)* ENTRY* (Comment)*;
-	    NAME ::= StringIdent;
-	    DESCRIPTION ::= String;
-	    ENTRY ::= "("  WORDNAME "," (Comment)*  CLUE "," (Comment)* DIRECTION "," (Comment)* ROW "," (Comment)* COL (Comment)* ")";
-	    WORDNAME ::= [a-z\-]+;
-	    CLUE ::= String;
-	    DIRECTION ::= "DOWN" | "ACROSS";
-	    ROW ::= Int;
-	    COL ::= Int;
-	}
+@skip IgnoreStuff {
+    FILE ::= ">>" NAME DESCRIPTION NEWLINES ENTRY*;
+    NAME ::= StringIdent;
+    DESCRIPTION ::= String;
+    ENTRY ::= "("  WORDNAME "," CLUE "," DIRECTION "," ROW "," COL ")";
+    WORDNAME ::= [a-z\-]+;
+    CLUE ::= String;
+    DIRECTION ::= "DOWN" | "ACROSS";
+    ROW ::= Int;
+    COL ::= Int;
 }
 NEWLINES ::= "\n"*;
 
@@ -18,4 +16,5 @@ StringIdent ::= '"' [^"\r\n\t\\]* '"';
 Int ::= [0-9]+;
 spaces ::= [ ]*;
 whitespace ::= [ \t\r\n]+;
-Comment::= "\/\/" [^\r\n]* "\n"+;
+Comment::= "\/\/" [^\r\n]* "\n"?;
+IgnoreStuff::=(Comment | whitespace);
