@@ -25,6 +25,25 @@ class CrosswordCanvas extends JComponent {
     private String currentBoard;
     private String currentPuzzleMatches;
     private String request;
+    
+    /*
+     * Abstraction Function
+     * AF(playerID, matchID, userInput, sendString, canvas) = a canvas represented by a state and the currentBoard if the 
+     *                                                        state is PLAY and a list of matches currentPuzzleMathces if the
+     *                                                        state is CHOOSE. The request is in line with the latest
+     *                                                        text that the user has entered into the text field.
+     * 
+     * Rep Invariant:
+     *  currentBoard only contains ?, #, and letters.
+     * 
+     * Safety from Rep Exposure:
+     *  All variables are private
+     *  None of the methods take in or return mutable objects
+     *  
+     * Thread safety argument:
+     *  Threadsafe because client is threadsafe.
+     * 
+     */
 
     /**
      * Horizontal offset from corner for first cell.
