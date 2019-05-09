@@ -1,4 +1,4 @@
 >> "Easy" "An easy puzzle to get started"
 
-(star, "twinkle twinkle //comment", ACROSS, 1, 0)
+(star, "twinkle twinkle \\not", ACROSS, 1, 0)
 

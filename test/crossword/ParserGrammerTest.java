@@ -63,7 +63,7 @@ public class ParserGrammerTest {
     
     //covers backslash in description
     @Test public void testParserBackslashDescription() throws UnableToParseException, IOException {
-        final File puzzleFile = new File("test-puzzles/comments.puzzle");
+        final File puzzleFile = new File("test-puzzles/backslash.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
         final String name = getName(parseTree);
         final String description = getDescription(parseTree);
@@ -78,7 +78,27 @@ public class ParserGrammerTest {
         for (int i = 0; i < words.size(); i++) {
             WordTuple w = words.get(i);
             WordTuple expW = expectedWords.get(i);
-            System.out.println(expW.getHint());
+            assertTrue(w.equals(expW));
+        }
+    }
+    
+    //covers comment inside description
+    @Test public void testParserCommentDescription() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/comments.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment\"", 1, "star", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
             assertTrue(w.equals(expW));
         }
     }
