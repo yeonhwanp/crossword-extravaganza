@@ -10,7 +10,7 @@ public class Player {
     // Abstraction function:
     //   AF(id) = represents an immutable player of our game with the id ID
     // Representation invariant:
-    //   true
+    //   id only contains alphanumeric characters
     // Safety from rep exposure:
     //   All fields are private, final and immutable. Methods only ever return immutable objects, and all inputs to methods are also immutable so it;s safe
     //   to directly alias them.
@@ -30,6 +30,7 @@ public class Player {
     
     private void checkRep() {
         assert id != null;
+        assert id.matches("^[a-zA-Z0-9]+$");
     }
     
     /**

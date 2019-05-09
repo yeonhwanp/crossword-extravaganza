@@ -288,7 +288,7 @@ public class Server {
 
 
     public static enum PuzzleGrammar {
-        FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES;
+        FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES, COMMENT;
     }
     
     
@@ -330,7 +330,7 @@ public class Server {
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
         // display the parse tree in various ways, for debugging only
-//         System.out.println("parse tree " + parseTree);
+         System.out.println("parse tree " + parseTree);
 //         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree

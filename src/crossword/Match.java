@@ -7,17 +7,6 @@ import java.util.Map;
 
 import crossword.Cell.Exist;
 
-
-/*
- * NOTES/TODO:
- *  - fix the rep exposure
- *  - fix the toString() 
- *  - implement checking for whether or not match is over
- *  - check whether or not a guess is consistent
- *  - implement challenge rules
- *  - 
- */
-
 /**
  * Ongoing match of Crossword Extravaganza to be played by two players.
  *

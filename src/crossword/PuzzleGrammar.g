@@ -1,8 +1,8 @@
 @skip whitespace {
-    FILE ::= ">>" NAME DESCRIPTION NEWLINES ENTRY*;
+    FILE ::= ">>" NAME (Comment)* DESCRIPTION (Comment)* NEWLINES (Comment)* ENTRY* (Comment)*;
     NAME ::= StringIdent;
     DESCRIPTION ::= String;
-    ENTRY ::= "("  WORDNAME ","  CLUE "," DIRECTION "," ROW "," COL ")";
+    ENTRY ::= "("  WORDNAME "," (Comment)*  CLUE "," (Comment)* DIRECTION "," (Comment)* ROW "," (Comment)* COL (Comment)* ")";
     WORDNAME ::= [a-z\-]+;
     CLUE ::= String;
     DIRECTION ::= "DOWN" | "ACROSS";
@@ -16,3 +16,4 @@ StringIdent ::= '"' [^"\r\n\t\\]* '"';
 Int ::= [0-9]+;
 spaces ::= [ ]*;
 whitespace ::= [ \t\r\n]+;
+Comment::= "\/\/" [^\r\n]* "\n"+;

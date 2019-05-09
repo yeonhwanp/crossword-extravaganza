@@ -23,7 +23,9 @@ public class WordTest {
     //  Test getLength
     //  Test isConfirmed - default (unchanged) value
     //  Test toString
-    //
+    //  Test getOwner
+    //  Test hasOwner
+    //  Test 
     //
 
     
@@ -147,6 +149,8 @@ public class WordTest {
         String expected = "1. cat at (3,2), in the DOWN direction, with the hint: hint";
         assertEquals(expected, firstWord.toString());
     }
+    
+    
     
     
     @Test
