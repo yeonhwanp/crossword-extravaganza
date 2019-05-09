@@ -103,6 +103,27 @@ public class ParserGrammerTest {
         }
     }
     
+    //covers comment between description and direction
+    @Test public void testParserCommentBetweenDescriptionDirection() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/commentWithNewline.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
+            assertTrue(w.equals(expW));
+        }
+    }
+    
     //covers newline in middle of wordEntry
     @Test public void testParserNewlineDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/newlineDesc.puzzle");

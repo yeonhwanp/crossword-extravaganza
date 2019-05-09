@@ -352,6 +352,7 @@ public class Server {
         
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.children().get(0).text();
+        System.out.println("hi");
         
 
         List<WordTuple> allWords = new ArrayList<>();
@@ -362,6 +363,7 @@ public class Server {
             
             //for every entry, use all of the printed information below to create a Word object
             //put this Word object into the set of words that the board holds on to
+            
             
             ParseTree<PuzzleGrammar> entryTree = children.get(i);
             
