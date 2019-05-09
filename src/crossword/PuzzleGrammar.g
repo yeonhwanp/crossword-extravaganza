@@ -1,6 +1,6 @@
 @skip whitespace {
     FILE ::= ">>" NAME (Comment)* DESCRIPTION (Comment)* NEWLINES (Comment)* ENTRY* (Comment)*;
-    NAME ::= StringIdent;
+    NAME ::= StringIdent (Comment)*;
     DESCRIPTION ::= String;
     ENTRY ::= "("  WORDNAME "," (Comment)*  CLUE "," (Comment)* DIRECTION "," (Comment)* ROW "," (Comment)* COL (Comment)* ")";
     WORDNAME ::= [a-z\-]+;
