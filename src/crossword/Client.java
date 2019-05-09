@@ -70,6 +70,19 @@ public class Client {
      *      such that two threads cannot get or modify the canvas at the same time.
      * 
      */
+    
+    /*
+     * Concurrency Design Comment:
+     *  We are currently using two threads. One thread to process input by the user (and in essence, the sending
+     *  and receiving of data associated with that request) and another thread to process active and live updates
+     *  to the client's GUI. 
+     * 
+     *  We know that this is threadsafe because the two threads are never accessing the same variables, and while the
+     *  canvas is the one thing shared by the two threads, it is ok because the methods that have access to the canvas are
+     *  locked to this object.
+     * 
+     * 
+     */
 
 
     /**
