@@ -19,12 +19,12 @@ import javax.swing.JComponent;
  */
 class CrosswordCanvas extends JComponent {
     
+    // Holds all the information about the game.
     private enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
-    
     private ClientState state;
+    private String request;
     private String currentBoard;
     private String currentPuzzleMatches;
-    private String request;
     
     /*
      * Abstraction Function
