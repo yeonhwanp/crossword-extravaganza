@@ -26,10 +26,13 @@ public class ParserGrammerTest {
      * Testing strategy for parser:
      * 
      * No whitespace, no comments anywhere
-     * Whitespace, newlines between lines of puzzle
-     * Comments in description
-     *      comments in one line, comments anywhere
-     * Newline in middle of word entry
+     * Whitespace, newlines between lines of puzzle (between description and entry)
+     *      newlines in the middle of a literal (in the middle of a name, description, wordname, clue)
+     * Comments
+     *      comments following text, comments on their own line
+     *      multi-line comments (consecutive lines)
+     *      comments inside a literal, comments in between literals
+     * Newline in middle of literal
      * 
      * 
      * 
@@ -83,6 +86,7 @@ public class ParserGrammerTest {
     }
     
     //covers comment inside description
+    //      comments following text
     @Test public void testParserCommentDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/comments.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -91,19 +95,21 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
         
         for (int i = 0; i < words.size(); i++) {
             WordTuple w = words.get(i);
+            System.out.println(w.getHint());
             WordTuple expW = expectedWords.get(i);
             assertTrue(w.equals(expW));
         }
     }
     
-    //covers comment between description and direction
+    //covers comment between literals (description and direction)
+    //      comments following text
     @Test public void testParserCommentBetweenDescriptionDirection() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/commentWithNewline.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -123,6 +129,29 @@ public class ParserGrammerTest {
             assertTrue(w.equals(expW));
         }
     }
+    
+    //covers comment inside literals (description)
+    //      comments following text on their own line
+    @Test public void testParserCommentInDescriptionOwnLine() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/commentsInDescription.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
+            assertTrue(w.equals(expW));
+        }
+    }
+    
     
     //covers newline in middle of wordEntry
     @Test public void testParserNewlineDescription() throws UnableToParseException, IOException {
