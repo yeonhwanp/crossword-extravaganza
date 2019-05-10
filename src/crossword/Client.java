@@ -293,6 +293,7 @@ public class Client {
     /**
      * RECEIVES:
      *  - PLAY, new, board
+     *  - PLAY, update, board
      *  - PLAY, true, board
      *  - PLAY, false, board
      */

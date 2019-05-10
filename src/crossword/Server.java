@@ -250,16 +250,35 @@ public class Server {
         });
         challengeRequest.getFilters().addAll(filters);
         
-        // handle requests for paths that start with /watch/
-        HttpContext watchRequest = server.createContext("/watch/", new HttpHandler() {
+        // handle requests for paths that start with /watchBoard/
+        HttpContext watchRequest = server.createContext("/watchBoard/", new HttpHandler() {
 
             public void handle(HttpExchange exchange) throws IOException {
 
-                watch(exchange);   
+                try {
+                    watchBoard(exchange);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }   
 
             }
         });
         watchRequest.getFilters().addAll(filters);
+        
+        // handle requests for paths that start with /watchMatches/
+        HttpContext watchMatchRequest = server.createContext("/watchMatches/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                try {
+                    watchMatches(exchange);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }   
+
+            }
+        });
+        watchMatchRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -341,7 +360,7 @@ public class Server {
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
         // display the parse tree in various ways, for debugging only
-         System.out.println("parse tree " + parseTree);
+//         System.out.println("parse tree " + parseTree);
 //         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree
@@ -363,7 +382,6 @@ public class Server {
         
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.children().get(0).text();
-        System.out.println("hi");
         
 
         List<WordTuple> allWords = new ArrayList<>();
@@ -569,6 +587,8 @@ public class Server {
                 out.flush();
                 exchange.close();
                 
+                folderPath.notifyAll();
+                
                 
                 while(puzzle.getNumberPlayers() < 2) {
                     folderPath.wait();
@@ -719,6 +739,8 @@ public class Server {
                 out.print(response);
                 out.flush();
                 exchange.close();
+                
+                folderPath.notifyAll();
 
             } else if (gameState.equals("play")) {
 
@@ -886,27 +908,91 @@ public class Server {
     }
     
 
+    /**
+     * Wait and watch until other matches are added and removed from the list of playable matches (with one player already)
+     * Communicate this information (live update) to the client
+     * @param exchange exchange to communicate with client
+     * @throws IOException 
+     * @throws InterruptedException 
+     */
+    private void watchMatches(HttpExchange exchange) throws IOException, InterruptedException {
+        
+        synchronized (folderPath) {
+            
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+            
+            String availableMatches = getChooseResponse("NEW");
+
+            while (availableMatches.equals(getChooseResponse("NEW"))) {
+                folderPath.wait();
+            }
+            
+            response = getChooseResponse("NEW");
+            
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            // if you do not close the exchange, the response will not be sent!
+            exchange.close();
+
+        }
+        
+    }
+    
     
     
     
     /**
      * Wait until the board changes, and when it does, show the newly changed board to the client
      * @param exchange exchange to communicate with client
+     * @throws IOException 
+     * @throws InterruptedException 
      */
-    private void watch(HttpExchange exchange) {
+    private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
-        
-        throw new RuntimeException("not done implementing!");
+        synchronized (folderPath) {
+            
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String matchID = path.substring(base.length());
+            
+            Match matchToWatch = twoPlayerMatches.get(matchID);
+            
+            
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+            
+            String currentMatchState = matchToWatch.toString();
+
+            while (currentMatchState.equals(matchToWatch.toString())) {
+                folderPath.wait();
+            }
+            
+            response = "PLAY\nupdate\n" + matchToWatch.toString();
+            
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            // if you do not close the exchange, the response will not be sent!
+            exchange.close();
+
+        }
     }
     
-    
-    
-    
 
-    
-    
-    
-    
     /**
      * Determines if the passed in player already is an existing player (unique or not)
      * @param player player to check uniqueness

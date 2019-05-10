@@ -195,7 +195,11 @@ public class ParserGrammerTest {
         }
     }
     
-
+    /**
+     * Find the name of the puzzle
+     * @param parseTree tree to find the name of
+     * @return name of the puzzle
+     */
     private static String getName(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
         ParseTree<PuzzleGrammar> nameTree = children.get(0);
@@ -204,6 +208,11 @@ public class ParserGrammerTest {
         return name;
     }
 
+    /**
+     * Find the description of the puzzle
+     * @param parseTree tree to find the description of
+     * @return description of the puzzle
+     */
     private static String getDescription(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
@@ -211,6 +220,11 @@ public class ParserGrammerTest {
         return description;
     }
 
+    /**
+     * Find all the words entries of the puzzle, in word tuple form
+     * @param parseTree tree to find the words of
+     * @return words of the puzzle, in word tuple form
+     */
     private static List<WordTuple> getWordTuples(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
 
