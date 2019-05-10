@@ -86,7 +86,8 @@ public class Server {
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
-     *  a value of twoPlayerMatches (again as a player of that match).
+     *  a value of twoPlayerMatches (again as a player of that match), but not both.
+     * Every player should not have multiple locations (there cannot be duplicate players)
      * Every key in mapIDToDescription should exist in mapIDToMatch, and vice versa.
      * Every key in twoPlayerMatches should not be in mapIDToDescription
      * 
@@ -120,7 +121,6 @@ public class Server {
     
     
     private static final int VALID = 200;
-    private static final int INVALID = 404;
 
     /**
      * Start a Crossword Extravaganza server.
@@ -288,7 +288,32 @@ public class Server {
      */
     private void checkRep() {
         assert server != null;
-        //TODO FINISH CHECKREP
+        
+        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches
+            int playerCount = 0;
+            for (String matchID : mapIDToMatch.keySet()) {
+                Match oneMatch = mapIDToMatch.get(matchID);
+                if (oneMatch.containsPlayer(player)) {
+                    playerCount++;
+                }
+            }
+            for (String matchID : twoPlayerMatches.keySet()) {
+                Match oneMatch = twoPlayerMatches.get(matchID);
+                if (oneMatch.containsPlayer(player)) {
+                    playerCount++;
+                }
+            }
+            assert playerCount == 1;
+        }
+        
+        assert mapIDToMatch.keySet().equals(mapIDToDescription.keySet());
+        
+        for (String matchID : twoPlayerMatches.keySet()) {
+            assert !mapIDToMatch.keySet().contains(matchID);
+        }
+        
+        
+        
     }
     
     /**
