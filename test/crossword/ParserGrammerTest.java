@@ -26,12 +26,11 @@ public class ParserGrammerTest {
      * Testing strategy for parser:
      * 
      * No whitespace, no comments anywhere
-     * Whitespace, newlines between lines of puzzle (between description and entry)
-     *      newlines in the middle of a literal (in the middle of a name, description, wordname, clue)
+     * Whitespace, newlines between lines of puzzle (between description, entry, wordname, clue)
      * Comments
      *      comments following text, comments on their own line
      *      multi-line comments (consecutive lines)
-     *      comments inside a literal, comments in between literals
+     *      comments in between literals
      * Newline in middle of literal
      * 
      * 
@@ -95,7 +94,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment\"", 1, "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -130,10 +129,10 @@ public class ParserGrammerTest {
         }
     }
     
-    //covers comment inside literals (description)
-    //      comments following text on their own line
+    //covers comment after description
+    //      comments on their own line
     @Test public void testParserCommentInDescriptionOwnLine() throws UnableToParseException, IOException {
-        final File puzzleFile = new File("test-puzzles/commentsInDescription.puzzle");
+        final File puzzleFile = new File("test-puzzles/commentAfterDescription.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
         final String name = getName(parseTree);
         final String description = getDescription(parseTree);
