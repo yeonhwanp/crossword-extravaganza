@@ -55,6 +55,9 @@ public class Cell {
         checkRep();
     }
     
+    /**
+     * TODO fix this up
+     */
     private void checkRep() {
         assert row >= 0;
         assert col >= 0;

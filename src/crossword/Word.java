@@ -71,6 +71,13 @@ public class Word {
     }
     
     /**
+     * TODO fix this up
+     */
+    private void checkRep() {
+        
+    }
+    
+    /**
      * Get the ID of the current word
      * @return the ID of the word
      */
