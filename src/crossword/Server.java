@@ -126,10 +126,9 @@ public class Server {
      * Start a Crossword Extravaganza server.
      * @param args The command line arguments should include only the folder where
      *             the puzzles are located.
-     * @throws IOException 
-     * @throws UnableToParseException 
+     * @throws IOException if an error occurs starting the server
      */
-    public static void main(String[] args) throws IOException, UnableToParseException {
+    public static void main(String[] args) throws IOException {
         String folderPath = args[0];
         
         final Server server = new Server(folderPath, 4949);
@@ -289,7 +288,7 @@ public class Server {
     private void checkRep() {
         assert server != null;
         
-        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches
+        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches)
             int playerCount = 0;
             for (String matchID : mapIDToMatch.keySet()) {
                 Match oneMatch = mapIDToMatch.get(matchID);
@@ -480,6 +479,7 @@ public class Server {
      * STATE: start
      * SEND: state, "NEW GAME"
      * @param exchange exchange to communicate with client
+     * @throws IOException if an error occurs starting the server
      */
     private static void init(HttpExchange exchange) throws IOException {
         
@@ -512,6 +512,7 @@ public class Server {
      *  ELSE: start
      *      SEND: STATE, "TRY AGAIN"
      * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be sent
      */
     private void handleStart(HttpExchange exchange) throws IOException {
         
@@ -567,8 +568,9 @@ public class Server {
      *      - ELSE: choose
      *          SEND: STATE, "TRY AGAIN", allMatches
      * @param exchange exchange to communicate with client
-     * @throws UnableToParseException 
-     * @throws InterruptedException 
+     * @throws IOException if headers cannot be sent
+     * @throws UnableToParseException if we cannot parse the board
+     * @throws InterruptedException if we improperly exit while waiting
      */
     private void chooseNewMatch(HttpExchange exchange) throws IOException, UnableToParseException, InterruptedException {
         
@@ -643,9 +645,7 @@ public class Server {
                 out.flush();
                 exchange.close();
             }
-            
-            
-        
+
         }
     }
     
@@ -661,6 +661,7 @@ public class Server {
      *          - STATE = choose
      *          - SEND: STATE, "TRY AGAIN", allMatches
      *  @param exchange exchange to communicate with client
+     *  @throws IOException if headers cannot be sent
      */
     private void playMatch(HttpExchange exchange) throws IOException {
         
@@ -732,6 +733,7 @@ public class Server {
      *   ELSE IF gameState == showScore:
      *      - Close connection
      * @param exchange exchange to communicate with client
+     * @throws if headers cannot be sent
      */
     private void exit(HttpExchange exchange) throws IOException {
         
@@ -874,6 +876,7 @@ public class Server {
      * IF FAILED_CHALLENGE (game logic):
      *     - SEND: PLAY, false, board
      * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be properly sent
      */
     private void challenge(HttpExchange exchange) throws IOException {
         
@@ -937,8 +940,8 @@ public class Server {
      * Wait and watch until other matches are added and removed from the list of playable matches (with one player already)
      * Communicate this information (live update) to the client
      * @param exchange exchange to communicate with client
-     * @throws IOException 
-     * @throws InterruptedException 
+     * @throws IOException if headers cannot be sent
+     * @throws InterruptedException if we improperly exit while waiting
      */
     private void watchMatches(HttpExchange exchange) throws IOException, InterruptedException {
         
@@ -975,8 +978,8 @@ public class Server {
     /**
      * Wait until the board changes, and when it does, show the newly changed board to the client
      * @param exchange exchange to communicate with client
-     * @throws IOException 
-     * @throws InterruptedException 
+     * @throws IOException if headers cannot be sent
+     * @throws InterruptedException if we improperly exit while waiting
      */
     private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
