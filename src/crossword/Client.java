@@ -187,6 +187,13 @@ public class Client {
         }
     }
     
+    /**
+     * Refreshes the canvas
+     */
+    public synchronized void repaint() {
+        canvas.repaint();
+    }
+    
     // ========= PUBLIC METHODS ========= //
 
     /**
@@ -197,8 +204,9 @@ public class Client {
      *  - START, "TRY AGAIN"
      */
     private synchronized void receiveStart(String[] response) {
-        String showState = response[0];
-        canvas.setRequest("start", showState);
+        String startState = response[0];
+        System.out.println(startState);
+        canvas.setRequest("start", startState);
     }
 
     /**
@@ -247,7 +255,6 @@ public class Client {
             }
             lineCount++;
         }
-
         canvas.setList(puzzleMatchString);
     }
 

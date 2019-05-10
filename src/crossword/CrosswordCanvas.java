@@ -19,7 +19,7 @@ import javax.swing.JComponent;
  */
 class CrosswordCanvas extends JComponent {
     
-    // Holds all the information about the game.
+    // Holds all of the information regarding the board details
     private enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
     private ClientState state;
     private String request;
@@ -73,6 +73,16 @@ class CrosswordCanvas extends JComponent {
      * Font for small indices used to indicate an ID in the crossword.
      */
     private final Font textFont = new Font("Arial", Font.PLAIN, 16);
+    
+    /**
+     * Font for bold things
+     */
+    private final Font boldFont = new Font("Arial", Font.BOLD, 32);
+    
+    /**
+     * Generally big font
+     */
+    private final Font bigFont = new Font("Arial", Font.PLAIN, 32); 
 
     /**
      * Draw a cell at position (row, col) in a crossword.
@@ -181,6 +191,23 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
         ++line;
     }
+    
+    // Centered text
+    private void printlnCenter(String s, Graphics g) {
+        g.setFont(bigFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
 
     private int x = 1;
     
@@ -216,7 +243,7 @@ class CrosswordCanvas extends JComponent {
     
     /**
      * Sets what the canvas should look like
-     * @param input the inputted string
+     * @param input the inputed string
      */
     public void setBoard(String input) {
         currentBoard = input;
@@ -260,13 +287,17 @@ class CrosswordCanvas extends JComponent {
     @Override
     public void paint(Graphics g) {
         
+        // Clear all the stuff?
+        line = 0;
+        
         // This is for the START state
         if (state == ClientState.START) {
             if (request.equals("NEW GAME")) {
-                println("let's start a new game!", g);
+                printlnCenter("Welcome to Crossword Extravaganza!", g);
             }
             else if (request.equals("TRY AGAIN")) {
-                println("That was an invalid request or the ID already exists. Try again!", g);
+                printlnCenter("That was an invalid request or the ID already exists.", g);
+                printlnCenter("Try again!", g);
             }
         }
         else if (state == ClientState.CHOOSE) {

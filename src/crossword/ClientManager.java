@@ -128,6 +128,8 @@ public class ClientManager {
                         String response = receiveResponse(responseBuffer);
                         client.parseResponse(response);
                         responseBuffer.close();
+                        
+                        client.repaint();
 
                     } catch (IOException e) {
                         e.printStackTrace();
