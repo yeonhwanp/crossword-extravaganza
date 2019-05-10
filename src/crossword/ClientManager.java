@@ -61,6 +61,9 @@ public class ClientManager {
         thisClient.connectToServer(args);
     }
     
+    /**
+     * Creates a new ClientManager object
+     */
     public ClientManager() {
         client = new Client();
     }
@@ -94,7 +97,7 @@ public class ClientManager {
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
         String initialRequest = receiveResponse(socketIn);
         
-        client.parseRequest(initialRequest);
+        client.parseResponse(initialRequest);
         client.launchGameWindow();
         socketIn.close();
 
@@ -112,10 +115,8 @@ public class ClientManager {
 
                     // Sending URL stuffs
                     try {
-
-                        // Splitting up the input provided by the user.
-                        String[] inputStrings = client.getUserInput().split(" ");
-                        String extension = client.parseUserInput(inputStrings);
+                        String userInput = client.getUserInput();
+                        String extension = client.parseUserInput(userInput);
                         
                         // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
                         
@@ -125,7 +126,7 @@ public class ClientManager {
 
                         // Get the response into one big line then parse it
                         String response = receiveResponse(responseBuffer);
-                        client.parseRequest(response);
+                        client.parseResponse(response);
                         responseBuffer.close();
 
                     } catch (IOException e) {
@@ -156,7 +157,7 @@ public class ClientManager {
     /**
      * Constructs the response into one big string, properly formatted with newlines like it should be.
      */
-    private String receiveResponse(BufferedReader response) throws IOException {
+    private static String receiveResponse(BufferedReader response) throws IOException {
         String fullString = "";
         String line;
         while ((line = response.readLine()) != null) {
@@ -164,14 +165,5 @@ public class ClientManager {
         }
         return fullString;
     }
-
-    /**
-     * Returns the subarray starting at some index start to the end of the array.
-     * Obtained from: https://www.techiedelight.com/get-subarray-array-specified-indexes-java/
-     */
-    private String[] getSubarray(String[] input, int start) {
-        return IntStream.range(start, input.length+1).mapToObj(i -> input[i]).toArray(String[]::new);
-    }
-
 
 }

@@ -3,26 +3,8 @@
  */
 package crossword;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.BreakIterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -39,6 +21,10 @@ public class Client {
     private static final int CANVAS_WIDTH = 1200;
     private static final int CANVAS_HEIGHT = 900;
     private static final int BOARD_PLAYER_LINES = 8;
+    private static final int TEXTFIELD_SIZE = 10;
+    private static final int TEXTBOX_FONT_SIZE = 20;
+    private static final int ENTERBUTTON_SIZE = 10;
+    private static final int CANVAS_ADD = 50;
     private boolean validInput = false;
     private String playerID;
     private String matchID;
@@ -73,43 +59,20 @@ public class Client {
      * 
      */
     
-    /*
-     * Concurrency Design Comment:
-     *  We are currently using two threads. One thread to process input by the user (and in essence, the sending
-     *  and receiving of data associated with that request) and another thread to process active and live updates
-     *  to the client's GUI. 
-     * 
-     *  We know that this is threadsafe because the two threads are never accessing the same variables, and while the
-     *  canvas is the one thing shared by the two threads, it is ok because the methods that have access to the canvas are
-     *  locked to this object.
-     * 
-     * 
-     */
-
-    /**
-     * Check for valid Client rep
-     */
     private void checkRep() {
         assert playerID.matches("^[a-zA-Z0-9]+$");
         assert matchID.matches("^[a-zA-Z0-9]+$");
     }
-    
-    public String getUserInput() {
-        return userInput;
-    }
 
     /**
-     * Starter code to display a window with a CrosswordCanvas,
-     * a text box to enter commands and an Enter button.
-     * 
-     * @param matchStr toString of client view of a match. Use this to display the puzzle, its hints, and any extra info.
+     * Display a window with a CrosswordCanvas, a text box to enter commands, and an Enter button.
      */
     public synchronized void launchGameWindow() {
 
         canvas.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        JTextField textbox = new JTextField(30);
-        textbox.setFont(new Font("Arial", Font.BOLD, 20));
+        JTextField textbox = new JTextField(TEXTFIELD_SIZE);
+        textbox.setFont(new Font("Arial", Font.BOLD, TEXTBOX_FONT_SIZE));
 
         // Upon enter, want to load into sendString and prompt the main thread to send to the server
         JButton enterButton = new JButton("Enter");
@@ -126,7 +89,7 @@ public class Client {
             }
         });
 
-        enterButton.setSize(10, 10);
+        enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
 
         JFrame window = new JFrame("Crossword Client");
         window.setLayout(new BorderLayout());
@@ -138,7 +101,7 @@ public class Client {
 
         window.add(contentPane, BorderLayout.SOUTH);
 
-        window.setSize(CANVAS_WIDTH + 50, CANVAS_HEIGHT + 50);
+        window.setSize(CANVAS_WIDTH + CANVAS_ADD, CANVAS_HEIGHT + CANVAS_ADD);
 
         window.getContentPane().add(contentPane);
 
@@ -146,21 +109,25 @@ public class Client {
         window.setVisible(true);
     }
     
+    // ========= PUBLIC METHODS ========= //
+    
     /**
-     * Constructs the response into one big string, properly formatted with newlines like it should be.
+     * @return The input from the user after they've pressed enter on the canvas.
      */
-    public String getResponse(BufferedReader response) throws IOException {
-        String fullString = "";
-        String line;
-        while ((line = response.readLine()) != null) {
-           fullString += line + "\n";
-        }
-        return fullString;
+    public String getUserInput() {
+        return userInput;
     }
     
-    public String parseUserInput(String[] inputStrings) {
+    /**
+     * Parses the user's raw input from the canvas and returns appropriate web protocol.
+     * @param userInput the user's raw input from the canvas textbox
+     * @return the proper extension for the GET request to send over to the server
+     */
+    public String parseUserInput(String userInput) {
         
+        String[] inputStrings = userInput.split(" "); 
         String sendString;
+        
         // Using the appropriate methods to send the request.
         switch (inputStrings[0]) {
         case "PLAY":
@@ -181,7 +148,6 @@ public class Client {
             }
             else {
                 validInput = false;
-                paintInvalidInput();
             }
             // New connect state
         default:
@@ -193,9 +159,10 @@ public class Client {
     }
 
     /**
-     * parses the string and does something
+     * Parses the response from the server and updates the canvas/client accordingly
+     * @param response the response form the server
      */
-    public synchronized void parseRequest(String response) throws IOException {
+    public synchronized void parseResponse(String response) {
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
         switch (splitResponse[0]) {
@@ -218,6 +185,8 @@ public class Client {
             throw new RuntimeException("Should never reach here");
         }
     }
+    
+    // ========= PUBLIC METHODS ========= //
 
     /**
      * Receives a start response from the server and parses it into the canvas.
@@ -226,7 +195,7 @@ public class Client {
      *  - START, "NEW GAME" 
      *  - START, "TRY AGAIN"
      */
-    public synchronized void receiveStart(String[] response) throws IOException {
+    private synchronized void receiveStart(String[] response) {
         String showState = response[1];
         canvas.setRequest("start", showState);
     }
@@ -238,7 +207,7 @@ public class Client {
      *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  - CHOOSE, "TRY AGAIN", allMatches
      */
-    public synchronized void receiveChoose(String[] response) throws IOException {
+    private synchronized void receiveChoose(String[] response) {
         
         int lineCount = 0;
 
@@ -285,7 +254,7 @@ public class Client {
      * RECEIVES:
      *  - WAIT, "WAITING"
      */
-    public synchronized void receiveWait() {
+    private synchronized void receiveWait() {
         canvas.setRequest("wait", "");
         matchID = userInput;
     }
@@ -296,7 +265,7 @@ public class Client {
      *  - PLAY, true, board
      *  - PLAY, false, board
      */
-    public synchronized void receivePlay(String[] response) {
+    private synchronized void receivePlay(String[] response) {
         
         int lineCount = 0;
 
@@ -319,14 +288,14 @@ public class Client {
     /**
      * RECEIVES: SHOW_SCORE, winner, board
      */
-    public synchronized void receiveEnd(String[] response) {
+    private synchronized void receiveEnd(String[] response) {
         canvas.setRequest("show_score", "");
     }
 
     /**
      * SENDS: /start/playerID
      */
-    public synchronized String sendStart() {  
+    private synchronized String sendStart() {  
         String sendString = "";
         if (canvas.getState() == "START" && !userInput.equals("")) {
             sendString = "/start/" + userInput;
@@ -341,7 +310,7 @@ public class Client {
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
-    public synchronized String sendChoose(String[] inputStrings) {
+    private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
         if (canvas.getState() == "CHOOSE" && inputStrings.length == 4) {
             sendString = "/new/" + playerID + "/" + inputStrings[1] + "/" + inputStrings[2] + "/" + inputStrings[3];
@@ -359,7 +328,7 @@ public class Client {
      * else:
      *  SENDS: /exit/state
      */
-    public synchronized String sendExit() {
+    private synchronized String sendExit() {
         String sendString = "";
         if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
             sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
@@ -373,7 +342,7 @@ public class Client {
     /**
      * SENDS: /play/playerID/matchID
      */
-    public synchronized String sendPlay(String[] inputStrings) {
+    private synchronized String sendPlay(String[] inputStrings) {
         String sendString = "";
         if (canvas.getState() == "PLAY" && inputStrings.length == 2) {
             sendString = "/play/" + playerID + "/" + inputStrings[1];
@@ -389,7 +358,7 @@ public class Client {
     /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
-    public synchronized String sendTry(String[] inputStrings) {
+    private synchronized String sendTry(String[] inputStrings) {
         String sendString;
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
@@ -403,7 +372,7 @@ public class Client {
     /**
      * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
      */
-    public synchronized String sendChallenge(String[] inputStrings) {
+    private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
@@ -414,21 +383,10 @@ public class Client {
         return sendString;
     }
 
-
-    /**
-     * Tells the user that there is an invalid input. 
-     */
-    public synchronized void paintInvalidInput() {
-    }
-
-
     /**
      * Parses the board
-     * @param socketIn
-     * @return
-     * @throws IOException
      */
-    public static String parseBoard(String[] boardArray) {
+    private static String parseBoard(String[] boardArray) {
 
         int lineCount = 0;
         String boardString = "";
@@ -461,11 +419,13 @@ public class Client {
         return boardString;
     }
     
+    //TODO: some method to tell the user that they've inputed something invalid
+    
     /**
      * Returns the subarray starting at some index start to the end of the array.
      * Obtained from: https://www.techiedelight.com/get-subarray-array-specified-indexes-java/
      */
-    public String[] getSubarray(String[] input, int start) {
+    private static String[] getSubarray(String[] input, int start) {
         return IntStream.range(start, input.length+1).mapToObj(i -> input[i]).toArray(String[]::new);
     }
 
