@@ -239,6 +239,17 @@ public class Server {
         });
         tryRequest.getFilters().addAll(filters);
         
+        // handle requests for paths that start with /challenge/
+        HttpContext challengeRequest = server.createContext("/challenge/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                challenge(exchange);   
+
+            }
+        });
+        challengeRequest.getFilters().addAll(filters);
+        
         // handle requests for paths that start with /watch/
         HttpContext watchRequest = server.createContext("/watch/", new HttpHandler() {
 
@@ -288,7 +299,7 @@ public class Server {
 
 
     public static enum PuzzleGrammar {
-        FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES, COMMENT;
+        FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES, COMMENT, COMMENTORWHITESPACE;
     }
     
     
@@ -352,6 +363,7 @@ public class Server {
         
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.children().get(0).text();
+        System.out.println("hi");
         
 
         List<WordTuple> allWords = new ArrayList<>();
@@ -362,6 +374,7 @@ public class Server {
             
             //for every entry, use all of the printed information below to create a Word object
             //put this Word object into the set of words that the board holds on to
+            
             
             ParseTree<PuzzleGrammar> entryTree = children.get(i);
             
@@ -711,13 +724,13 @@ public class Server {
 
                 String matchID = states[1];
                 twoPlayerMatches.remove(matchID);
-                final String response;
-                String temporaryResponse = "SHOW_SCORE\n";
+                String finishedResponse = "SHOW_SCORE\n";
                 Match currentMatch = mapIDToMatch.get(matchID);
-//                 temporaryResponse += currentMatch.getMatchScore();
-                response = temporaryResponse;
+                String winnerID = currentMatch.calculateWinner();
+                finishedResponse += winnerID + "\n" + currentMatch.toString();
+                final String finished = finishedResponse;
 
-                out.print(response);
+                out.print(finished);
                 out.flush();
                 exchange.close();
 
@@ -737,7 +750,7 @@ public class Server {
      * IF VALID REQUEST -> Ongoing (game logic):
      *     - SEND: PLAY, true, board
      * IF VALID_REQUEST -> Finish (game logic):
-     *     - SEND: SHOW_SCORE, score
+     *     - SEND: SHOW_SCORE, winner, board
      * IF INVALID (game logic):
      *     - SEND: PLAY, false, board
      * @param exchange exchange to communicate with client
@@ -774,7 +787,8 @@ public class Server {
 
                     if (validTry && matchFinished) {
                         String finishedResponse = "SHOW_SCORE\n";
-                        // finishedResponse += currentMatch.getMatchScore();
+                        String winnerID = currentMatch.calculateWinner();
+                        finishedResponse += winnerID + "\n" + currentMatch.toString();
                         final String finished = finishedResponse;
 
                         out.print(finished);
@@ -809,7 +823,7 @@ public class Server {
      * IF VALID CHALLENGE -> Ongoing (game logic):
      *     - SEND: PLAY, true, board
      * IF VALID_CHALLENGE -> Finish (game logic):
-     *     - SEND: SHOW_SCORE, score
+     *     - SEND: SHOW_SCORE, winner, board
      * IF FAILED_CHALLENGE (game logic):
      *     - SEND: PLAY, false, board
      * @param exchange exchange to communicate with client
@@ -871,15 +885,7 @@ public class Server {
         
     }
     
-    
-    
-    /**
-     * Send the score of the match to the client
-     */
-    private void sendShowScore(HttpExchange exchange) { 
-        throw new RuntimeException("not done implementing!");
-    }
-    
+
     
     
     
@@ -892,6 +898,11 @@ public class Server {
         
         throw new RuntimeException("not done implementing!");
     }
+    
+    
+    
+    
+
     
     
     

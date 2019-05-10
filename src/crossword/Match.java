@@ -435,6 +435,26 @@ public class Match {
     }
     
     /**
+     * Find the winner's player ID of a finished match. If there's a tie, returns "TIE"
+     * @return the winner of the match, based on total points
+     */
+    public synchronized String calculateWinner() { 
+        
+        int score1 = this.getScore(players.get(0));
+        int score2 = this.getScore(players.get(1));
+        if (score1 > score2) {
+            return players.get(0).getID();
+        }
+        else if (score1 < score2) {
+            return players.get(1).getID();
+        }
+        else {
+            return "TIE";
+        }
+        
+    }
+    
+    /**
      * Determines if this match contains given player
      * @param player player to check existence of
      * @return if match contains given player

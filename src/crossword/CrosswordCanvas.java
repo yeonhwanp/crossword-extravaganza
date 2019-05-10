@@ -19,12 +19,31 @@ import javax.swing.JComponent;
  */
 class CrosswordCanvas extends JComponent {
     
+    // Holds all of the information regarding the board details
     private enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
-    
     private ClientState state;
+    private String request;
     private String currentBoard;
     private String currentPuzzleMatches;
-    private String request;
+    
+    /*
+     * Abstraction Function
+     * AF(playerID, matchID, userInput, sendString, canvas) = a canvas represented by a state and the currentBoard if the 
+     *                                                        state is PLAY and a list of matches currentPuzzleMathces if the
+     *                                                        state is CHOOSE. The request is in line with the latest
+     *                                                        text that the user has entered into the text field.
+     * 
+     * Rep Invariant:
+     *  currentBoard only contains ?, #, and letters.
+     * 
+     * Safety from Rep Exposure:
+     *  All variables are private
+     *  None of the methods take in or return mutable objects
+     *  
+     * Thread safety argument:
+     *  Threadsafe because client is threadsafe.
+     * 
+     */
 
     /**
      * Horizontal offset from corner for first cell.
@@ -54,6 +73,16 @@ class CrosswordCanvas extends JComponent {
      * Font for small indices used to indicate an ID in the crossword.
      */
     private final Font textFont = new Font("Arial", Font.PLAIN, 16);
+    
+    /**
+     * Font for bold things
+     */
+    private final Font boldFont = new Font("Arial", Font.BOLD, 32);
+    
+    /**
+     * Generally big font
+     */
+    private final Font bigFont = new Font("Arial", Font.PLAIN, 32); 
 
     /**
      * Draw a cell at position (row, col) in a crossword.
@@ -162,6 +191,55 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
         ++line;
     }
+    
+    // Centered text
+    private void printlnCenterBig(String s, Graphics g) {
+        g.setFont(bigFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    private void printlnCenterBold(String s, Graphics g) {
+        g.setFont(boldFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    private void printlnCenter(String s, Graphics g) {
+        g.setFont(textFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
 
     private int x = 1;
     
@@ -197,7 +275,7 @@ class CrosswordCanvas extends JComponent {
     
     /**
      * Sets what the canvas should look like
-     * @param input the inputted string
+     * @param input the inputed string
      */
     public void setBoard(String input) {
         currentBoard = input;
@@ -241,20 +319,53 @@ class CrosswordCanvas extends JComponent {
     @Override
     public void paint(Graphics g) {
         
+        // Clear all the stuff?
+        line = 0;
+        
         // This is for the START state
         if (state == ClientState.START) {
             if (request.equals("NEW GAME")) {
-                println("let's start a new game!", g);
+                printlnCenterBig("Welcome to Crossword Extravaganza!", g);
+                printlnCenterBig("Please enter a user ID with only: ALPHANUMERICS", g);
             }
             else if (request.equals("TRY AGAIN")) {
-                println("That was an invalid request or the ID already exists. Try again!", g);
+                printlnCenterBig("That was an invalid request or the ID already exists.", g);
+                printlnCenterBig("Try again!", g);
             }
         }
         else if (state == ClientState.CHOOSE) {
-            System.out.println(currentPuzzleMatches);
+            if (request.equals("NEW")) {
+                printMatchList(g, false);
+            }
         }
         else if (state == ClientState.PLAY) {
             printBoard(g);
+        }
+    }
+    
+    private void printMatchList(Graphics g, boolean isWrong) {
+        String[] lines = currentPuzzleMatches.split("\\n");
+        int lineCounter = 0;
+        
+        // Printing valid puzzles
+        printlnCenterBold("Valid Puzzles To Choose From:", g);
+        line += 1;
+        int validPuzzleCount = Integer.valueOf(lines[lineCounter]);
+        lineCounter++;
+        for (int i = 0; i < validPuzzleCount; i++) {
+            int listCounter = i + 1;
+            printlnCenter(listCounter + ". " + lines[lineCounter], g);
+            lineCounter++;
+        }
+        
+        // Printing valid Matches
+        printlnCenterBold("Valid Matches To Connect To:", g);
+        line += 5; // To space out the title and the list
+        int validMatchCount = Integer.valueOf(lines[lineCounter]);
+        for (int i = 0; i < validMatchCount; i++) {
+            // TODO: Fix this syntax when I get valid matches to connect to
+            printlnCenter(i + ". " + lines[lineCounter], g);
+            lineCounter++;
         }
     }
     
