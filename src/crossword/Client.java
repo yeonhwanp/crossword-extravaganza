@@ -3,6 +3,8 @@
  */
 package crossword;
 
+// TODO: check for invalid command inputs
+
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.util.stream.IntStream;
@@ -205,7 +207,6 @@ public class Client {
      */
     private synchronized void receiveStart(String[] response) {
         String startState = response[0];
-        System.out.println(startState);
         canvas.setRequest("start", startState);
     }
 

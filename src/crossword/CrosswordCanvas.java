@@ -193,8 +193,40 @@ class CrosswordCanvas extends JComponent {
     }
     
     // Centered text
-    private void printlnCenter(String s, Graphics g) {
+    private void printlnCenterBig(String s, Graphics g) {
         g.setFont(bigFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    private void printlnCenterBold(String s, Graphics g) {
+        g.setFont(boldFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(100, 0, 0));
+        int centerX = (1200 - fm.stringWidth(s)) / 2;
+        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    private void printlnCenter(String s, Graphics g) {
+        g.setFont(textFont);
         FontMetrics fm = g.getFontMetrics();
         // Before changing the color it is a good idea to record what the old color
         // was.
@@ -293,18 +325,47 @@ class CrosswordCanvas extends JComponent {
         // This is for the START state
         if (state == ClientState.START) {
             if (request.equals("NEW GAME")) {
-                printlnCenter("Welcome to Crossword Extravaganza!", g);
+                printlnCenterBig("Welcome to Crossword Extravaganza!", g);
+                printlnCenterBig("Please enter a user ID with only: ALPHANUMERICS", g);
             }
             else if (request.equals("TRY AGAIN")) {
-                printlnCenter("That was an invalid request or the ID already exists.", g);
-                printlnCenter("Try again!", g);
+                printlnCenterBig("That was an invalid request or the ID already exists.", g);
+                printlnCenterBig("Try again!", g);
             }
         }
         else if (state == ClientState.CHOOSE) {
-            System.out.println(currentPuzzleMatches);
+            if (request.equals("NEW")) {
+                printMatchList(g, false);
+            }
         }
         else if (state == ClientState.PLAY) {
             printBoard(g);
+        }
+    }
+    
+    private void printMatchList(Graphics g, boolean isWrong) {
+        String[] lines = currentPuzzleMatches.split("\\n");
+        int lineCounter = 0;
+        
+        // Printing valid puzzles
+        printlnCenterBold("Valid Puzzles To Choose From:", g);
+        line += 1;
+        int validPuzzleCount = Integer.valueOf(lines[lineCounter]);
+        lineCounter++;
+        for (int i = 0; i < validPuzzleCount; i++) {
+            int listCounter = i + 1;
+            printlnCenter(listCounter + ". " + lines[lineCounter], g);
+            lineCounter++;
+        }
+        
+        // Printing valid Matches
+        printlnCenterBold("Valid Matches To Connect To:", g);
+        line += 5; // To space out the title and the list
+        int validMatchCount = Integer.valueOf(lines[lineCounter]);
+        for (int i = 0; i < validMatchCount; i++) {
+            // TODO: Fix this syntax when I get valid matches to connect to
+            printlnCenter(i + ". " + lines[lineCounter], g);
+            lineCounter++;
         }
     }
     
