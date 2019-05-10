@@ -18,6 +18,7 @@ import javax.swing.WindowConstants;
  */
 public class Client {
 
+    // Holds all of the information regarding the player and their actions themselves
     private static final int CANVAS_WIDTH = 1200;
     private static final int CANVAS_HEIGHT = 900;
     private static final int BOARD_PLAYER_LINES = 8;
@@ -196,7 +197,7 @@ public class Client {
      *  - START, "TRY AGAIN"
      */
     private synchronized void receiveStart(String[] response) {
-        String showState = response[1];
+        String showState = response[0];
         canvas.setRequest("start", showState);
     }
 
@@ -426,7 +427,7 @@ public class Client {
      * Obtained from: https://www.techiedelight.com/get-subarray-array-specified-indexes-java/
      */
     private static String[] getSubarray(String[] input, int start) {
-        return IntStream.range(start, input.length+1).mapToObj(i -> input[i]).toArray(String[]::new);
+        return IntStream.range(start, input.length).mapToObj(i -> input[i]).toArray(String[]::new);
     }
 
 
