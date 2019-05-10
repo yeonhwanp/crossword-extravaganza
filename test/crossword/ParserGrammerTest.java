@@ -26,12 +26,15 @@ public class ParserGrammerTest {
      * Testing strategy for parser:
      * 
      * No whitespace, no comments anywhere
-     * Whitespace, newlines between lines of puzzle (between description, entry, wordname, clue)
+     * Whitespace, newlines between literals of puzzle (between description, entry, wordname, clue)
+     *      single newlines, multiple newlines
      * Comments
-     *      comments following text, comments on their own line
-     *      multi-line comments (consecutive lines)
+     *      comments following text (inside a literal)
      *      comments in between literals
-     * Newline in middle of literal
+     *          comments on same line as literal, comments on their own line
+     *          multi-line comments (consecutive lines)
+     * Backslash
+     *      backslash inside literal
      * 
      * 
      * 
@@ -39,7 +42,7 @@ public class ParserGrammerTest {
     
     
     
-    //covers whitespace between lines of puzzle
+    //covers whitespace between literals of puzzle
     @Test public void testParserSimple() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/warmup.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -63,7 +66,7 @@ public class ParserGrammerTest {
 
     }
     
-    //covers backslash in description
+    //covers backslash in literal (description)
     @Test public void testParserBackslashDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/backslash.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -85,7 +88,6 @@ public class ParserGrammerTest {
     }
     
     //covers comment inside description
-    //      comments following text
     @Test public void testParserCommentDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/comments.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -101,14 +103,13 @@ public class ParserGrammerTest {
         
         for (int i = 0; i < words.size(); i++) {
             WordTuple w = words.get(i);
-            System.out.println(w.getHint());
             WordTuple expW = expectedWords.get(i);
             assertTrue(w.equals(expW));
         }
     }
     
     //covers comment between literals (description and direction)
-    //      comments following text
+    //      comments on same line as literal
     @Test public void testParserCommentBetweenDescriptionDirection() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/commentWithNewline.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -129,7 +130,7 @@ public class ParserGrammerTest {
         }
     }
     
-    //covers comment after description
+    //covers comment after literal (description)
     //      comments on their own line
     @Test public void testParserCommentInDescriptionOwnLine() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/commentAfterDescription.puzzle");
@@ -152,8 +153,8 @@ public class ParserGrammerTest {
     }
     
     
-    //covers newline in middle of wordEntry
-    @Test public void testParserNewlineDescription() throws UnableToParseException, IOException {
+    //covers newline in between literals (single newline)
+    @Test public void testParserNewlineInBetween() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/newlineDesc.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
         final String name = getName(parseTree);
@@ -172,6 +173,28 @@ public class ParserGrammerTest {
             assertTrue(w.equals(expW));
         }
     }
+    
+    //covers newline in between literals (multiple newline)
+    @Test public void testParserNewlineInBetweenMultiple() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/multipleNewLines.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
+            assertTrue(w.equals(expW));
+        }
+    }
+    
 
     private static String getName(ParseTree<PuzzleGrammar> parseTree) {
         final List<ParseTree<PuzzleGrammar>> children = parseTree.children();
