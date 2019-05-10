@@ -38,22 +38,37 @@ public class MatchTest {
     //
     /*
      * Test addPlayer()
+     *      this has had no players added yet, has had one player added so far
      * 
      * Test getNumberPlayers()
      *  0 players, 1 player, 2 players
      * 
-     * Test decreaseChallenge
+     * Test decreaseChallenge()
+     *  has already been decreased
      * 
-     * Test incrementChallengeByTwo
+     * Test incrementChallengeByTwo()
+     *  has already been incremented
+     *  has been decreased before
      * 
      * Test incrementScore()
+     *  has already been incremented before
      * 
      * Test getScore()
+     *  normal score only, challenge score only, both normal and challenge
      * 
      * Test getChallengePoints
+     *  has been incremented by two, has been decreased
      * 
      * Test tryInsert()
-     *  valid insert, invalid insert
+     *  valid insert
+     *      no inconsistencies with pre-entered words by others
+     *          no overlap of words, overlap of words
+     *      changes own, previously entered word
+     *  invalid insert
+     *      inconsistent with pre-entered words by others
+     *          tries to enter same word that has already been entered
+     *          overlaps with other word
+     *      wrong word size
      * 
      * Test challenge()
      *  valid challenge, invalid challenge
@@ -364,6 +379,7 @@ public class MatchTest {
     
     
     //covers addPlayer()
+    //      no player has been added before
     @Test
     public void testAddPlayer() {
         
@@ -371,6 +387,20 @@ public class MatchTest {
         Match currentMatch = new Match("Match name", "Match description", words);
         currentMatch.addPlayer(new Player("hi"));
         assertTrue(currentMatch.containsPlayer(new Player("hi")));
+        
+    }
+    
+    //covers addPlayer()
+    //      one player has been added before
+    @Test
+    public void testAddPlayerOne() {
+        
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        currentMatch.addPlayer(new Player("before"));
+        currentMatch.addPlayer(new Player("hi"));
+        assertTrue(currentMatch.containsPlayer(new Player("hi")));
+        assertTrue(currentMatch.containsPlayer(new Player("before")));
         
     }
     
@@ -403,6 +433,216 @@ public class MatchTest {
         currentMatch.addPlayer(new Player("a"));
         assertEquals(2, currentMatch.getNumberPlayers());
     }
+    
+    //covers decreaseChallenge(), getChallengePoints()
+    @Test
+    public void testDecreaseChallenge() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.decreaseChallenge(yo);
+        assertEquals(-1, currentMatch.getChallengePoints(yo));
+    }
+    
+    //covers decreaseChallenge(), getChallengePoints()
+    //      has already been decreased
+    @Test
+    public void testDecreaseChallengeAgain() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.decreaseChallenge(yo);
+        currentMatch.decreaseChallenge(yo);
+        assertEquals(-2, currentMatch.getChallengePoints(yo));
+    }
+    
+    //covers incrementChallengeByTwo(), getChallengePoints()
+    @Test
+    public void testIncrementChallengeByTwo() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        assertEquals(2, currentMatch.getChallengePoints(yo));
+    }
+    
+    //covers incrementChallengeByTwo(), getChallengePoints()
+    //      has already been incremented
+    @Test
+    public void testIncrementChallengeByTwoAgain() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        assertEquals(4, currentMatch.getChallengePoints(yo));
+    }
+    
+    //covers incrementChallengeByTwo() and decreaseChallenge, getChallengePoints()
+    @Test
+    public void testIncrementChallengeAndDecreaseChallenge() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.decreaseChallenge(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        assertEquals(1, currentMatch.getChallengePoints(yo));
+    }
+    
+    //covers incrementScore(), getScore()
+    //      normal score only
+    @Test
+    public void testIncrementScore() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.incrementScore(yo);
+        assertEquals(1, currentMatch.getScore(yo));
+    }
+    
+    //covers getScore()
+    //      challengeScore only
+    @Test
+    public void testIncrementChallengeGetScore() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        assertEquals(2, currentMatch.getScore(yo));
+    }
+    
+    //covers getScore()
+    //      normal score and challengeScore
+    @Test
+    public void testGetScoreBoth() {
+        List<WordTuple> words = new ArrayList<>();
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        currentMatch.incrementChallengeByTwo(yo);
+        currentMatch.incrementScore(yo);
+        currentMatch.incrementScore(yo);
+        assertEquals(4, currentMatch.getScore(yo));
+    }
+    
+    //covers tryInsert()
+    //      valid insert, no inconsistencies with pre-entered words (no overlap)
+    @Test
+    public void testTryInsertValidNoOverlap() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+
+        assertTrue(currentMatch.tryInsert(yo, 1, "aba"));
+        
+    }
+    
+    //covers tryInsert()
+    //      valid insert, no inconsistencies with pre-entered words (yes overlap)
+    @Test
+    public void testTryInsertValidOverlap() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "mab", "ACROSS");
+        words.add(firstWordTuple);
+        words.add(secondWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+
+        currentMatch.tryInsert(yo, 1, "aba");
+        assertTrue(currentMatch.tryInsert(dude, 2, "obo"));
+        
+    }
+    
+    //covers tryInsert()
+    //      valid insert, replaces own word
+    @Test
+    public void testTryInsertValidReplacesOwn() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+
+        currentMatch.tryInsert(yo, 1, "now");
+        assertTrue(currentMatch.tryInsert(yo, 1, "aba"));
+        
+    }
+    
+    //covers tryInsert()
+    //      invalid insert, inconsistent with other words already entered by others (same word)
+    @Test
+    public void testTryInsertInvalidOthers() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+
+        currentMatch.tryInsert(yo, 1, "now");
+        assertTrue(!currentMatch.tryInsert(dude, 1, "aba"));
+        
+    }
+    
+    //covers tryInsert()
+    //      invalid insert, inconsistent with other words already entered by others (overlaps at letter)
+    @Test
+    public void testTryInsertInvalidOthersOverlap() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "mab", "ACROSS");
+        words.add(firstWordTuple);
+        words.add(secondWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+
+        currentMatch.tryInsert(yo, 1, "now");
+        assertTrue(!currentMatch.tryInsert(dude, 2, "aba"));
+        
+    }
+    
+    //covers tryInsert()
+    //      invalid insert, incorrect length of word
+    @Test
+    public void testTryInsertInvalidLength() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "cat", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        
+        
+        assertTrue(!currentMatch.tryInsert(yo, 1, "a"));
+        
+    }
+    
     
     
     

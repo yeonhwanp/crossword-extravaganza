@@ -321,8 +321,12 @@ public class Word {
     }
     
     private void byPassInsert(Player player, String insertValue) {
+        System.out.println(insertValue);
+        
         for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to clear out the inconsistencies
             final Cell currentCell = this.involvedCells.get(i);
+            System.out.println(currentCell);
+            System.out.println(currentCell.getCurrentValue() != insertValue.charAt(i));
 
             if(!currentCell.isBlank() && currentCell.getCurrentValue() != insertValue.charAt(i)) {
                 currentCell.clearCorrespondingWords();
