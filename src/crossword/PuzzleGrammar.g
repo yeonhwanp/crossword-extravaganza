@@ -1,4 +1,4 @@
-@skip IgnoreStuff {
+@skip CommentOrWhitespace {
     FILE ::= ">>" NAME DESCRIPTION NEWLINES ENTRY*;
     NAME ::= StringIdent;
     DESCRIPTION ::= String;
@@ -17,4 +17,4 @@ Int ::= [0-9]+;
 spaces ::= [ ]*;
 whitespace ::= [ \t\r\n]+;
 Comment::= "\/\/" [^\r\n]* "\n"?;
-IgnoreStuff::=(Comment | whitespace);
+CommentOrWhitespace::=(Comment | whitespace);
