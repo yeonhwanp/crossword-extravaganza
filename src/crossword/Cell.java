@@ -100,7 +100,7 @@ public class Cell {
      * @return true if the cell's value has been changed, false otherwise
      */
     public boolean changeValue(char pValue, Player player) {
-        if(canChangeValue(player))
+        if(pValue == getCurrentValue() || canChangeValue(player))
         {
             System.out.println("hi");
             value = pValue;
