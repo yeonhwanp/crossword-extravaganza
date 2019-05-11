@@ -154,6 +154,7 @@ public class Match {
     
     /**
      * Check for valid match rep
+     * TODO fix this up
      */
     private synchronized void checkRep() {
 //        assert matchName.matches("\" [^\"\r\n\t\\]* \"");

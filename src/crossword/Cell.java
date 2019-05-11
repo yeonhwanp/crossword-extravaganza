@@ -55,6 +55,9 @@ public class Cell {
         checkRep();
     }
     
+    /**
+     * TODO fix this up
+     */
     private void checkRep() {
         assert row >= 0;
         assert col >= 0;
@@ -94,17 +97,19 @@ public class Cell {
      * Change the value of the letter that this cell hosts
      * @param pValue the new value of this cell
      * @param player the player implementing the change
-     * @return true if the cell's value has been changed, false otherwise
+     * @return true if the cell's value has been changed (or if it's the same character), false otherwise
      */
     public boolean changeValue(char pValue, Player player) {
-        if(canChangeValue(player))
+        if(pValue == getCurrentValue() || canChangeValue(player))
         {
+            System.out.println("hi");
             value = pValue;
             
             checkRep();
             return true;
         }
         
+        System.out.println("pvalue: "+  pValue);
         checkRep();
         return false;
     }

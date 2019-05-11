@@ -86,7 +86,8 @@ public class Server {
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
-     *  a value of twoPlayerMatches (again as a player of that match).
+     *  a value of twoPlayerMatches (again as a player of that match), but not both.
+     * Every player should not have multiple locations (there cannot be duplicate players)
      * Every key in mapIDToDescription should exist in mapIDToMatch, and vice versa.
      * Every key in twoPlayerMatches should not be in mapIDToDescription
      * 
@@ -120,16 +121,14 @@ public class Server {
     
     
     private static final int VALID = 200;
-    private static final int INVALID = 404;
 
     /**
      * Start a Crossword Extravaganza server.
      * @param args The command line arguments should include only the folder where
      *             the puzzles are located.
-     * @throws IOException 
-     * @throws UnableToParseException 
+     * @throws IOException if an error occurs starting the server
      */
-    public static void main(String[] args) throws IOException, UnableToParseException {
+    public static void main(String[] args) throws IOException {
         String folderPath = args[0];
         
         final Server server = new Server(folderPath, 4949);
@@ -250,16 +249,35 @@ public class Server {
         });
         challengeRequest.getFilters().addAll(filters);
         
-        // handle requests for paths that start with /watch/
-        HttpContext watchRequest = server.createContext("/watch/", new HttpHandler() {
+        // handle requests for paths that start with /watchBoard/
+        HttpContext watchRequest = server.createContext("/watchBoard/", new HttpHandler() {
 
             public void handle(HttpExchange exchange) throws IOException {
 
-                watch(exchange);   
+                try {
+                    watchBoard(exchange);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }   
 
             }
         });
         watchRequest.getFilters().addAll(filters);
+        
+        // handle requests for paths that start with /watchMatches/
+        HttpContext watchMatchRequest = server.createContext("/watchMatches/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                try {
+                    watchMatches(exchange);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }   
+
+            }
+        });
+        watchMatchRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -269,7 +287,32 @@ public class Server {
      */
     private void checkRep() {
         assert server != null;
-        //TODO FINISH CHECKREP
+        
+        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches)
+            int playerCount = 0;
+            for (String matchID : mapIDToMatch.keySet()) {
+                Match oneMatch = mapIDToMatch.get(matchID);
+                if (oneMatch.containsPlayer(player)) {
+                    playerCount++;
+                }
+            }
+            for (String matchID : twoPlayerMatches.keySet()) {
+                Match oneMatch = twoPlayerMatches.get(matchID);
+                if (oneMatch.containsPlayer(player)) {
+                    playerCount++;
+                }
+            }
+            assert playerCount == 1;
+        }
+        
+        assert mapIDToMatch.keySet().equals(mapIDToDescription.keySet());
+        
+        for (String matchID : twoPlayerMatches.keySet()) {
+            assert !mapIDToMatch.keySet().contains(matchID);
+        }
+        
+        
+        
     }
     
     /**
@@ -341,7 +384,7 @@ public class Server {
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
 
         // display the parse tree in various ways, for debugging only
-         System.out.println("parse tree " + parseTree);
+//         System.out.println("parse tree " + parseTree);
 //         Visualizer.showInBrowser(parseTree);
 
         // make an AST from the parse tree
@@ -363,7 +406,6 @@ public class Server {
         
         ParseTree<PuzzleGrammar> descriptionTree = children.get(1);
         String description = descriptionTree.children().get(0).text();
-        System.out.println("hi");
         
 
         List<WordTuple> allWords = new ArrayList<>();
@@ -437,6 +479,7 @@ public class Server {
      * STATE: start
      * SEND: state, "NEW GAME"
      * @param exchange exchange to communicate with client
+     * @throws IOException if an error occurs starting the server
      */
     private static void init(HttpExchange exchange) throws IOException {
         
@@ -469,6 +512,7 @@ public class Server {
      *  ELSE: start
      *      SEND: STATE, "TRY AGAIN"
      * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be sent
      */
     private void handleStart(HttpExchange exchange) throws IOException {
         
@@ -524,8 +568,9 @@ public class Server {
      *      - ELSE: choose
      *          SEND: STATE, "TRY AGAIN", allMatches
      * @param exchange exchange to communicate with client
-     * @throws UnableToParseException 
-     * @throws InterruptedException 
+     * @throws IOException if headers cannot be sent
+     * @throws UnableToParseException if we cannot parse the board
+     * @throws InterruptedException if we improperly exit while waiting
      */
     private void chooseNewMatch(HttpExchange exchange) throws IOException, UnableToParseException, InterruptedException {
         
@@ -569,6 +614,8 @@ public class Server {
                 out.flush();
                 exchange.close();
                 
+                folderPath.notifyAll();
+                
                 
                 while(puzzle.getNumberPlayers() < 2) {
                     folderPath.wait();
@@ -598,9 +645,7 @@ public class Server {
                 out.flush();
                 exchange.close();
             }
-            
-            
-        
+
         }
     }
     
@@ -616,6 +661,7 @@ public class Server {
      *          - STATE = choose
      *          - SEND: STATE, "TRY AGAIN", allMatches
      *  @param exchange exchange to communicate with client
+     *  @throws IOException if headers cannot be sent
      */
     private void playMatch(HttpExchange exchange) throws IOException {
         
@@ -687,6 +733,7 @@ public class Server {
      *   ELSE IF gameState == showScore:
      *      - Close connection
      * @param exchange exchange to communicate with client
+     * @throws if headers cannot be sent
      */
     private void exit(HttpExchange exchange) throws IOException {
         
@@ -719,6 +766,8 @@ public class Server {
                 out.print(response);
                 out.flush();
                 exchange.close();
+                
+                folderPath.notifyAll();
 
             } else if (gameState.equals("play")) {
 
@@ -827,6 +876,7 @@ public class Server {
      * IF FAILED_CHALLENGE (game logic):
      *     - SEND: PLAY, false, board
      * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be properly sent
      */
     private void challenge(HttpExchange exchange) throws IOException {
         
@@ -886,27 +936,91 @@ public class Server {
     }
     
 
+    /**
+     * Wait and watch until other matches are added and removed from the list of playable matches (with one player already)
+     * Communicate this information (live update) to the client
+     * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be sent
+     * @throws InterruptedException if we improperly exit while waiting
+     */
+    private void watchMatches(HttpExchange exchange) throws IOException, InterruptedException {
+        
+        synchronized (folderPath) {
+            
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+            
+            String availableMatches = getChooseResponse("NEW");
+
+            while (availableMatches.equals(getChooseResponse("NEW"))) {
+                folderPath.wait();
+            }
+            
+            response = getChooseResponse("NEW");
+            
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            // if you do not close the exchange, the response will not be sent!
+            exchange.close();
+
+        }
+        
+    }
+    
     
     
     
     /**
      * Wait until the board changes, and when it does, show the newly changed board to the client
      * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be sent
+     * @throws InterruptedException if we improperly exit while waiting
      */
-    private void watch(HttpExchange exchange) {
+    private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
-        
-        throw new RuntimeException("not done implementing!");
+        synchronized (folderPath) {
+            
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String matchID = path.substring(base.length());
+            
+            Match matchToWatch = twoPlayerMatches.get(matchID);
+            
+            
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+            
+            String currentMatchState = matchToWatch.toString();
+
+            while (currentMatchState.equals(matchToWatch.toString())) {
+                folderPath.wait();
+            }
+            
+            response = "PLAY\nupdate\n" + matchToWatch.toString();
+            
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            // if you do not close the exchange, the response will not be sent!
+            exchange.close();
+
+        }
     }
     
-    
-    
-    
 
-    
-    
-    
-    
     /**
      * Determines if the passed in player already is an existing player (unique or not)
      * @param player player to check uniqueness
