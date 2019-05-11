@@ -497,6 +497,7 @@ public class Server {
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         out.print(response);
         out.flush();
+        System.out.println("sent back start, NEW GAME - client should now choose playerID");
 
         // if you do not close the exchange, the response will not be sent!
         exchange.close();
@@ -547,6 +548,8 @@ public class Server {
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             out.print(response);
             out.flush();
+            
+            System.out.println("sent back choose, (new or try again), allMatches - client should now see all the available matches to choose");
 
             // if you do not close the exchange, the response will not be sent!
             exchange.close();
@@ -613,6 +616,7 @@ public class Server {
                 out.print(waitResponse);
                 out.flush();
                 exchange.close();
+                System.out.println("sent back wait, waiting, so server is waiting until another player joins match");
                 
                 folderPath.notifyAll();
                 
@@ -634,6 +638,8 @@ public class Server {
                 outAgain.flush();
                 
                 exchange.close();
+                
+                System.out.println("sent back play, new, match, so the client should now see the match to play");
                 
             }
             else {
@@ -702,6 +708,7 @@ public class Server {
                 final String validResponse = validTemporary;
                 out.print(validResponse);
                 out.flush();
+                System.out.println("sent back play, new , match, so client should now see the match that they just joined");
                 
                 folderPath.notifyAll();
     
@@ -711,6 +718,8 @@ public class Server {
                 final String invalidResponse = getChooseResponse("TRY AGAIN");
                 out.print(invalidResponse);
                 out.flush();
+                System.out.println("sent back choose, try again, allmatches. client should choose a valid match to start/play this time");
+                System.out.println("client should now see available matches to choose from");
             }
      
             exchange.close();
@@ -726,7 +735,7 @@ public class Server {
      *      - Close connection
      *   ELSE IF gameState == wait:
      *      - Terminate game
-     *      - SEND: CHOOSE, "NEW"
+     *      - SEND: CHOOSE, "NEW", allMatches
      *   ELSE IF gameState == play:
      *      - Terminate game
      *      - SEND: SHOW_SCORE, score
@@ -762,10 +771,11 @@ public class Server {
                 mapIDToDescription.remove(matchID);
                 mapIDToMatch.remove(matchID);
 
-                final String response = "CHOOSE\nNEW";
+                final String response = getChooseResponse("NEW");
                 out.print(response);
                 out.flush();
                 exchange.close();
+                System.out.println("sent choose, new, allmatchesclient should now see list of matches to choose from.");
                 
                 folderPath.notifyAll();
 
@@ -782,6 +792,7 @@ public class Server {
                 out.print(finished);
                 out.flush();
                 exchange.close();
+                System.out.println("sent showScore, score (includes match toString). so client should see the winner's playerID of the match");
 
             } else if (gameState.equals("showScore")) {
                 exchange.close();
@@ -843,6 +854,7 @@ public class Server {
                         out.print(finished);
                         out.flush();
                         exchange.close();
+                        System.out.println("sent showScore, score (includes match toString). client made a finishing move, so client should see winner");
 
                     } else {
 
@@ -853,6 +865,8 @@ public class Server {
                         out.print(ongoing);
                         out.flush();
                         exchange.close();
+                        
+                        System.out.println("sent play, true/false, match. client made a valid/invalid move, so choose another move");
 
                     }
 
@@ -916,6 +930,7 @@ public class Server {
                         out.print(finished);
                         out.flush();
                         exchange.close();
+                        System.out.println("sent show score, score, match. client made a valid challenge that finished the game, should now see score.");
 
                     } else {
 
@@ -926,6 +941,7 @@ public class Server {
                         out.print(ongoing);
                         out.flush();
                         exchange.close();
+                        System.out.println("sent play, true/false, match. client made a valid or invalid challenge, and should now see board again. ");
 
                     }
 
@@ -964,6 +980,7 @@ public class Server {
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             out.print(response);
             out.flush();
+            System.out.println("sent over updated available matches (it just changed)");
 
             // if you do not close the exchange, the response will not be sent!
             exchange.close();
@@ -1013,6 +1030,7 @@ public class Server {
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             out.print(response);
             out.flush();
+            System.out.println("sent over updated board (it just changed by someone making a move)");
 
             // if you do not close the exchange, the response will not be sent!
             exchange.close();
