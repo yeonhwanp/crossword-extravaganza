@@ -564,7 +564,7 @@ public class Server {
      *      - puzzle_ID must exist
      *  STATE:
      *      - IF precondition: WAIT
-     *          SEND: STATE, "WAITING"
+     *          SEND: STATE
      *          THEN: server.wait() until someone else connects to the board 
      *          STATE: PLAY
      *          SEND: STATE, new, board
@@ -611,7 +611,7 @@ public class Server {
                 mapIDToMatch.put(matchID, puzzle);
 
                 
-                final String waitResponse = "WAIT\nWAITING";
+                final String waitResponse = "wait";
                 
                 out.print(waitResponse);
                 out.flush();

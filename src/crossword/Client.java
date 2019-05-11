@@ -169,6 +169,8 @@ public class Client {
     public synchronized void parseResponse(String response) {
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
+        
+        System.out.println(response);
         switch (splitResponse[0]) {
         case "start":
             receiveStart(rest);
