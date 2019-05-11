@@ -335,7 +335,11 @@ class CrosswordCanvas extends JComponent {
         }
         else if (state == ClientState.CHOOSE) {
             if (request.equals("NEW")) {
-                printMatchList(g, false);
+                printMatchList(g);
+            }
+            else if (request.equals("TRY AGAIN")) {
+                printlnCenterBig("That was an invalid request. Try again!", g);
+                printMatchList(g);
             }
         }
         else if (state == ClientState.PLAY) {
@@ -343,7 +347,7 @@ class CrosswordCanvas extends JComponent {
         }
     }
     
-    private void printMatchList(Graphics g, boolean isWrong) {
+    private void printMatchList(Graphics g) {
         String[] lines = currentPuzzleMatches.split("\\n");
         int lineCounter = 0;
         
