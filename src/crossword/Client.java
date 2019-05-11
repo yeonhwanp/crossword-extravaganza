@@ -117,7 +117,7 @@ public class Client {
     /**
      * @return The input from the user after they've pressed enter on the canvas.
      */
-    public String getUserInput() {
+    public synchronized String getUserInput() {
         return userInput;
     }
     
@@ -126,26 +126,27 @@ public class Client {
      * @param userInput the user's raw input from the canvas textbox
      * @return the proper extension for the GET request to send over to the server
      */
-    public String parseUserInput(String userInput) {
+    public synchronized String parseUserInput(String userInput) {
         
         String[] inputStrings = userInput.split(" "); 
+        String[] commandInfo = getSubarray(inputStrings, 1);
         String sendString;
         
         // Using the appropriate methods to send the request.
         switch (inputStrings[0]) {
         case "PLAY":
-            sendString = sendPlay(inputStrings);
+            sendString = sendPlay(commandInfo);
             break;
         case "NEW":
-            sendString = sendChoose(inputStrings);
+            sendString = sendChoose(commandInfo);
             break;
         case "TRY":
-            sendString = sendTry(inputStrings);
+            sendString = sendTry(commandInfo);
             break;
         case "CHALLENGE":
-            sendString = sendChallenge(inputStrings);
+            sendString = sendChallenge(commandInfo);
         case "EXIT":
-            if (inputStrings.length == 1) {
+            if (commandInfo.length == 0) {
                 sendExit();
                 validInput = true;
             }
@@ -316,19 +317,36 @@ public class Client {
         }
         return sendString;
     }
-
+    
     /**
      * SENDS: /choose/playerID/matchID/puzzleID/description
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "CHOOSE" && inputStrings.length == 4) {
-            sendString = "/new/" + playerID + "/" + inputStrings[1] + "/" + inputStrings[2] + "/" + inputStrings[3];
+        if (canvas.getState() == "CHOOSE" && inputStrings.length == 3) {
+            sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
             validInput = false;
         }
         else {
             validInput = true;
         }
+        System.out.println(sendString);
+        return sendString;
+    }
+    
+    /**
+     * SENDS: /play/playerID/matchID
+     */
+    private synchronized String sendPlay(String[] inputStrings) {
+        String sendString;
+        if (canvas.getState() == "CHOOSE" && inputStrings.length == 1) {
+            sendString = "/play/" + playerID + "/" + inputStrings[0];
+        }
+        else {
+            sendString = "";
+            validInput = false;
+        }
+        System.out.println(inputStrings.length + sendString);
         return sendString;
     }
 
@@ -350,33 +368,17 @@ public class Client {
     }
 
     /**
-     * SENDS: /play/playerID/matchID
-     */
-    private synchronized String sendPlay(String[] inputStrings) {
-        String sendString = "";
-        if (canvas.getState() == "PLAY" && inputStrings.length == 2) {
-            sendString = "/play/" + playerID + "/" + inputStrings[1];
-        }
-        else {
-            validInput = false;
-        }
-        return sendString = "";
-    }
-
-
-
-    /**
      * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
      */
     private synchronized String sendTry(String[] inputStrings) {
-        String sendString;
+        String sendString = "";
         if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
         else {
             validInput = false;
         }
-        return sendString = "";
+        return sendString;
     }
 
     /**
