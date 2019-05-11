@@ -477,7 +477,7 @@ public class Server {
     /**
      * RECEIVE: New connection request
      * STATE: start
-     * SEND: state, "NEW GAME"
+     * SEND: state, "new game"
      * @param exchange exchange to communicate with client
      * @throws IOException if an error occurs starting the server
      */
@@ -487,7 +487,7 @@ public class Server {
         exchange.sendResponseHeaders(VALID, 0);
 
         String result = "start\n"
-                + "NEW GAME";
+                + "new game";
         
         response = result;
 
@@ -497,7 +497,7 @@ public class Server {
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         out.print(response);
         out.flush();
-        System.out.println("sent back start, NEW GAME - client should now choose playerID");
+        System.out.println("sent back start, new game - client should now choose playerID");
 
         // if you do not close the exchange, the response will not be sent!
         exchange.close();
@@ -509,9 +509,9 @@ public class Server {
      *  PRECONDITION: The ID must be unique (non-existing)
      * STATE:
      *  IF precondition: choose
-     *      SEND: STATE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     *      SEND: STATE, "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
      *  ELSE: start
-     *      SEND: STATE, "TRY AGAIN"
+     *      SEND: STATE, "try again"
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be sent
      */
@@ -536,9 +536,9 @@ public class Server {
             if (isUniquePlayer(potentialPlayer)) {
 
                 allPlayers.add(potentialPlayer);
-                response = getChooseResponse("NEW");
+                response = getChooseResponse("new");
             } else {
-                response = "start\n" + "TRY AGAIN";
+                response = "start\n" + "try again";
 
             }
 
@@ -563,13 +563,13 @@ public class Server {
      *      - matchID must be unique
      *      - puzzle_ID must exist
      *  STATE:
-     *      - IF precondition: WAIT
-     *          SEND: STATE, "WAITING"
+     *      - IF precondition: wait
+     *          SEND: STATE
      *          THEN: server.wait() until someone else connects to the board 
-     *          STATE: PLAY
+     *          STATE: play
      *          SEND: STATE, new, board
      *      - ELSE: choose
-     *          SEND: STATE, "TRY AGAIN", allMatches
+     *          SEND: STATE, "try again", allMatches
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be sent
      * @throws UnableToParseException if we cannot parse the board
@@ -611,12 +611,12 @@ public class Server {
                 mapIDToMatch.put(matchID, puzzle);
 
                 
-                final String waitResponse = "WAIT\nWAITING";
+                final String waitResponse = "wait";
                 
                 out.print(waitResponse);
                 out.flush();
                 exchange.close();
-                System.out.println("sent back wait, waiting, so server is waiting until another player joins match");
+                System.out.println("sent back wait, so server is waiting until another player joins match");
                 
                 folderPath.notifyAll();
                 
@@ -631,7 +631,7 @@ public class Server {
                 
                 
                 final String playResponse;
-                String playResult = "PLAY\nnew\n";
+                String playResult = "play\nnew\n";
                 playResult += puzzle.toString();
                 playResponse = playResult;
                 outAgain.print(playResponse);
@@ -645,7 +645,7 @@ public class Server {
             else {
                 
                 final String response;
-                response = getChooseResponse("TRY AGAIN");
+                response = getChooseResponse("try again");
                 
                 out.print(response);
                 out.flush();
@@ -661,11 +661,11 @@ public class Server {
      *      - matchID must exist
      *  STATE:
      *      - IF precondition:
-     *          - STATE = PLAY
+     *          - STATE = play
      *          - SEND: STATE, new, board
      *      - ELSE:
      *          - STATE = choose
-     *          - SEND: STATE, "TRY AGAIN", allMatches
+     *          - SEND: STATE, "try again", allMatches
      *  @param exchange exchange to communicate with client
      *  @throws IOException if headers cannot be sent
      */
@@ -701,7 +701,7 @@ public class Server {
                 
                 twoPlayerMatches.put(matchID, matchToPlay);
                 
-                String validTemporary = "PLAY\n"
+                String validTemporary = "play\n"
                         + "new\n";
                 validTemporary += matchToPlay.toString();
                 
@@ -715,7 +715,7 @@ public class Server {
             }
             else {
                 
-                final String invalidResponse = getChooseResponse("TRY AGAIN");
+                final String invalidResponse = getChooseResponse("try again");
                 out.print(invalidResponse);
                 out.flush();
                 System.out.println("sent back choose, try again, allmatches. client should choose a valid match to start/play this time");
@@ -735,10 +735,10 @@ public class Server {
      *      - Close connection
      *   ELSE IF gameState == wait:
      *      - Terminate game
-     *      - SEND: CHOOSE, "NEW", allMatches
+     *      - SEND: choose, "new", allMatches
      *   ELSE IF gameState == play:
      *      - Terminate game
-     *      - SEND: SHOW_SCORE, score
+     *      - SEND: show score, score
      *   ELSE IF gameState == showScore:
      *      - Close connection
      * @param exchange exchange to communicate with client
@@ -771,7 +771,7 @@ public class Server {
                 mapIDToDescription.remove(matchID);
                 mapIDToMatch.remove(matchID);
 
-                final String response = getChooseResponse("NEW");
+                final String response = getChooseResponse("new");
                 out.print(response);
                 out.flush();
                 exchange.close();
@@ -783,7 +783,7 @@ public class Server {
 
                 String matchID = states[1];
                 twoPlayerMatches.remove(matchID);
-                String finishedResponse = "SHOW_SCORE\n";
+                String finishedResponse = "show score\n";
                 Match currentMatch = mapIDToMatch.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
@@ -808,11 +808,11 @@ public class Server {
      *     - MATCH_ID must exist in currently playing matches
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - SEND: PLAY, true, board
+     *     - SEND: play, true, board
      * IF VALID_REQUEST -> Finish (game logic):
-     *     - SEND: SHOW_SCORE, winner, board
+     *     - SEND: show score, winner, board
      * IF INVALID (game logic):
-     *     - SEND: PLAY, false, board
+     *     - SEND: play, false, board
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
@@ -846,7 +846,7 @@ public class Server {
                     boolean matchFinished = currentMatch.isFinished();
 
                     if (validTry && matchFinished) {
-                        String finishedResponse = "SHOW_SCORE\n";
+                        String finishedResponse = "show score\n";
                         String winnerID = currentMatch.calculateWinner();
                         finishedResponse += winnerID + "\n" + currentMatch.toString();
                         final String finished = finishedResponse;
@@ -858,7 +858,7 @@ public class Server {
 
                     } else {
 
-                        String ongoingResponse = "PLAY\n";
+                        String ongoingResponse = "play\n";
                         ongoingResponse += String.valueOf(validTry) + "\n" + currentMatch.toString();
                         final String ongoing = ongoingResponse;
 
@@ -884,11 +884,11 @@ public class Server {
      *     - matchID must exist
      *     - playerID must be one of the players in the match
      * IF VALID CHALLENGE -> Ongoing (game logic):
-     *     - SEND: PLAY, true, board
+     *     - SEND: play, true, board
      * IF VALID_CHALLENGE -> Finish (game logic):
-     *     - SEND: SHOW_SCORE, winner, board
+     *     - SEND: show score, winner, board
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: PLAY, false, board
+     *     - SEND: play, false, board
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be properly sent
      */
@@ -923,7 +923,7 @@ public class Server {
                     boolean matchFinished = currentMatch.isFinished();
 
                     if (validChallenge && matchFinished) {
-                        String finishedResponse = "SHOW_SCORE\n";
+                        String finishedResponse = "show score\n";
                         // finishedResponse += currentMatch.getMatchScore();
                         final String finished = finishedResponse;
 
@@ -934,7 +934,7 @@ public class Server {
 
                     } else {
 
-                        String ongoingResponse = "PLAY\n";
+                        String ongoingResponse = "play\n";
                         ongoingResponse += String.valueOf(validChallenge) + "\n" + currentMatch.toString();
                         final String ongoing = ongoingResponse;
 
@@ -966,13 +966,13 @@ public class Server {
             final String response;
             exchange.sendResponseHeaders(VALID, 0);
             
-            String availableMatches = getChooseResponse("NEW");
+            String availableMatches = getChooseResponse("new");
 
-            while (availableMatches.equals(getChooseResponse("NEW"))) {
+            while (availableMatches.equals(getChooseResponse("new"))) {
                 folderPath.wait();
             }
             
-            response = getChooseResponse("NEW");
+            response = getChooseResponse("new");
             
 
             // write the response to the output stream using UTF-8 character encoding
@@ -1022,7 +1022,7 @@ public class Server {
                 folderPath.wait();
             }
             
-            response = "PLAY\nupdate\n" + matchToWatch.toString();
+            response = "play\nupdate\n" + matchToWatch.toString();
             
 
             // write the response to the output stream using UTF-8 character encoding
