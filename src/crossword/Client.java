@@ -377,6 +377,10 @@ public class Client {
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
+        System.out.println("---------");
+        System.out.println(canvas.getState());
+        System.out.println(inputStrings[0] + inputStrings[1]);
+        System.out.println("---------");
         if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 3) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }

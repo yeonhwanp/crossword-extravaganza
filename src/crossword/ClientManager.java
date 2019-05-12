@@ -61,7 +61,7 @@ public class ClientManager {
         ClientManager thisClient = new ClientManager();
         thisClient.connectToServer(args);
     }
-    
+
     /**
      * Creates a new ClientManager object
      */
@@ -97,7 +97,7 @@ public class ClientManager {
         final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
         String initialRequest = receiveResponse(socketIn);
-        
+
         client.parseResponse(initialRequest);
         client.launchGameWindow();
         socketIn.close();
@@ -106,7 +106,7 @@ public class ClientManager {
         new Thread(() -> {
             while (true) {
                 synchronized(client) {
-                    
+
                     // Waiting for button press to send message
                     try {
                         client.wait();
@@ -118,9 +118,9 @@ public class ClientManager {
                     try {
                         String userInput = client.getUserInput();
                         String extension = client.parseUserInput(userInput);
-                        
+
                         // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
-                        
+
                         // Send GET request
                         URL test = new URL("http://" + host + ":" + port + extension);
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
@@ -129,9 +129,9 @@ public class ClientManager {
                         String response = receiveResponse(responseBuffer);
                         client.parseResponse(response);
                         responseBuffer.close();
-                        
+
                         client.repaint();
-                        
+
                         // Waiting for a player
                         if (client.isWaiting()) {
                             URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
@@ -142,7 +142,7 @@ public class ClientManager {
                             client.parseResponse(joinedResponse);
                             joinedBuffer.close();
                             client.repaint();
-                            
+
                             System.out.println("in here!");
                         }
 
@@ -170,7 +170,7 @@ public class ClientManager {
         //            }
         //        }).start();
     }
-    
+
     /**
      * Constructs the response into one big string, properly formatted with newlines like it should be.
      */
