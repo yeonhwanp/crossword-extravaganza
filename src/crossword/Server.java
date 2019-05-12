@@ -684,7 +684,6 @@ public class Server {
                 folderPath.wait();
             }
             
-            exchange.sendResponseHeaders(VALID, 0);
             
             
             final String playResponse;
