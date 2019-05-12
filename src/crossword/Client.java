@@ -3,11 +3,16 @@
  */
 package crossword;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 // TODO: check for invalid command inputs
 // TODO: Reset matchID if exit or join different game etc.
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -35,6 +40,7 @@ public class Client {
     private String playerID;
     private String matchID;
     private String textboxInput;
+    private boolean isWaiting = false;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
     // For the lock 
@@ -157,6 +163,13 @@ public class Client {
      */
     public synchronized String getMatches() {
         return canvas.getListOfMatches();
+    }
+    
+    /**
+     * @return A boolean if the player is waiting for another player to join the game.
+     */
+    public synchronized boolean isWaiting() {
+        return isWaiting;
     }
     
     // ========= OBSERVER METHODS ========= // 
@@ -307,6 +320,7 @@ public class Client {
     private synchronized void receiveWait() {
         canvas.setRequest("wait", "");
         matchID = textboxInput;
+        isWaiting = true;
     }
 
     /**
@@ -317,6 +331,8 @@ public class Client {
      *  - PLAY, false, board
      */
     private synchronized void receivePlay(String[] response) {
+        
+        isWaiting = false;
         int lineCount = 0;
 
         // Set the state of the canvas
@@ -380,6 +396,20 @@ public class Client {
         }
         else {
             throw new RuntimeException("Wrong play format.");
+        }
+        return sendString;
+    }
+    
+    /**
+     * SENDS: /play/playerID/matchID
+     */
+    private synchronized String sendWait() {
+        String sendString = "";
+        if (canvas.getState() == ClientState.WAIT) {
+            sendString = "/waitforjoin/" + playerID;
+        }
+        else {
+            throw new RuntimeException("Wrong wait format.");
         }
         return sendString;
     }

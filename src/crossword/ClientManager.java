@@ -131,6 +131,19 @@ public class ClientManager {
                         responseBuffer.close();
                         
                         client.repaint();
+                        
+                        // Waiting for a player
+                        if (client.isWaiting()) {
+                            URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getUserID());
+                            BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+
+                            // Get the response into one big line then parse it
+                            String joinedResponse = receiveResponse(joinedBuffer);
+                            client.parseResponse(joinedResponse);
+                            joinedBuffer.close();
+                            
+                            client.repaint();
+                        }
 
                     } catch (IOException e) {
                         e.printStackTrace();
