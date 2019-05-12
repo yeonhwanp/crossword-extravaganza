@@ -673,18 +673,19 @@ public class Server {
             assert path.startsWith(base);
             final String matchID = path.substring(base.length());
             
+            System.out.println("matchID: " + matchID);
             
-            exchange.sendResponseHeaders(VALID, 0);
-            OutputStream body = exchange.getResponseBody();
-            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            Match puzzle = mapIDToMatch.get(matchID);
             
-            Match puzzle = twoPlayerMatches.get(matchID);
+            System.out.println(puzzle);
             
             while(puzzle.getNumberPlayers() < 2) {
                 folderPath.wait();
             }
-            
-            
+
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             
             final String playResponse;
             String playResult = "play\nnew\n";
