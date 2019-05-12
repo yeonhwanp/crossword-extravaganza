@@ -482,7 +482,7 @@ public class Client {
                 boardString += boardArray[i];
             }
         }
-        System.out.println(boardString);
+//        System.out.println(boardString);
         return boardString;
     }
     

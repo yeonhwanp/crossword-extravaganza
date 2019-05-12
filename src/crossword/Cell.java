@@ -102,14 +102,12 @@ public class Cell {
     public boolean changeValue(char pValue, Player player) {
         if(pValue == getCurrentValue() || canChangeValue(player))
         {
-            System.out.println("hi");
             value = pValue;
             
             checkRep();
             return true;
         }
         
-        System.out.println("pvalue: "+  pValue);
         checkRep();
         return false;
     }

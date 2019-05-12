@@ -321,12 +321,9 @@ public class Word {
     }
     
     private void byPassInsert(Player player, String insertValue) {
-        System.out.println(insertValue);
         
         for(int i = 0; i < this.involvedCells.size(); i++) { // iterate through the cells to clear out the inconsistencies
             final Cell currentCell = this.involvedCells.get(i);
-            System.out.println(currentCell);
-            System.out.println(currentCell.getCurrentValue() != insertValue.charAt(i));
 
             if(!currentCell.isBlank() && currentCell.getCurrentValue() != insertValue.charAt(i)) {
                 currentCell.clearCorrespondingWords();
@@ -382,6 +379,7 @@ public class Word {
     
     /**
      * Try a challenge by player player on this word with challengeWord, under the condition that this is on the Match currentMatch
+     * Challengers will gain/lose points according to correct challenge rules defined in project specification.
      * @param player must be a player within currentMatch
      * @param challengeWord the new challenge word
      * @param currentMatch the current match that this word and player are on
