@@ -292,8 +292,8 @@ class CrosswordCanvas extends JComponent {
     /**
      * @return The state of the client gameside
      */
-    public String getState() {
-        return state.toString();
+    public ClientState getState() {
+        return state;
     }
     
     /**
@@ -350,6 +350,10 @@ class CrosswordCanvas extends JComponent {
         }
         else if (state == ClientState.WAIT) {
             printlnCenterBig("Waiting for other player to join...", g);
+        }
+        else if (state == ClientState.PLAY) {
+            //... Conditionals based on PLAY stuff ...// 
+            printBoard(g);
         }
     }
     
@@ -424,5 +428,8 @@ class CrosswordCanvas extends JComponent {
             }
             println(wordString, g);
         }
+        
+        // Get score + challenge points.
+        System.out.println(currentBoard);
     }
 }

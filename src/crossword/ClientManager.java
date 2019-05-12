@@ -131,8 +131,6 @@ public class ClientManager {
                         responseBuffer.close();
                         
                         client.repaint();
-                        
-                        System.out.println("hello?");
 
                     } catch (IOException e) {
                         e.printStackTrace();

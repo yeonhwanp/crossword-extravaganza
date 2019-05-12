@@ -4,6 +4,7 @@
 package crossword;
 
 // TODO: check for invalid command inputs
+// TODO: Reset matchID if exit or join different game etc.
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -140,7 +141,7 @@ public class Client {
     /**
      * @return the state of the game (client side).
      */
-    public synchronized String getState() {
+    public synchronized ClientState getState() {
         return canvas.getState();
     }
     
@@ -171,7 +172,7 @@ public class Client {
         
         String[] inputStrings = userInput.split(" "); 
         String[] commandInfo = getSubarray(inputStrings, 1);
-        String sendString;
+        String sendString = "";
         
         // Using the appropriate methods to send the request.
         switch (inputStrings[0]) {
@@ -186,11 +187,13 @@ public class Client {
             break;
         case "CHALLENGE":
             sendString = sendChallenge(commandInfo);
+            break;
         case "EXIT":
             sendExit(commandInfo);
-            // New connect state
+            break;
         case "START":
-            sendString = sendStart();
+            sendString = sendStart(commandInfo);
+            break;
         default:
             throw new RuntimeException("User input error. Should never reach here.");
         }
@@ -206,7 +209,6 @@ public class Client {
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
         
-        System.out.println(response);
         switch (splitResponse[0]) {
         case "start":
             receiveStart(rest);
@@ -266,8 +268,8 @@ public class Client {
         lineCount++;
 
         // Set the player ID
-        if (chooseState.equals("NEW")) {
-            playerID = textboxInput;
+        if (chooseState.equals("new")) {
+            playerID = textboxInput.split(" ")[1];
         }
 
         String puzzleMatchString = "";
@@ -315,7 +317,6 @@ public class Client {
      *  - PLAY, false, board
      */
     private synchronized void receivePlay(String[] response) {
-        
         int lineCount = 0;
 
         // Set the state of the canvas
@@ -324,7 +325,7 @@ public class Client {
         lineCount++;
 
         if (chooseState.equals("new")) {
-            matchID = textboxInput;
+            matchID = textboxInput.split(" ")[1];
         }
 
         // Set the board of the game
@@ -344,10 +345,10 @@ public class Client {
     /**
      * SENDS: /start/playerID
      */
-    private synchronized String sendStart() {  
+    private synchronized String sendStart(String[] inputStrings) {  
         String sendString = "";
-        if (canvas.getState() == "START" && !textboxInput.equals("")) {
-            sendString = "/start/" + textboxInput;
+        if (canvas.getState() == ClientState.START && !textboxInput.equals("")) {
+            sendString = "/start/" + inputStrings[0];
         }
         else {
             throw new RuntimeException("Wrong start format.");
@@ -360,13 +361,12 @@ public class Client {
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "CHOOSE" && inputStrings.length == 3) {
+        if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 3) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
             throw new RuntimeException("Wrong new format.");
         }
-        System.out.println(sendString);
         return sendString;
     }
     
@@ -375,13 +375,12 @@ public class Client {
      */
     private synchronized String sendPlay(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "CHOOSE" && inputStrings.length == 1) {
+        if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 1) {
             sendString = "/play/" + playerID + "/" + inputStrings[0];
         }
         else {
             throw new RuntimeException("Wrong play format.");
         }
-        System.out.println(inputStrings.length + sendString);
         return sendString;
     }
 
@@ -394,11 +393,11 @@ public class Client {
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
         if (inputStrings.length == 0) {
-            if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
-                sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
+            if (canvas.getState() == ClientState.WAIT || canvas.getState() == ClientState.PLAY) {
+                sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + matchID;
             }
             else {
-                sendString = "/exit/" + canvas.getState().toLowerCase();
+                sendString = "/exit/" + canvas.getState().toString().toLowerCase();
             }
         }
         else {
@@ -412,7 +411,7 @@ public class Client {
      */
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
+        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 3) {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
         else {
@@ -426,7 +425,7 @@ public class Client {
      */
     private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "PLAY" && inputStrings.length == 3) {
+        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 3) {
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
         else {
@@ -439,35 +438,17 @@ public class Client {
      * Parses the board
      */
     private static String parseBoard(String[] boardArray) {
-
-        int lineCount = 0;
         String boardString = "";
-
-        String[] dimensions = boardArray[lineCount].split("x");
-        lineCount++;
         
-        for (int i = 0; i < Integer.valueOf(dimensions[0]); i++) {
-            boardString += boardArray[lineCount] + "\n";
-            lineCount++;
-        }
-
-        String numberOfWords = boardArray[lineCount];
-        lineCount++;
-        
-        for (int i = 0; i < Integer.valueOf(numberOfWords); i++) {
-            boardString += boardArray[lineCount] + "\n";
-            lineCount++;
-        }
-
-        for (int i = 0; i < BOARD_PLAYER_LINES; i++) {
-            if (i != BOARD_PLAYER_LINES - 1) {
-                boardString += boardArray[lineCount] + "\n";
+        for (int i = 0; i < boardArray.length; i++) {
+            if (i != boardArray.length - 1) {
+                boardString += boardArray[i] + "\n";
             }
             else {
-                boardString += boardArray[lineCount];
+                boardString += boardArray[i];
             }
-            lineCount++;
         }
+        System.out.println(boardString);
         return boardString;
     }
     
