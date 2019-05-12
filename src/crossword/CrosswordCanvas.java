@@ -10,6 +10,8 @@ import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
+import crossword.Client.ClientState;
+
 /**
  * This component allows you to draw a crossword puzzle. Right now it just has
  * some helper methods to draw cells and add text in them, and some demo code
@@ -18,9 +20,7 @@ import javax.swing.JComponent;
  * @author asolar
  */
 class CrosswordCanvas extends JComponent {
-    
-    // Holds all of the information regarding the board details
-    private enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
+
     private ClientState state;
     private String request;
     private String currentBoard;
@@ -296,10 +296,16 @@ class CrosswordCanvas extends JComponent {
         return state.toString();
     }
     
+    /**
+     * @return a text representation of the client gameboard along with necessary information
+     */
     public String getCurrentBoard() {
-        throw new RuntimeException("Not implemented yet!");
+        return currentBoard;
     }
     
+    /**
+     * @return a text representation of the list of valid/available matches.
+     */
     public String getListOfMatches() {
         return currentPuzzleMatches;
     }
@@ -324,26 +330,26 @@ class CrosswordCanvas extends JComponent {
         
         // This is for the START state
         if (state == ClientState.START) {
-            if (request.equals("NEW GAME")) {
+            if (request.equals("new game")) {
                 printlnCenterBig("Welcome to Crossword Extravaganza!", g);
                 printlnCenterBig("Please enter a user ID with only: ALPHANUMERICS", g);
             }
-            else if (request.equals("TRY AGAIN")) {
+            else if (request.equals("try again")) {
                 printlnCenterBig("That was an invalid request or the ID already exists.", g);
                 printlnCenterBig("Try again!", g);
             }
         }
         else if (state == ClientState.CHOOSE) {
-            if (request.equals("NEW")) {
+            if (request.equals("new")) {
                 printMatchList(g);
             }
-            else if (request.equals("TRY AGAIN")) {
+            else if (request.equals("try again")) {
                 printlnCenterBig("That was an invalid request. Try again!", g);
                 printMatchList(g);
             }
         }
-        else if (state == ClientState.PLAY) {
-            printBoard(g);
+        else if (state == ClientState.WAIT) {
+            printlnCenterBig("Waiting for other player to join...", g);
         }
     }
     
@@ -366,10 +372,11 @@ class CrosswordCanvas extends JComponent {
         printlnCenterBold("Valid Matches To Connect To:", g);
         line += 5; // To space out the title and the list
         int validMatchCount = Integer.valueOf(lines[lineCounter]);
+        lineCounter++;
         for (int i = 0; i < validMatchCount; i++) {
-            // TODO: Fix this syntax when I get valid matches to connect to
-            printlnCenter(i + ". " + lines[lineCounter], g);
-            lineCounter++;
+            int listCounter = i + 1;
+            printlnCenter(listCounter + ". " + lines[lineCounter] + " \"" + lines[lineCounter+1] + "\"", g);
+            lineCounter += 2;
         }
     }
     

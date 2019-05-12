@@ -19,6 +19,9 @@ import javax.swing.WindowConstants;
  * Crossword game client for server.
  */
 public class Client {
+    
+    // Holds all of the information regarding the board details
+    public enum ClientState {START, CHOOSE, WAIT, PLAY, SHOW_SCORE}
 
     // Holds all of the information regarding the player and their actions themselves
     private static final int CANVAS_WIDTH = 1200;
@@ -28,10 +31,9 @@ public class Client {
     private static final int TEXTBOX_FONT_SIZE = 20;
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
-    private boolean validInput = false;
     private String playerID;
     private String matchID;
-    private String userInput;
+    private String textboxInput;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
     // For the lock 
@@ -86,7 +88,7 @@ public class Client {
             // Event Dispatch Thread, which is different from the main
             // thread.
             synchronized (thisLock) {
-                userInput = textbox.getText();
+                textboxInput = textbox.getText();
                 textbox.setText("");
                 thisLock.notifyAll();
             }
@@ -112,14 +114,53 @@ public class Client {
         window.setVisible(true);
     }
     
-    // ========= PUBLIC METHODS ========= //
+    // ========= OBSERVER METHODS ========= // 
     
     /**
      * @return The input from the user after they've pressed enter on the canvas.
      */
     public synchronized String getUserInput() {
-        return userInput;
+        return textboxInput;
     }
+    
+    /**
+     * @return the current player's ID
+     */
+    public synchronized String getUserID() {
+        return playerID;
+    }
+    
+    /**
+     * @return the ID of the match being played at the moment.
+     */
+    public synchronized String getMatchID() {
+        return matchID;
+    }
+    
+    /**
+     * @return the state of the game (client side).
+     */
+    public synchronized String getState() {
+        return canvas.getState();
+    }
+    
+    /** 
+     * @return a text representation + all necessary information encompassed within a single string.
+     */
+    public synchronized String getBoardText() {
+        return canvas.getCurrentBoard();
+    }
+    
+    /**
+     * @return the list of available matches.
+     */
+    public synchronized String getMatches() {
+        return canvas.getListOfMatches();
+    }
+    
+    // ========= OBSERVER METHODS ========= // 
+    
+    // ========= PUBLIC METHODS ========= //
     
     /**
      * Parses the user's raw input from the canvas and returns appropriate web protocol.
@@ -146,17 +187,12 @@ public class Client {
         case "CHALLENGE":
             sendString = sendChallenge(commandInfo);
         case "EXIT":
-            if (commandInfo.length == 0) {
-                sendExit();
-                validInput = true;
-            }
-            else {
-                validInput = false;
-            }
+            sendExit(commandInfo);
             // New connect state
-        default:
+        case "START":
             sendString = sendStart();
-            break;
+        default:
+            throw new RuntimeException("User input error. Should never reach here.");
         }
         
         return sendString;
@@ -231,7 +267,7 @@ public class Client {
 
         // Set the player ID
         if (chooseState.equals("NEW")) {
-            playerID = userInput;
+            playerID = textboxInput;
         }
 
         String puzzleMatchString = "";
@@ -268,7 +304,7 @@ public class Client {
      */
     private synchronized void receiveWait() {
         canvas.setRequest("wait", "");
-        matchID = userInput;
+        matchID = textboxInput;
     }
 
     /**
@@ -288,7 +324,7 @@ public class Client {
         lineCount++;
 
         if (chooseState.equals("new")) {
-            matchID = userInput;
+            matchID = textboxInput;
         }
 
         // Set the board of the game
@@ -310,12 +346,11 @@ public class Client {
      */
     private synchronized String sendStart() {  
         String sendString = "";
-        if (canvas.getState() == "START" && !userInput.equals("")) {
-            sendString = "/start/" + userInput;
-            validInput = true;
+        if (canvas.getState() == "START" && !textboxInput.equals("")) {
+            sendString = "/start/" + textboxInput;
         }
         else {
-            validInput = false;
+            throw new RuntimeException("Wrong start format.");
         }
         return sendString;
     }
@@ -327,10 +362,9 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == "CHOOSE" && inputStrings.length == 3) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
-            validInput = false;
         }
         else {
-            validInput = true;
+            throw new RuntimeException("Wrong new format.");
         }
         System.out.println(sendString);
         return sendString;
@@ -340,13 +374,12 @@ public class Client {
      * SENDS: /play/playerID/matchID
      */
     private synchronized String sendPlay(String[] inputStrings) {
-        String sendString;
+        String sendString = "";
         if (canvas.getState() == "CHOOSE" && inputStrings.length == 1) {
             sendString = "/play/" + playerID + "/" + inputStrings[0];
         }
         else {
-            sendString = "";
-            validInput = false;
+            throw new RuntimeException("Wrong play format.");
         }
         System.out.println(inputStrings.length + sendString);
         return sendString;
@@ -358,13 +391,18 @@ public class Client {
      * else:
      *  SENDS: /exit/state
      */
-    private synchronized String sendExit() {
+    private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
-            sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
+        if (inputStrings.length == 0) {
+            if (canvas.getState() == "WAIT" || canvas.getState() == "PLAY") {
+                sendString = "/exit/" + canvas.getState().toLowerCase() + "/" + matchID;
+            }
+            else {
+                sendString = "/exit/" + canvas.getState().toLowerCase();
+            }
         }
         else {
-            sendString = "/exit/" + canvas.getState().toLowerCase();
+            throw new RuntimeException("Wrong exit format");
         }
         return sendString;
     }
@@ -378,7 +416,7 @@ public class Client {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
         else {
-            validInput = false;
+            throw new RuntimeException("Wrong try format.");
         }
         return sendString;
     }
@@ -392,7 +430,7 @@ public class Client {
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
         }
         else {
-            validInput = false;
+            throw new RuntimeException("Wrong challenge format.");
         }
         return sendString;
     }
