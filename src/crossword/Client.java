@@ -319,7 +319,7 @@ public class Client {
      */
     private synchronized void receiveWait() {
         canvas.setRequest("wait", "");
-        matchID = textboxInput;
+        matchID = textboxInput.split(" ")[1];
         isWaiting = true;
     }
 
