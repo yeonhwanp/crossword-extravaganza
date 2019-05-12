@@ -685,16 +685,14 @@ public class Server {
             }
             
             exchange.sendResponseHeaders(VALID, 0);
-            OutputStream bodyAgain = exchange.getResponseBody();
-            PrintWriter outAgain = new PrintWriter(new OutputStreamWriter(bodyAgain, UTF_8), true);
             
             
             final String playResponse;
             String playResult = "play\nnew\n";
             playResult += puzzle.toString();
             playResponse = playResult;
-            outAgain.print(playResponse);
-            outAgain.flush();
+            out.print(playResponse);
+            out.flush();
             
             exchange.close();
             
