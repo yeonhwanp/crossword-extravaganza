@@ -673,11 +673,8 @@ public class Server {
             assert path.startsWith(base);
             final String matchID = path.substring(base.length());
             
-            System.out.println("matchID: " + matchID);
             
             Match puzzle = mapIDToMatch.get(matchID);
-            
-            System.out.println(puzzle);
             
             while(puzzle.getNumberPlayers() < 2) {
                 folderPath.wait();
