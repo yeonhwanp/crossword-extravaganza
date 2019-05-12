@@ -215,6 +215,21 @@ public class Server {
         });
         playRequest.getFilters().addAll(filters);
         
+        // handle requests for paths that start with /waitforjoin/
+        HttpContext waitForJoinRequest = server.createContext("/waitforjoin/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                try {
+                    waitForJoin(exchange);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }   
+
+            }
+        });
+        waitForJoinRequest.getFilters().addAll(filters);
+        
         
         // handle requests for paths that start with /exit/
         HttpContext exitRequest = server.createContext("/exit/", new HttpHandler() {
@@ -565,9 +580,6 @@ public class Server {
      *  STATE:
      *      - IF precondition: wait
      *          SEND: STATE
-     *          THEN: server.wait() until someone else connects to the board 
-     *          STATE: play
-     *          SEND: STATE, new, board
      *      - ELSE: choose
      *          SEND: STATE, "try again", allMatches
      * @param exchange exchange to communicate with client
@@ -621,25 +633,6 @@ public class Server {
                 folderPath.notifyAll();
                 
                 
-                while(puzzle.getNumberPlayers() < 2) {
-                    folderPath.wait();
-                }
-                
-                exchange.sendResponseHeaders(VALID, 0);
-                OutputStream bodyAgain = exchange.getResponseBody();
-                PrintWriter outAgain = new PrintWriter(new OutputStreamWriter(bodyAgain, UTF_8), true);
-                
-                
-                final String playResponse;
-                String playResult = "play\nnew\n";
-                playResult += puzzle.toString();
-                playResponse = playResult;
-                outAgain.print(playResponse);
-                outAgain.flush();
-                
-                exchange.close();
-                
-                System.out.println("sent back play, new, match, so the client should now see the match to play");
                 
             }
             else {
@@ -654,6 +647,63 @@ public class Server {
 
         }
     }
+    
+    /**
+     * RECEIVE: A request in the form of: "waitforjoin matchID
+     *  PRECONDITION:
+     *      - matchID must exist in twoPlayerMatches
+     *  STATE:
+     *      - If precondition:
+     *      THEN: folderPath.wait() until someone else connects to the board 
+     *          STATE: play
+     *          SEND: STATE, new, board
+     * @param exchange
+     * @throws IOException
+     * @throws InterruptedException 
+     */
+    private void waitForJoin(HttpExchange exchange) throws IOException, InterruptedException {
+        
+        synchronized (folderPath) {
+        
+            // if you want to know the requested path:
+            final String path = exchange.getRequestURI().getPath();
+            
+            // it will always start with the base path from server.createContext():
+            final String base = exchange.getHttpContext().getPath();
+            assert path.startsWith(base);
+            final String matchID = path.substring(base.length());
+            
+            
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            
+            Match puzzle = twoPlayerMatches.get(matchID);
+            
+            while(puzzle.getNumberPlayers() < 2) {
+                folderPath.wait();
+            }
+            
+            exchange.sendResponseHeaders(VALID, 0);
+            OutputStream bodyAgain = exchange.getResponseBody();
+            PrintWriter outAgain = new PrintWriter(new OutputStreamWriter(bodyAgain, UTF_8), true);
+            
+            
+            final String playResponse;
+            String playResult = "play\nnew\n";
+            playResult += puzzle.toString();
+            playResponse = playResult;
+            outAgain.print(playResponse);
+            outAgain.flush();
+            
+            exchange.close();
+            
+            System.out.println("sent back play, new, match, so the client should now see the match to play");
+            
+        }
+        
+    }
+    
     
     /**
      * RECEIVE: A play request in the form: "play playerID matchID"
