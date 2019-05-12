@@ -79,8 +79,14 @@ public class WordTest {
      *      Word to challenge is same as word you are proposing
      *      Proposed word is incorrect length
      *  
+     *  Test tryChallenge
+     *      Because tryChallenge takes in a Match, and because there is no way to retrieve the Word object we want to
+     *      test on, we cannot directly call word.tryChallenge because we don't have access to these words. However, this method
+     *      is called directly by Match.java's challenge() method, and the only difference is that challenge() first checks if
+     *      the passed in wordID is an existing ID (see challenge() test cases).
+     *      As such, all of tryChallenge's partitions are the same as the partitions described in MatchTest for challenge(), and
+     *      we can test for tryChallenge based on these.
      *  
-     *  /TODO rest of methods
      *  
      */
 
