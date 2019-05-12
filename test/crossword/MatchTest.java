@@ -13,33 +13,32 @@ import org.junit.jupiter.api.Test;
 public class MatchTest {
 
 
-    // Testing strategy for checkConsistency():
-    //  Partition the input as follows:
-    //
-    //      Size of words: 0, 1, 2, >2
-    //      Type of directions: all across, all down, both across and down
-    //          all across: different rows, same row
-    //              same row: no overlap, yes overlap
-    //          all down: different columns, same column
-    //              same column: no overlap, yes overlap
-    //          both across and down: no overlap, yes overlap
-    //              Yes overlap with same letter, different letter
-    //              Down word compared with across, across word compared with down
-    //              Number of overlaps: 0, 1, >1
-    //          
-    //
-    // Testing strategy for toString():
-    //  Partition the input as follows:
-    //      Type of match name: empty string, non-empty string
-    //      Type of match description: empty string, non-empty string
-    //      Number of entries: 0, 1, >1
-    //  More partitions:
-    //      Word has been inserted, word has been challenged, word has been taken off board
-    //  These extra partitions are covered within tests for tryInsert() and challenge()
-    //      
-    //          
-    //
-    /*
+    /* Testing strategy for checkConsistency():
+     *   Partition the input as follows:
+     * 
+     *      Size of words: 0, 1, 2, >2
+     *      Type of directions: all across, all down, both across and down
+     *          all across: different rows, same row
+     *              same row: no overlap, yes overlap
+     *          all down: different columns, same column
+     *              same column: no overlap, yes overlap
+     *          both across and down: no overlap, yes overlap
+     *              Yes overlap with same letter, different letter
+     *              Down word compared with across, across word compared with down
+     *              Number of overlaps: 0, 1, >1
+     *          
+     *
+     * Testing strategy for toString():
+     *  Partition the input as follows:
+     *      Type of match name: empty string, non-empty string
+     *      Type of match description: empty string, non-empty string
+     *      Number of entries: 0, 1, >1
+     *  More partitions:
+     *      Word has been inserted, word has been challenged, word has been taken off board
+     *  These extra partitions are covered within tests for tryInsert() and challenge()
+     *      
+     *          
+     *
      * Test addPlayer()
      *      this has had no players added yet, has had one player added so far
      * 
