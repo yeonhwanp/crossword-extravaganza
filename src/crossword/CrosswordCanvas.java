@@ -91,8 +91,13 @@ class CrosswordCanvas extends JComponent {
      * @param g Graphics environment used to draw the cell.
      */
     private void drawCell(int row, int col, Graphics g) {
+        Color oldColor = g.getColor();
         g.drawRect(originX + col * delta,
                    originY + row * delta, delta, delta);
+        g.setColor(Color.WHITE);
+        g.fillRect(originX + col * delta,
+                originY + row * delta, delta, delta);
+        g.setColor(oldColor);
     }
 
     /**
@@ -396,8 +401,14 @@ class CrosswordCanvas extends JComponent {
         // Create the board with values
         for (; lineCounter < Integer.valueOf(dimensions[0]) + 1; lineCounter++) {
             for (int j = 0; j <Integer.valueOf(dimensions[1]); j++) {
-                if (lines[lineCounter].charAt(j) == '?') {
+                
+                char thisChar = lines[lineCounter].charAt(j);
+                if (thisChar == '?') {
                     drawCell(lineCounter-1, j, g);
+                }
+                else if (Character.isLetter(thisChar)) {
+                    drawCell(lineCounter-1, j, g);
+                    letterInCell(Character.toString(thisChar), lineCounter-1, j, g);
                 }
             }
         }

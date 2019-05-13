@@ -480,4 +480,22 @@ public class Match {
     public synchronized boolean containsPlayer(Player player) {
         return players.contains(player);
     }
+    
+    
+    /**
+     * Get the other player string (identifier) that is currently playing, where the other player is the player that is NOT the
+     * passed in player
+     * @param player player to match player against
+     * @return other player's identifier that does not match player
+     */
+    public synchronized String getOtherPlayer(Player player) {
+
+        if (players.get(0).equals(player)) {
+            return players.get(1).getID();
+        }
+        else {
+            return players.get(0).getID();
+        }
+        
+    }
 }

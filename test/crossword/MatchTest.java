@@ -71,6 +71,8 @@ public class MatchTest {
      *          tries to enter same word that has already been entered
      *          overlaps with other word
      *      wrong word size
+     *      word already confirmed
+     *      ID insert doesn't exist
      * 
      * Test challenge()
      *  valid challenge, invalid challenge
@@ -85,6 +87,7 @@ public class MatchTest {
      *      Word to challenge is already confirmed
      *      Word to challenge is same as word you are proposing
      *      Proposed word is incorrect length
+     *      ID inserted does not exist
      *      
      *  
      * Test getMatchName()
@@ -103,6 +106,9 @@ public class MatchTest {
      * Test containsPlayer()
      *  contains player, does not contain
      * 
+     * Test getOtherPlayer()
+     *  check 0th index player (pass in first index player as parameter)
+     *  check first index player
      * 
      * Methods oneDimensionOverlap and verticalHorizontalConsistent are fully covered within checkConsistency() partition
      * 
@@ -705,6 +711,37 @@ public class MatchTest {
     }
     
     //covers tryInsert()
+    //      invalid insert, already confirmed
+    @Test
+    public void testTryInsertInvalidConfirmed() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+
+        currentMatch.tryInsert(yo, 1, "now");
+        currentMatch.challenge(dude, 1, "dba");
+        
+        assertTrue(!currentMatch.tryInsert(dude, 1, "hey"));
+        
+        String expected = "3x11\n" + 
+                "##########d\n" + 
+                "##########b\n" +
+                "##########a\n" +
+                "1\n" + 
+                "0 10 DOWN 1\n" + 
+                "hint\n";
+        assertEquals(expected, currentMatch.toString());
+        
+        
+    }
+    
+    //covers tryInsert()
     //      invalid insert, inconsistent with other words already entered by others (overlaps at letter)
     @Test
     public void testTryInsertInvalidOthersOverlap() {
@@ -744,6 +781,31 @@ public class MatchTest {
         currentMatch.addPlayer(yo);
         
         assertTrue(!currentMatch.tryInsert(yo, 1, "a"));
+        
+        String expected = "3x11\n" + 
+                "##########?\n" + 
+                "##########?\n" +
+                "##########?\n" +
+                "1\n" + 
+                "0 10 DOWN 1\n" + 
+                "hint\n";
+        assertEquals(expected, currentMatch.toString());
+        
+    }
+    
+    //covers tryInsert()
+    //      invalid insert, non-existent ID
+    @Test
+    public void testTryInsertInvalidID() {
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "cat", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        
+        assertTrue(!currentMatch.tryInsert(yo, 3, "a"));
         
         String expected = "3x11\n" + 
                 "##########?\n" + 
@@ -1033,6 +1095,32 @@ public class MatchTest {
  
     }
     
+    //covers challenge() invalid challenge 
+    //      non-existent ID
+    @Test
+    public void testChallengeInvalidID() {
+
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "cat", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        
+        assertTrue(!currentMatch.challenge(yo, 3, "a"));
+        
+        String expected = "3x11\n" + 
+                "##########?\n" + 
+                "##########?\n" +
+                "##########?\n" +
+                "1\n" + 
+                "0 10 DOWN 1\n" + 
+                "hint\n";
+        assertEquals(expected, currentMatch.toString());
+ 
+    }
+    
     
     
     //////////////////////////////////////////////GET MATCH NAME TESTS////////////////////////////////////////////
@@ -1088,6 +1176,7 @@ public class MatchTest {
     
     //covers isFinished()
     //  is actually finished, through challenge
+    //  also tests isConfirmed() - true (see WordTest.java for reference)
     @Test
     public void testIsFinishedYesChallenge() {
 
@@ -1155,7 +1244,7 @@ public class MatchTest {
     
     
     //covers containsPlayer()
-    //      contains player
+    //      does not contain player
     @Test
     public void testContainsPlayerNo() {
 
@@ -1165,6 +1254,35 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
         
         assertTrue(!currentMatch.containsPlayer(yo));
+    }
+    
+    //covers getOtherPlayer
+    //  check 0th index
+    @Test
+    public void testGetOtherPlayer() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        currentMatch.addPlayer(yo);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+    }
+    
+    //covers getOtherPlayer
+    //  check 1st index
+    @Test
+    public void testGetOtherPlayer1stIndex() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
     }
     
     
