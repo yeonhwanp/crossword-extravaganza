@@ -78,7 +78,7 @@ public class Word {
      */
     private void checkRep() {
         assert this.startRow >= 0 && this.startCol >= 0;
-        assert this.id >= 0;
+        assert this.id >= 1;
         assert this.direction != null;
         assert involvedCells.size() == correctValue.length();
         if(this.isConfirmed()) {

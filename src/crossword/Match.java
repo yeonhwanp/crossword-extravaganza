@@ -94,7 +94,7 @@ public class Match {
         int counter = 1;
 
         for (WordTuple wordTuple : wordTuples) {
-            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter, // TODO: we don't know what these IDs are supposed to be
+            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter,
                     wordTuple.getWord(), wordTuple.getDirection());
             this.words.add(newWord);
             this.idToWordMap.put(newWord.getID(), newWord);
