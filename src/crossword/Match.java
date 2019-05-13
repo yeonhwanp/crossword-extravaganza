@@ -202,7 +202,7 @@ public class Match {
         assert checkSetEquality(scores.keySet(), challengePts.keySet());
     }
     
-    private <E> boolean checkSetEquality(Set<E> first, Set<E> second) {
+    private synchronized <E> boolean checkSetEquality(Set<E> first, Set<E> second) {
         if(first.size() != second.size()) return false;
         
         for(E e : first) {
