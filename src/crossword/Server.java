@@ -707,7 +707,7 @@ public class Server {
      *  STATE:
      *      - IF precondition:
      *          - STATE = play
-     *          - SEND: STATE, new, board
+     *          - SEND: STATE, new, board, challengepoints
      *      - ELSE:
      *          - STATE = choose
      *          - SEND: STATE, "try again", allMatches
@@ -829,7 +829,7 @@ public class Server {
                 String matchID = states[1];
                 twoPlayerMatches.remove(matchID);
                 String finishedResponse = "show score\n";
-                Match currentMatch = mapIDToMatch.get(matchID);
+                Match currentMatch = twoPlayerMatches.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
                 final String finished = finishedResponse;

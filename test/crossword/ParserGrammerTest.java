@@ -75,7 +75,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\not\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\\\n ot\"", 1, "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -83,6 +83,7 @@ public class ParserGrammerTest {
         for (int i = 0; i < words.size(); i++) {
             WordTuple w = words.get(i);
             WordTuple expW = expectedWords.get(i);
+            System.out.println(w.getHint());
             assertTrue(w.equals(expW));
         }
     }
@@ -96,7 +97,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment \\\\\\n\"", 1, "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
