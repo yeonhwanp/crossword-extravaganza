@@ -392,11 +392,11 @@ public class MatchTest {
                 "########???\n" + 
                 "#########??\n" + 
                 "3\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "0 9 DOWN 1\n" + 
+                "0 9 DOWN 2 false false \n" + 
                 "hint\n" + 
-                "1 8 ACROSS 1\n" + 
+                "1 8 ACROSS 3 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -419,7 +419,7 @@ public class MatchTest {
                 "##########?\n" + 
                 "##########?\n" + 
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -621,7 +621,7 @@ public class MatchTest {
                 "##########b\n" +
                 "##########a\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true false yo\n" + 
                 "hint\n";
         
         assertEquals(expected, currentMatch.toString());
@@ -647,9 +647,9 @@ public class MatchTest {
                 "obo\n" + 
                 "#a#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -672,9 +672,9 @@ public class MatchTest {
                 "?b?\n" + 
                 "#a#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -703,7 +703,7 @@ public class MatchTest {
                 "##########o\n" +
                 "##########w\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -734,7 +734,7 @@ public class MatchTest {
                 "##########b\n" +
                 "##########a\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -760,9 +760,9 @@ public class MatchTest {
                 "?o?\n" + 
                 "#w#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -787,7 +787,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -812,7 +812,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -845,9 +845,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(2, currentMatch.getChallengePoints(dude));
@@ -875,9 +875,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(2, currentMatch.getChallengePoints(dude));
@@ -904,9 +904,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -934,9 +934,9 @@ public class MatchTest {
                 "???\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -965,9 +965,9 @@ public class MatchTest {
                 "hia\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -995,9 +995,9 @@ public class MatchTest {
                 "aia\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1026,9 +1026,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -1057,9 +1057,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1086,9 +1086,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1115,7 +1115,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
  
