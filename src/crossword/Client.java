@@ -202,7 +202,7 @@ public class Client {
             sendString = sendChallenge(commandInfo);
             break;
         case "EXIT":
-            sendExit(commandInfo);
+            sendString = sendExit(commandInfo);
             break;
         case "START":
             sendString = sendStart(commandInfo);
@@ -377,10 +377,6 @@ public class Client {
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
-        System.out.println("---------");
-        System.out.println(canvas.getState());
-        System.out.println(inputStrings[0] + inputStrings[1]);
-        System.out.println("---------");
         if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 3) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
@@ -400,20 +396,6 @@ public class Client {
         }
         else {
             throw new RuntimeException("Wrong play format.");
-        }
-        return sendString;
-    }
-    
-    /**
-     * SENDS: /play/playerID/matchID
-     */
-    private synchronized String sendWait() {
-        String sendString = "";
-        if (canvas.getState() == ClientState.WAIT) {
-            sendString = "/waitforjoin/" + playerID;
-        }
-        else {
-            throw new RuntimeException("Wrong wait format.");
         }
         return sendString;
     }
@@ -437,6 +419,7 @@ public class Client {
         else {
             throw new RuntimeException("Wrong exit format");
         }
+        
         return sendString;
     }
 
@@ -445,8 +428,9 @@ public class Client {
      */
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 3) {
-            sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
+        System.out.println(canvas.getState() + " STATE");
+        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 2) {
+            sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
             throw new RuntimeException("Wrong try format.");
@@ -459,8 +443,8 @@ public class Client {
      */
     private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 3) {
-            sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[1] + "/" + inputStrings[2];
+        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 2) {
+            sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
             throw new RuntimeException("Wrong challenge format.");
@@ -482,7 +466,6 @@ public class Client {
                 boardString += boardArray[i];
             }
         }
-        System.out.println(boardString);
         return boardString;
     }
     

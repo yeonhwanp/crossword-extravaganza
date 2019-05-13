@@ -101,57 +101,108 @@ public class ClientManager {
         client.parseResponse(initialRequest);
         client.launchGameWindow();
         socketIn.close();
+        
+        while (true) {
+            synchronized(client) {
 
-        // Thread to handle outgoing messages. Never want this to end until someone does end
-        new Thread(() -> {
-            while (true) {
-                synchronized(client) {
+                // Waiting for button press to send message
+                try {
+                    client.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                    // Waiting for button press to send message
-                    try {
-                        client.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                // Sending URL stuffs
+                try {
+                    String userInput = client.getUserInput();
+                    String extension = client.parseUserInput(userInput);
 
-                    // Sending URL stuffs
-                    try {
-                        String userInput = client.getUserInput();
-                        String extension = client.parseUserInput(userInput);
+                    // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
 
-                        // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
+                    // Send GET request
+                    URL test = new URL("http://" + host + ":" + port + extension);
+                    BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
 
-                        // Send GET request
-                        URL test = new URL("http://" + host + ":" + port + extension);
-                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+                    // Get the response into one big line then parse it
+                    String response = receiveResponse(responseBuffer);
+                    client.parseResponse(response);
+                    responseBuffer.close();
+
+                    client.repaint();
+
+                    // Waiting for a player
+                    if (client.isWaiting()) {
+                        URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
+                        BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
 
                         // Get the response into one big line then parse it
-                        String response = receiveResponse(responseBuffer);
-                        client.parseResponse(response);
-                        responseBuffer.close();
-
+                        String joinedResponse = receiveResponse(joinedBuffer);
+                        client.parseResponse(joinedResponse);
+                        joinedBuffer.close();
                         client.repaint();
 
-                        // Waiting for a player
-                        if (client.isWaiting()) {
-                            URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
-                            BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
-
-                            // Get the response into one big line then parse it
-                            String joinedResponse = receiveResponse(joinedBuffer);
-                            client.parseResponse(joinedResponse);
-                            joinedBuffer.close();
-                            client.repaint();
-
-                            System.out.println("in here!");
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("in here!");
                     }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        }).start();
+        }
+        
+//        
+//        
+//
+//        // Thread to handle outgoing messages. Never want this to end until someone does end
+//        new Thread(() -> {
+//            while (true) {
+//                synchronized(client) {
+//
+//                    // Waiting for button press to send message
+//                    try {
+//                        client.wait();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    // Sending URL stuffs
+//                    try {
+//                        String userInput = client.getUserInput();
+//                        String extension = client.parseUserInput(userInput);
+//
+//                        // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
+//
+//                        // Send GET request
+//                        URL test = new URL("http://" + host + ":" + port + extension);
+//                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+//
+//                        // Get the response into one big line then parse it
+//                        String response = receiveResponse(responseBuffer);
+//                        client.parseResponse(response);
+//                        responseBuffer.close();
+//
+//                        client.repaint();
+//
+//                        // Waiting for a player
+//                        if (client.isWaiting()) {
+//                            URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
+//                            BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
+//
+//                            // Get the response into one big line then parse it
+//                            String joinedResponse = receiveResponse(joinedBuffer);
+//                            client.parseResponse(joinedResponse);
+//                            joinedBuffer.close();
+//                            client.repaint();
+//
+//                            System.out.println("in here!");
+//                        }
+//
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }).start();
 
         //        // Thread to handle watches
         //        new Thread(() -> {
