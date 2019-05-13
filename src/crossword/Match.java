@@ -90,12 +90,15 @@ public class Match {
         this.matchDescription = matchDescription;
         this.words = new ArrayList<>();
         this.idToWordMap = new HashMap<Integer, Word>();
+        
+        int counter = 1;
 
         for (WordTuple wordTuple : wordTuples) {
-            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), wordTuple.getID(), // TODO: we don't know what these IDs are supposed to be
+            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter, // TODO: we don't know what these IDs are supposed to be
                     wordTuple.getWord(), wordTuple.getDirection());
             this.words.add(newWord);
             this.idToWordMap.put(newWord.getID(), newWord);
+            counter++;
         }
                 
         int maxRow = 0;
