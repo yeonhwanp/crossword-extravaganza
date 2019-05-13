@@ -174,20 +174,46 @@ public class Match {
             assert idToWordMap.containsKey(i);
         }
         
-        final Set<Word> wordsSet = new HashSet<>(words);
-        assert wordsSet.size() == words.size();
+//        final Set<Word> wordsSet = new HashSet<>(words);
+//        assert wordsSet.size() == words.size();
+//        
+//        System.out.println(wordsSet);
+//        System.out.println(idToWordMap.values());
+//        System.out.println(wordsSet.equals(idToWordMap.values()));
+//        System.out.println(idToWordMap.values().size());
+//        System.out.println(wordsSet.size());
+//
+//        assert wordsSet.size() == idToWordMap.values().size();
+//        
+//        for(Word w : wordsSet) {
+//            assert idToWordMap.values().contains(w);
+//        }
         
-        System.out.println(wordsSet);
-        System.out.println(idToWordMap.values());
-        System.out.println(wordsSet.equals(idToWordMap.values()));
-        assert wordsSet.equals(idToWordMap.values());
+        assert checkSetEquality(new HashSet<>(words), new HashSet<>(idToWordMap.values()));
         
-        assert players.size() == 2;
-        assert scores.keySet().size() == 2;
-        assert challengePts.keySet().size() == 2;
+//        assert players.size() == 2;
+//        assert scores.keySet().size() == 2;
+//        assert challengePts.keySet().size() == 2;
+//        
+//        assert scores.keySet().equals(new HashSet<>(players));
+//        assert scores.keySet().equals(challengePts.keySet());
         
-        assert scores.keySet().equals(new HashSet<>(players));
-        assert scores.keySet().equals(challengePts.keySet());
+        assert checkSetEquality(scores.keySet(), new HashSet<>(players));
+        assert checkSetEquality(scores.keySet(), challengePts.keySet());
+    }
+    
+    private <E> boolean checkSetEquality(Set<E> first, Set<E> second) {
+        if(first.size() != second.size()) return false;
+        
+        for(E e : first) {
+            if(!second.contains(e)) return false;
+        }
+        
+        for(E e : second) {
+            if(!first.contains(e)) return false;
+        }
+        
+        return true;
     }
     
     /**
