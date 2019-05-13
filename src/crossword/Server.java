@@ -827,10 +827,14 @@ public class Server {
             } else if (gameState.equals("play")) {
 
                 String matchID = states[1];
-                twoPlayerMatches.remove(matchID);
+                
                 String finishedResponse = "show score\n";
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
+                
+                
+                twoPlayerMatches.remove(matchID);
+                
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
                 final String finished = finishedResponse;
 
