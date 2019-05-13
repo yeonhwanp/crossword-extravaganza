@@ -27,7 +27,7 @@ public class Word {
     //          in other words, we must have that (involvedCells.get(i).getRow() == involvedCells.get(i+1).getRow() AND involvedCells.get(i).getCol() < involvedCells.get(i+1).getCol())
     //          OR (involvedCells.get(i).getRow() < involvedCells.get(i+1).getRow() AND involvedCells.get(i).getCol() == involvedCells.get(i+1).getCol())
     //    involvedCells.size() == correctValue.length()
-    //    if a cell is confirmed, it must have an owner
+    //    if a cell is confirmed, it must have an owner, and the getValue must be the correctValue
     //
     // Safety from rep exposure:
     //    startRow, startCol, id, hint, correctValue, and direction are all private and final
@@ -92,6 +92,10 @@ public class Word {
             else {
                 assert (involvedCells.get(i).getRow() + 1 == involvedCells.get(i+1).getRow() && involvedCells.get(i).getCol() == involvedCells.get(i+1).getCol());
             }
+        }
+        
+        if(this.isConfirmed()) {
+            assert correctValue.equals(this.getCurrentValue());
         }
                 
     }

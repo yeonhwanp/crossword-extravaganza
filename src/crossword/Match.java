@@ -272,7 +272,8 @@ public class Match {
         resultString += words.size() + "\n";
         
         for(Word word : words) {
-            resultString += word.getRowLowerBound() + " " + word.getColumnLowerBound() + " " + word.getDirection().name() + " " + word.getID() + "\n";
+            resultString += word.getRowLowerBound() + " " + word.getColumnLowerBound() + " " + word.getDirection().name() + " " 
+        + word.getID() + " " + String.valueOf(word.hasOwner()) + " " + String.valueOf(word.isConfirmed()) + " " + (word.hasOwner() ? String.valueOf(word.getOwner()) : "") + "\n";
             resultString += word.getHint() + "\n";
         }
         
