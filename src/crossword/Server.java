@@ -1094,27 +1094,50 @@ public class Server {
             Match matchToWatch = twoPlayerMatches.get(matchID);
             
             
-            final String response;
-            exchange.sendResponseHeaders(VALID, 0);
-            
-            String currentMatchState = matchToWatch.toString();
+            new Thread(new Runnable() {
+                public void run() {
 
-            while (currentMatchState.equals(matchToWatch.toString())) {
-                folderPath.wait();
-            }
+                    synchronized (matchToWatch) {
+                        
+                        
+                        final String response;
+                        try {
+                            exchange.sendResponseHeaders(VALID, 0);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        
+                        String currentMatchState = matchToWatch.toString();
             
-            response = "play\nupdate\n" + matchToWatch.toString();
+                        while (currentMatchState.equals(matchToWatch.toString())) {
+                            try {
+                                matchToWatch.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        
+                        response = "play\nupdate\n" + matchToWatch.toString();
+                        
             
-
-            // write the response to the output stream using UTF-8 character encoding
-            OutputStream body = exchange.getResponseBody();
-            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-            out.print(response);
-            out.flush();
-            System.out.println("sent over updated board (it just changed by someone making a move)");
-
-            // if you do not close the exchange, the response will not be sent!
-            exchange.close();
+                        // write the response to the output stream using UTF-8 character encoding
+                        OutputStream body = exchange.getResponseBody();
+                        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+                        out.print(response);
+                        out.flush();
+                        System.out.println("sent over updated board (it just changed by someone making a move)");
+            
+                        // if you do not close the exchange, the response will not be sent!
+                        exchange.close();
+                    }
+                    
+                    
+                }
+            }).start();
+            
+            
+            
+            
 
         }
     }
