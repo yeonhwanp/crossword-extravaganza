@@ -2,8 +2,10 @@ package crossword;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import crossword.Cell.Exist;
 
@@ -46,6 +48,12 @@ public class Match {
     //    matchName cannot contain newlines, or tabs
     //    rows >= 0 && col >= 0
     //    ids in idToWordMap are >= 1, unique, and increasingly sequential.
+    //    every word in the list words appears as a value in idToWordMap and vice versa
+    //    players.size() == 2 (there are exactly two players)
+    //    scores.keySet().size() == 2
+    //    challengePts.keySet().size() == 2
+    //    same players in players, scores, and challengePts
+    //    
     //
     // Safety from rep exposure:
     //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
@@ -84,7 +92,7 @@ public class Match {
         this.idToWordMap = new HashMap<Integer, Word>();
 
         for (WordTuple wordTuple : wordTuples) {
-            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), wordTuple.getID(),
+            Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), wordTuple.getID(), // TODO: we don't know what these IDs are supposed to be
                     wordTuple.getWord(), wordTuple.getDirection());
             this.words.add(newWord);
             this.idToWordMap.put(newWord.getID(), newWord);
@@ -152,20 +160,30 @@ public class Match {
         return players.size();
     }
     
+    
     /**
      * Check for valid match rep
-     * TODO fix this up
+     * TODO fix this up, include some stuff for checking match description and name
      */
     private synchronized void checkRep() {
 //        assert matchName.matches("\" [^\"\r\n\t\\]* \"");
         assert rows >= 0;
         assert columns >= 0;
         
-        int lower = 0;
-        for (Integer i : idToWordMap.keySet()) {
-            assert i > lower;
-            lower = i;
+        for(int i = 1; i <= idToWordMap.size(); i++) {
+            assert idToWordMap.containsKey(i);
         }
+        
+        final Set<Word> wordsSet = new HashSet<>(words);
+        assert wordsSet.size() == words.size();
+        assert wordsSet.equals(idToWordMap.keySet());
+        
+        assert players.size() == 2;
+        assert scores.keySet().size() == 2;
+        assert challengePts.keySet().size() == 2;
+        
+        assert scores.keySet().equals(new HashSet<>(players));
+        assert scores.keySet().equals(challengePts.keySet());
     }
     
     /**
