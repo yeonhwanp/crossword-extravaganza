@@ -106,6 +106,9 @@ public class MatchTest {
      * Test containsPlayer()
      *  contains player, does not contain
      * 
+     * Test getOtherPlayer()
+     *  check 0th index player (pass in first index player as parameter)
+     *  check first index player
      * 
      * Methods oneDimensionOverlap and verticalHorizontalConsistent are fully covered within checkConsistency() partition
      * 
@@ -1241,7 +1244,7 @@ public class MatchTest {
     
     
     //covers containsPlayer()
-    //      contains player
+    //      does not contain player
     @Test
     public void testContainsPlayerNo() {
 
@@ -1251,6 +1254,35 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
         
         assertTrue(!currentMatch.containsPlayer(yo));
+    }
+    
+    //covers getOtherPlayer
+    //  check 0th index
+    @Test
+    public void testGetOtherPlayer() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        currentMatch.addPlayer(yo);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+    }
+    
+    //covers getOtherPlayer
+    //  check 1st index
+    @Test
+    public void testGetOtherPlayer1stIndex() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
     }
     
     
