@@ -142,7 +142,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossAcossDifferentRows() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(3, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 2, "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -157,7 +157,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossAcossSameRowsNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 200, "hint", 1, "splat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 200, "hint", 2, "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -172,7 +172,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossAcossSameRowsYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 1, "splat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 2, "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -187,7 +187,7 @@ public class MatchTest {
     public void testCheckConsistencyDownDownDifferentColumns() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 1, "splat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 2, "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -202,7 +202,7 @@ public class MatchTest {
     public void testCheckConsistencyDownDownSameColumnsNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(100, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 2, "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -217,7 +217,7 @@ public class MatchTest {
     public void testCheckConsistencyDownDownSameColumnsYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(5, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 2, "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -233,7 +233,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossDownNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(100, 200, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 2, "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -249,7 +249,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossDownYesOverlapDifferentLetter() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 2, "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -264,7 +264,7 @@ public class MatchTest {
     public void testCheckConsistencyAcrossDownYesOverlapSameLetter() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(0, 1, "hint", 1, "daa", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(0, 1, "hint", 2, "daa", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -279,7 +279,7 @@ public class MatchTest {
     public void testCheckConsistencyDownAcrossYesOverlapDifferentLetter() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "cat", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -295,8 +295,8 @@ public class MatchTest {
     public void testCheckConsistencyDownAcrossMoreWordTuplesYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 1, "hey", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "cat", "ACROSS");
+        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 3, "hey", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -314,8 +314,8 @@ public class MatchTest {
     public void testCheckConsistencyDownAcrossMoreWordTuplesNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(3, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 1, "bad", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "cat", "ACROSS");
+        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 3, "bad", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -333,8 +333,8 @@ public class MatchTest {
     public void testCheckConsistencyDownAcrossMoreWordTuplesBothOverlapInvalid() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bad", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 2, "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 3, "bad", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -353,8 +353,8 @@ public class MatchTest {
     public void testCheckConsistencyDownAcrossMoreWordTuplesMultipleOverlapValid() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bab", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 2, "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 3, "bab", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -376,8 +376,8 @@ public class MatchTest {
     public void testToStringSimple() {
         List<WordTuple> words = new ArrayList<>();
         WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bab", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 2, "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 3, "bab", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);

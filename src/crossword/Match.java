@@ -176,6 +176,7 @@ public class Match {
         
         final Set<Word> wordsSet = new HashSet<>(words);
         assert wordsSet.size() == words.size();
+        
         assert wordsSet.equals(idToWordMap.keySet());
         
         assert players.size() == 2;
