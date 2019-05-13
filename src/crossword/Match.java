@@ -177,7 +177,10 @@ public class Match {
         final Set<Word> wordsSet = new HashSet<>(words);
         assert wordsSet.size() == words.size();
         
-        assert wordsSet.equals(idToWordMap.keySet());
+        System.out.println(wordsSet);
+        System.out.println(idToWordMap.values());
+        System.out.println(wordsSet.equals(idToWordMap.values()));
+        assert wordsSet.equals(idToWordMap.values());
         
         assert players.size() == 2;
         assert scores.keySet().size() == 2;
