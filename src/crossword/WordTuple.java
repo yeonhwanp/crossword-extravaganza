@@ -12,18 +12,16 @@ public class WordTuple {
     private final String direction;
     private final int startRow;
     private final int startCol;
-    private final int id;
     
     
     /*
      * Abstraction Function:
-     * AF(word, hint, direction, startRow, startCol, id) = Word tuple that is the word word, with an associated hint hint to
-     * help users guess the word, in the direction direction, starting at row startRow and column startCol, with word ID id.
+     * AF(word, hint, direction, startRow, startCol) = Word tuple that is the word word, with an associated hint hint to
+     * help users guess the word, in the direction direction, starting at row startRow and column startCol
      * 
      * Rep Invariant:
      *  direction must be ACROSS or DOWN
      *  startRow and startCol must be non-negative
-     *  id must be positive
      * 
      * Safety from rep exposure:
      *  all of our fields are private and final and immutable, therefore no rep exposure
@@ -39,17 +37,15 @@ public class WordTuple {
      * @param pRow row that word starts in
      * @param pCol column that word starts in
      * @param pHint hint that to help players guess word
-     * @param pID id of this word in the puzzle
      * @param pWord actual word that is to be guessed
      * @param pDirection direction of the word
      */
-    public WordTuple(final int pRow, final int pCol, final String pHint, final int pID, final String pWord, final String pDirection) {
+    public WordTuple(final int pRow, final int pCol, final String pHint, final String pWord, final String pDirection) {
         this.word = pWord;
         this.hint = pHint;
         this.direction = pDirection;
         this.startRow = pRow;
         this.startCol = pCol;
-        this.id = pID;
         checkRep();
     }
     
@@ -59,7 +55,6 @@ public class WordTuple {
     private void checkRep() {
         assert direction.equals("ACROSS") || direction.equals("DOWN");
         assert startRow >= 0 && startCol >= 0;
-        assert id > 0;
     }
     
     /**
@@ -102,14 +97,6 @@ public class WordTuple {
         return startCol;
     }
     
-    /**
-     * Get the numeric ID of this word
-     * @return numeric ID of the word
-     */
-    public int getID() {
-        return id;
-    }
-    
     @Override
     /**
      * Checks equality of word tuple objects
@@ -122,8 +109,7 @@ public class WordTuple {
                 (((WordTuple) that).getHint().equals(this.getHint())) &&
                 (((WordTuple) that).getDirection().equals(this.getDirection())) &&
                 (((WordTuple) that).getRow() == this.getRow()) &&
-                (((WordTuple) that).getCol() == this.getCol()) &&
-                (((WordTuple) that).getID() == this.getID());
+                (((WordTuple) that).getCol() == this.getCol());
     }
     
     @Override
@@ -133,7 +119,7 @@ public class WordTuple {
      */
     public int hashCode() {
         return getAscii(getWord())*21 + getAscii(getHint())*11 + getAscii(getDirection())*9
-                + getRow()*7 + getCol()*8 + getID()*6;
+                + getRow()*7 + getCol()*8;
     }
     
     

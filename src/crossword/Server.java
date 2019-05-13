@@ -441,7 +441,7 @@ public class Server {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
-            WordTuple currentWord = new WordTuple(row, col, hint, i-2, wordname, direction);
+            WordTuple currentWord = new WordTuple(row, col, hint, wordname, direction);
           
             allWords.add(currentWord);
         }
