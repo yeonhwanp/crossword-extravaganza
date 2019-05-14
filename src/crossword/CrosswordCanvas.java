@@ -25,6 +25,7 @@ class CrosswordCanvas extends JComponent {
     private String request;
     private String currentBoard;
     private String currentPuzzleMatches;
+    private String endString;
     
     /*
      * Abstraction Function
@@ -292,6 +293,14 @@ class CrosswordCanvas extends JComponent {
      */
     public void setList(String puzzleMatchString) {
         currentPuzzleMatches = puzzleMatchString;
+    }
+    
+    /**
+     * Sets the score to the last updated
+     * @param scoreString
+     */
+    public void setScore(String scoreString) {
+        endString = scoreString;
     }
     
     /**

@@ -406,10 +406,42 @@ public class Client {
     }
 
     /**
-     * RECEIVES: SHOW_SCORE, winner, board
+     * RECEIVES: show_score, winner, myPlayer, score, challengepts, otherPlayer, score, challengepts
      */
     private synchronized void receiveEnd(String[] response) {
-        canvas.setRequest("show_score", "");
+        int lineCount = 0;
+
+        // Set the state of the canvas
+        String winner = response[lineCount];
+        canvas.setRequest("show_score", winner);
+        lineCount++;
+
+        String endString = "";
+
+        // Parsing through available puzzles
+        String numberOfNew = response[lineCount];
+        puzzleMatchString += numberOfNew + "\n";
+        lineCount++;
+        for (int i = 0; i < Integer.valueOf(numberOfNew); i++) {
+            puzzleMatchString += response[lineCount] + "\n";
+            lineCount++;
+        }
+
+        // Parsing through available matches
+        String numberOfCurrent = response[lineCount];
+        lineCount++;
+
+        puzzleMatchString += numberOfCurrent + "\n";
+        for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
+            if (i != Integer.valueOf(numberOfCurrent)*2 - 1) {
+                puzzleMatchString += response[lineCount] + "\n";
+            }
+            else {
+                puzzleMatchString += response[lineCount];
+            }
+            lineCount++;
+        }
+        canvas.setList(puzzleMatchString);
     }
 
     /**
