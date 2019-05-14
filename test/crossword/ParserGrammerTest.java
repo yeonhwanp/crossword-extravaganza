@@ -35,6 +35,7 @@ public class ParserGrammerTest {
      *          multi-line comments (consecutive lines)
      * Backslash
      *      backslash inside literal
+     *      contains \n, \r, \t
      * 
      * 
      * 
@@ -90,6 +91,7 @@ public class ParserGrammerTest {
     }
     
     //covers backslash in literal (description)
+    //   \n
     @Test public void testParserBackslashDescription() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/backslash.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -98,7 +100,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\\\n ot\"", "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\n ot\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -106,7 +108,28 @@ public class ParserGrammerTest {
         for (int i = 0; i < words.size(); i++) {
             WordTuple w = words.get(i);
             WordTuple expW = expectedWords.get(i);
-            System.out.println(w.getHint());
+            assertTrue(w.equals(expW));
+        }
+    }
+    
+    //covers backslash in literal (description)
+    //   \r, \t
+    @Test public void testParserBackslashDescriptionOthers() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/backslash2.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle \\\\r to \\\\t get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
             assertTrue(w.equals(expW));
         }
     }
@@ -120,7 +143,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment \\\\\\n\"", "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment \\\\n\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);

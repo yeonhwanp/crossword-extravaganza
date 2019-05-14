@@ -55,8 +55,6 @@ import edu.mit.eecs.parserlib.UnableToParseException;
  * data at a time. if we didn't do this, then there could be a lot of interleaving and potential overwriting of changed
  * reps.
  * 
- * 
- * 
  */
 
 /**
@@ -850,7 +848,7 @@ public class Server {
                 out.print(response);
                 out.flush();
                 exchange.close();
-//                System.out.println("sent choose, new, allmatchesclient should now see list of matches to choose from.");
+//                System.out.println("sent choose, new, allmatches. client should now see list of matches to choose from.");
                 
                 folderPath.notifyAll();
 
@@ -954,9 +952,7 @@ public class Server {
                             
                             twoPlayerMatches.remove(matchID);
                             mapIDToWinners.put(matchID, winnerID);
-                            
-                            
-                            
+
                             currentMatch.notifyAll();
        
                             
@@ -1128,8 +1124,6 @@ public class Server {
             
             out.flush();
 //            System.out.println("sent over updated available matches (it just changed)");
-
-            // if you do not close the exchange, the response will not be sent!
             exchange.close();
 
         }
@@ -1148,7 +1142,7 @@ public class Server {
      */
     private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
-        synchronized (folderPath) { //DEADLOCK TODO
+        synchronized (folderPath) {
             
             // if you want to know the requested path:
             final String path = exchange.getRequestURI().getPath();
