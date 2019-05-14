@@ -5,8 +5,6 @@ package crossword;
  */
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,14 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.stream.IntStream;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 
 import crossword.Client.ClientState;
 
@@ -104,32 +94,32 @@ public class ClientManager {
 
         new Thread(() -> {
             while (true) {
-                    try {
-                        if (client.getState() == ClientState.CHOOSE) {
-                            URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
-                            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
-                            // Get the response into one big line then parse it
-                            String response = receiveResponse(responseBuffer);
-                            synchronized(client) {
-                                if (client.getState() == ClientState.CHOOSE) {
-                                    client.parseResponse(response, "");
-                                    responseBuffer.close();
-                                    client.repaint();  
-                                }
+                try {
+                    if (client.getState() == ClientState.CHOOSE) {
+                        URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
+                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                        // Get the response into one big line then parse it
+                        String response = receiveResponse(responseBuffer);
+                        synchronized(client) {
+                            if (client.getState() == ClientState.CHOOSE) {
+                                client.parseResponse(response, "");
+                                responseBuffer.close();
+                                client.repaint();  
                             }
-                            
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
-        
+
         new Thread(() -> {
             while (true) {
                 try {
                     if (client.getState() == ClientState.PLAY) {
-                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + "/" + client.getUserID() + "/" + client.getMatchID());
+                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getUserID() + "/" + client.getMatchID());
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                         // Get the response into one big line then parse it
                         String response = receiveResponse(responseBuffer);
@@ -146,79 +136,8 @@ public class ClientManager {
                 }
             }
         }).start();
-        
+
     }
-
-    //        
-    //        
-    //
-    //        // Thread to handle outgoing messages. Never want this to end until someone does end
-    //        new Thread(() -> {
-    //            while (true) {
-    //                synchronized(client) {
-    //
-    //                    // Waiting for button press to send message
-    //                    try {
-    //                        client.wait();
-    //                    } catch (InterruptedException e) {
-    //                        e.printStackTrace();
-    //                    }
-    //
-    //                    // Sending URL stuffs
-    //                    try {
-    //                        String userInput = client.getUserInput();
-    //                        String extension = client.parseUserInput(userInput);
-    //
-    //                        // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
-    //
-    //                        // Send GET request
-    //                        URL test = new URL("http://" + host + ":" + port + extension);
-    //                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-    //
-    //                        // Get the response into one big line then parse it
-    //                        String response = receiveResponse(responseBuffer);
-    //                        client.parseResponse(response);
-    //                        responseBuffer.close();
-    //
-    //                        client.repaint();
-    //
-    //                        // Waiting for a player
-    //                        if (client.isWaiting()) {
-    //                            URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
-    //                            BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
-    //
-    //                            // Get the response into one big line then parse it
-    //                            String joinedResponse = receiveResponse(joinedBuffer);
-    //                            client.parseResponse(joinedResponse);
-    //                            joinedBuffer.close();
-    //                            client.repaint();
-    //
-    //                            System.out.println("in here!");
-    //                        }
-    //
-    //                    } catch (IOException e) {
-    //                        e.printStackTrace();
-    //                    }
-    //                }
-    //            }
-    //        }).start();
-
-    //        // Thread to handle watches
-    //        new Thread(() -> {
-    //            while (true) { 
-    //                URL test;
-    //                try {
-    //                    test = new URL("http://" + host + ":" + port + sendString);
-    //                    BufferedReader response = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-    //                    
-    //                    String watchState = response.readLine();
-    //                    parseRequest(watchState, response);
-    //                } catch (IOException e) {
-    //                    e.printStackTrace();
-    //                }
-    //                canvas.repaint();
-    //            }
-    //        }).start();
 
     /**
      * Constructs the response into one big string, properly formatted with newlines kept, as read through response
