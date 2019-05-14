@@ -1,15 +1,9 @@
 package crossword;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
-
-import crossword.Cell.Exist;
 
 public class WordTupleTest {
 
@@ -129,6 +123,16 @@ public class WordTupleTest {
     public void testEqualsNotDirection() {
         
         WordTuple first = new WordTuple(0, 1, "hint", "cat", "ACROSS");
+        WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");
+        assertTrue(!first.equals(second));
+        
+    }
+    
+    //covers equals() not equal - row
+    @Test
+    public void testEqualsNotRow() {
+        
+        WordTuple first = new WordTuple(1, 1, "hint", "cat", "DOWN");
         WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");
         assertTrue(!first.equals(second));
         

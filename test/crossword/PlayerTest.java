@@ -16,7 +16,7 @@ public class PlayerTest {
      * Test equals()
      *  equals, not equals
      *  
-     * Test hashcode()
+     * Test hashCode()
      * 
      */
     
@@ -51,7 +51,7 @@ public class PlayerTest {
 
     }
     
-    //covers hashcode()
+    //covers hashCode()
     @Test
     public void testHashcode() {
         

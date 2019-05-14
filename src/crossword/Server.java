@@ -309,6 +309,8 @@ public class Server {
      */
     private void checkRep() {
         assert server != null;
+        assert folderPath != null;
+        assert validPuzzleNames != null;
         
         for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches)
             int playerCount = 0;
@@ -333,6 +335,8 @@ public class Server {
             assert !mapIDToMatch.keySet().contains(matchID);
         }
         
+        assert mapIDToWinners != null;
+        assert finishedMatches != null;
         
         
     }
