@@ -117,11 +117,12 @@ public class ClientManager {
 
                         // Send GET request
                         URL test = new URL("http://" + host + ":" + port + extension);
-                        System.out.println("DEBUG: "+test);
+                        System.out.println("OUT: "+test);
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
 
                         // Get the response into one big line then parse it
                         String response = receiveResponse(responseBuffer);
+                        System.out.println("RESPONSE: " + response);
                         client.parseResponse(response);
                         responseBuffer.close();
 
