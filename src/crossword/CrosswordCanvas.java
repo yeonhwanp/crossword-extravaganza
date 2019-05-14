@@ -315,6 +315,13 @@ class CrosswordCanvas extends JComponent {
         return currentPuzzleMatches;
     }
     
+    /**
+     * @return To be used for testing
+     */
+    public String getRequestState() {
+        return request;
+    }
+    
     // =============== MY METHODS =============== //
 
     /**

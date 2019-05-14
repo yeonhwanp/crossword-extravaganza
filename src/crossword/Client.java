@@ -11,8 +11,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -37,14 +43,101 @@ public class Client {
     private static final int TEXTBOX_FONT_SIZE = 20;
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
+    private final String host;
+    private final int port;
     private String playerID;
     private String matchID;
     private String textboxInput;
-    private boolean isWaiting = false;
+    private String lastInput;
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
     // For the lock 
     private final Client thisLock = this;
+    
+    /**
+     * Create a new Client object
+     * @param host the host we're connecting to
+     * @param port the port we're connecting to
+     */
+    public Client(String host, int port) { 
+        this.host = host;
+        this.port = port;
+    }
+    
+    public static void main(String[] args) throws UnknownHostException, IOException {
+        // Create a new client object and have it connect
+        connectToServer(args);
+    }
+    
+    
+    // TESTING ANYWAYS //
+    
+    private static synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
+
+        // ========= PARSING LAUNCH ARGUMENTS ========= //
+        final Queue<String> arguments = new LinkedList<>(List.of(args));
+        final String host;
+        final int port;
+        try {
+            host = arguments.remove();
+        } catch (NoSuchElementException nse) {
+            throw new IllegalArgumentException("missing HOST", nse);
+        }
+        try {
+            port = Integer.parseInt(arguments.remove());
+        } catch (NoSuchElementException | NumberFormatException e) {
+            throw new IllegalArgumentException("missing or invalid PORT", e);
+        }
+        
+        Client client = new Client(host, port);
+        
+        // ========= PARSING LAUNCH ARGUMENTS ========= //
+
+        // Send initial GET request and parse the response
+        final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
+        BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
+        String initialRequest = receiveResponse(socketIn);
+
+        client.parseResponse(initialRequest);
+        client.launchGameWindow();
+        socketIn.close();
+    }
+    
+    private synchronized void hello() {
+        // Sending URL stuffs
+        try {
+            String userInput = getUserInput();
+            String extension = parseUserInput(userInput);
+
+            // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
+
+            // Send GET request
+            URL test = new URL("http://" + host + ":" + port + extension);
+            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+
+            // Get the response into one big line then parse it
+            String response = receiveResponse(responseBuffer);
+            parseResponse(response);
+            responseBuffer.close();
+
+            repaint();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Constructs the response into one big string, properly formatted with newlines like it should be.
+     */
+    public static String receiveResponse(BufferedReader response) throws IOException {
+        String fullString = "";
+        String line;
+        while ((line = response.readLine()) != null) {
+            fullString += line + "\n";
+        }
+        return fullString;
+    }
 
     /*
      * Abstraction Function
@@ -94,11 +187,15 @@ public class Client {
             // button. Recall from reading 24 that this code runs on the
             // Event Dispatch Thread, which is different from the main
             // thread.
-            synchronized (thisLock) {
-                textboxInput = textbox.getText();
-                textbox.setText("");
-                thisLock.notifyAll();
-            }
+//            synchronized (thisLock) {
+//                textboxInput = textbox.getText();
+//                textbox.setText("");
+//                thisLock.notifyAll();
+//            }
+            
+              textboxInput = textbox.getText();
+              textbox.setText("");
+              hello();
         });
 
         enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
@@ -166,10 +263,17 @@ public class Client {
     }
     
     /**
-     * @return A boolean if the player is waiting for another player to join the game.
+     * @return for testing
      */
-    public synchronized boolean isWaiting() {
-        return isWaiting;
+    public synchronized String getRequestState() {
+        return canvas.getRequestState();
+    }
+    
+    /**
+     * @return last input
+     */
+    public synchronized String getLastInput() {
+        return lastInput;
     }
     
     // ========= OBSERVER METHODS ========= // 
@@ -182,6 +286,8 @@ public class Client {
      * @return the proper extension for the GET request to send over to the server
      */
     public synchronized String parseUserInput(String userInput) {
+        
+        lastInput = userInput;
         
         String[] inputStrings = userInput.split(" "); 
         String[] commandInfo = getSubarray(inputStrings, 1);
@@ -217,8 +323,9 @@ public class Client {
     /**
      * Parses the response from the server and updates the canvas/client accordingly
      * @param response the response form the server
+     * @throws IOException 
      */
-    public synchronized void parseResponse(String response) {
+    public synchronized void parseResponse(String response) throws IOException {
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
         
@@ -282,7 +389,7 @@ public class Client {
 
         // Set the player ID
         if (chooseState.equals("new")) {
-            playerID = textboxInput.split(" ")[1];
+            playerID = lastInput.split(" ")[1];
         }
 
         String puzzleMatchString = "";
@@ -315,12 +422,26 @@ public class Client {
 
     /**
      * RECEIVES:
-     *  - WAIT, "WAITING"
+     *  - WAIT
+     * @throws IOException 
      */
-    private synchronized void receiveWait() {
-        canvas.setRequest("wait", "");
-        matchID = textboxInput.split(" ")[1];
-        isWaiting = true;
+    private void receiveWait() throws IOException {
+        synchronized (thisLock) {
+            canvas.setRequest("wait", "");
+            matchID = lastInput.split(" ")[1];
+            this.repaint(); 
+        }
+        
+        // Send back response
+        URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getMatchID());
+        BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
+
+        // Get the response into one big line then parse it
+        String joinedResponse = ClientManager.receiveResponse(joinedBuffer);
+        synchronized (thisLock) {
+            this.parseResponse(joinedResponse);
+            joinedBuffer.close(); 
+        }
     }
 
     /**
@@ -331,8 +452,6 @@ public class Client {
      *  - PLAY, false, board
      */
     private synchronized void receivePlay(String[] response) {
-        
-        isWaiting = false;
         int lineCount = 0;
 
         // Set the state of the canvas
@@ -341,7 +460,7 @@ public class Client {
         lineCount++;
 
         if (chooseState.equals("new")) {
-            matchID = textboxInput.split(" ")[1];
+            matchID = lastInput.split(" ")[1];
         }
 
         // Set the board of the game
@@ -363,7 +482,7 @@ public class Client {
      */
     private synchronized String sendStart(String[] inputStrings) {  
         String sendString = "";
-        if (canvas.getState() == ClientState.START && !textboxInput.equals("")) {
+        if (canvas.getState() == ClientState.START && !lastInput.equals("")) {
             sendString = "/start/" + inputStrings[0];
         }
         else {
