@@ -76,6 +76,9 @@ public class Client {
      * 
      */
 
+    /**
+     * Check for proper client representation.
+     */
     private void checkRep() {
         assert playerID.matches("^[a-zA-Z0-9]+$");
         assert matchID.matches("^[a-zA-Z0-9]+$");
@@ -89,6 +92,7 @@ public class Client {
     public Client(String host, int port) { 
         this.host = host;
         this.port = port;
+        checkRep();
     }
    
 
@@ -258,7 +262,7 @@ public class Client {
      * Parses the response from the server and updates the canvas/client accordingly
      * @param response the response form the server
      * @param lastInput the player input
-     * @throws IOException something
+     * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */
     public void parseResponse(String response, String lastInput) throws IOException {
         String[] splitResponse = response.split("\n");
@@ -298,8 +302,8 @@ public class Client {
      * Receives a start response from the server and parses it into the canvas.
      * 
      * RECEIVES: 
-     *  - START, "NEW GAME" 
-     *  - START, "TRY AGAIN"
+     *  - start, "new game" 
+     *  - start, "try again"
      */
     private synchronized void receiveStart(String[] response) {
         String startState = response[0];
@@ -310,8 +314,8 @@ public class Client {
      * Receives a choose response from the server and parses it into the canvas.
      * 
      * RECEIVES: 
-     *  - CHOOSE, "NEW", allMatches (matches with one player to join, and puzzles with no players to start a new match)
-     *  - CHOOSE, "TRY AGAIN", allMatches
+     *  - choose, "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     *  - choose, "try again", allMatches
      */
     private synchronized void receiveChoose(String[] response, String lastInput) {
 
@@ -357,7 +361,7 @@ public class Client {
 
     /**
      * RECEIVES:
-     *  - WAIT
+     *  - wait
      * @throws IOException 
      */
     private void receiveWait(String lastInput) throws IOException {
@@ -381,10 +385,10 @@ public class Client {
 
     /**
      * RECEIVES:
-     *  - PLAY, new, board, playerstuff
-     *  - PLAY, update, board, playerstuff
-     *  - PLAY, true, board, playerstuff
-     *  - PLAY, false, board, playerstuff
+     *  - play, new, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
+     *  - play, update, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
+     *  - play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
+     *  - play, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      */
     private synchronized void receivePlay(String[] response, String lastInput) {
         int lineCount = 0;
@@ -406,7 +410,7 @@ public class Client {
     }
 
     /**
-     * RECEIVES: SHOW_SCORE, winner, board
+     * RECEIVES: show_score, winner, board
      */
     private synchronized void receiveEnd(String[] response) {
         canvas.setRequest("show_score", "");
@@ -478,7 +482,7 @@ public class Client {
     }
 
     /**
-     * SENDS: /TRY/PLAYERID/MATCHID/WORDID/WORD
+     * SENDS: /try/playerID/matchID/wordID/word
      */
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
@@ -493,7 +497,7 @@ public class Client {
     }
 
     /**
-     * SENDS: /CHALLENGE/PLAYERID/MATCHID/WORDID/WORD
+     * SENDS: /challenge/playerID/matchID/wordID/word
      */
     private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
@@ -507,7 +511,9 @@ public class Client {
     }
 
     /**
-     * Parses the board
+     * Parses the board into a single string
+     * @param boardArray array containing each line of the board
+     * @return board as a single string
      */
     private static String parseBoard(String[] boardArray) {
         String boardString = "";

@@ -1047,7 +1047,7 @@ public class Server {
                         out.print(finished);
                         out.flush();
                         exchange.close();
-                        System.out.println("sent show score, score, match. client made a valid challenge that finished the game, should now see score.");
+                        System.out.println("sent show_score, score, match. client made a valid challenge that finished the game, should now see score.");
 
                     } else {
                         
@@ -1167,7 +1167,7 @@ public class Server {
                             
                             
                             String winnerID = mapIDToWinners.get(matchID);
-                            response = "show score\n" + winnerID + "\n" + matchToWatch.toString();
+                            response = "show_score\n" + winnerID + "\n" + matchToWatch.toString();
                         }
                         
                         

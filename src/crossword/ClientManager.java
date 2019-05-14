@@ -1,5 +1,8 @@
 package crossword;
 
+/**
+ * Client manager to receive responses and communicate with server
+ */
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.awt.BorderLayout;
@@ -218,9 +221,9 @@ public class ClientManager {
     //        }).start();
 
     /**
-     * Constructs the response into one big string, properly formatted with newlines like it should be.
-     * @response hello
-     * @throws IOException "hello"
+     * Constructs the response into one big string, properly formatted with newlines kept, as read through response
+     * @return the constructed response in a string form, with newlines kept
+     * @throws IOException if the response line cannot be read
      */
     public static String receiveResponse(BufferedReader response) throws IOException {
         String fullString = "";
