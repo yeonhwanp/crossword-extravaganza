@@ -1118,6 +1118,8 @@ public class Server {
             assert path.startsWith(base);
             final String matchID = path.substring(base.length());
             
+            
+            
             Match matchToWatch = twoPlayerMatches.get(matchID);
             
             
