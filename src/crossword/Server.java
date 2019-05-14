@@ -873,20 +873,28 @@ public class Server {
                 
                 synchronized (currentMatch) { //TODO RUN THIS BY WILLIAM!
                     currentMatch.notifyAll();
-                }
+
+                
+//                System.out.println("hey here");
                 
                 String otherPlayerID = currentMatch.getOtherPlayer(quittingPlayer);
                 Player otherPlayer = getPlayer(otherPlayerID);
+                
+//                System.out.println("first checkpoint");
                 
                 finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
                         currentMatch.getChallengePoints(quittingPlayer) + "\n" + otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
                         currentMatch.getChallengePoints(otherPlayer);
                 final String finished = finishedResponse;
+                
+//                System.out.println("made it this far");
 
                 out.print(finished);
                 out.flush();
                 exchange.close();
                 System.out.println("sent showScore, score (includes match toString). so client should see the winner's playerID of the match");
+                
+                }
 
             } else if (gameState.equals("showScore")) {
                 exchange.close();
@@ -1127,7 +1135,7 @@ public class Server {
      */
     private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
-        synchronized (folderPath) {
+        synchronized (folderPath) { //DEADLOCK TODO
             
             // if you want to know the requested path:
             final String path = exchange.getRequestURI().getPath();
@@ -1173,7 +1181,6 @@ public class Server {
                             Player currentPlayer = getPlayer(playerID);
                             String otherPlayerID = matchToWatch.getOtherPlayer(currentPlayer);
                             Player otherPlayer = getPlayer(otherPlayerID);
-                            
                             
                             
                             String winnerID = mapIDToWinners.get(matchID);
