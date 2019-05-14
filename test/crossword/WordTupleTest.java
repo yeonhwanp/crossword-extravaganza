@@ -27,6 +27,12 @@ public class WordTupleTest {
      * Test getCol()
      * 
      * Test equals() - equals, not equals
+     *  not equals differences:
+     *      word
+     *      hint
+     *      direction
+     *      startRow
+     *      startCol
      * 
      * Test hashCode()
      * 
@@ -98,9 +104,39 @@ public class WordTupleTest {
         
     }
     
+    //covers equals() not equal - word
+    @Test
+    public void testEqualsNotWord() {
+        
+        WordTuple first = new WordTuple(0, 1, "hint", "a", "DOWN");
+        WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");
+        assertTrue(!first.equals(second));
+        
+    }
+    
+    //covers equals() not equal - hint
+    @Test
+    public void testEqualsNotHint() {
+        
+        WordTuple first = new WordTuple(0, 1, "a", "cat", "DOWN");
+        WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");
+        assertTrue(!first.equals(second));
+        
+    }
+    
+    //covers equals() not equal - direction
+    @Test
+    public void testEqualsNotDirection() {
+        
+        WordTuple first = new WordTuple(0, 1, "hint", "cat", "ACROSS");
+        WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");
+        assertTrue(!first.equals(second));
+        
+    }
+    
     //covers equals() not equal - column
     @Test
-    public void testEqualsNot() {
+    public void testEqualsNotCol() {
         
         WordTuple first = new WordTuple(0, 2, "hint", "cat", "DOWN");
         WordTuple second = new WordTuple(0, 1, "hint", "cat", "DOWN");

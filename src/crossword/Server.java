@@ -285,8 +285,8 @@ public class Server {
         });
         watchRequest.getFilters().addAll(filters);
         
-        // handle requests for paths that start with /watchMatches/
-        HttpContext watchMatchRequest = server.createContext("/watchMatches/", new HttpHandler() {
+        // handle requests for paths that start with /watchmatches/
+        HttpContext watchMatchRequest = server.createContext("/watchmatches/", new HttpHandler() {
 
             public void handle(HttpExchange exchange) throws IOException {
 
@@ -863,7 +863,11 @@ public class Server {
                 finishedMatches.put(matchID, currentMatch);
                 String automaticWinner = currentMatch.getOtherPlayer(quittingPlayer);
                 mapIDToWinners.put(matchID, automaticWinner);
-                currentMatch.notifyAll();
+                
+                
+                synchronized (currentMatch) {
+                    currentMatch.notifyAll();
+                }
                 
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
                 final String finished = finishedResponse;
@@ -1051,6 +1055,7 @@ public class Server {
     
 
     /**
+     * RECEIVES: request to watch for other matches to be added or removed in the form of: watchMatches
      * Wait and watch until other matches are added and removed from the list of playable matches (with one player already)
      * Communicate this information (live update) to the client
      * @param exchange exchange to communicate with client
@@ -1091,6 +1096,7 @@ public class Server {
     
     
     /**
+     * RECEIVES: watch request in the form of: watchBoard matchID
      * Wait until the board changes, and when it does, show the newly changed board to the client
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be sent
