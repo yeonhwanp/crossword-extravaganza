@@ -44,8 +44,8 @@ public class Client {
     private static final int CANVAS_ADD = 50;
     private final String host;
     private final int port;
-    private String playerID;
-    private String matchID;
+    private String playerID = "";
+    private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
     // For the lock 
@@ -323,7 +323,7 @@ public class Client {
         lineCount++;
 
         // Set the player ID
-        if (chooseState.equals("new")) {
+        if (chooseState.equals("new") && playerID.equals("")) {
             playerID = lastInput.split(" ")[1];
         }
 

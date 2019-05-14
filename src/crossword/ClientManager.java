@@ -22,6 +22,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import crossword.Client.ClientState;
+
 public class ClientManager {
 
     /*
@@ -96,6 +98,32 @@ public class ClientManager {
         client.parseResponse(initialRequest, ""); // TODO check this line "" is ok?
         client.launchGameWindow();
         socketIn.close();
+
+        new Thread(() -> {
+            while (true) {
+                try {
+                    URL sendURL = null;
+                    if (client.getState() == ClientState.CHOOSE) {
+                        sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
+                    }
+                    else if (client.getState() == ClientState.PLAY) {
+                        sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getMatchID());
+                    }
+                    
+                    if (client.getState() == ClientState.CHOOSE || client.getState() == ClientState.PLAY) {
+                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+
+                        // Get the response into one big line then parse it
+                        String response = ClientManager.receiveResponse(responseBuffer);
+                        client.parseResponse(response, "");
+                        responseBuffer.close();
+                        client.repaint(); 
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     //        
@@ -169,18 +197,18 @@ public class ClientManager {
     //            }
     //        }).start();
 
-/**
- * Constructs the response into one big string, properly formatted with newlines like it should be.
- * @response hello
- * @throws IOException "hello"
- */
-public static String receiveResponse(BufferedReader response) throws IOException {
-    String fullString = "";
-    String line;
-    while ((line = response.readLine()) != null) {
-        fullString += line + "\n";
+    /**
+     * Constructs the response into one big string, properly formatted with newlines like it should be.
+     * @response hello
+     * @throws IOException "hello"
+     */
+    public static String receiveResponse(BufferedReader response) throws IOException {
+        String fullString = "";
+        String line;
+        while ((line = response.readLine()) != null) {
+            fullString += line + "\n";
+        }
+        return fullString;
     }
-    return fullString;
-}
 
 }
