@@ -1,14 +1,9 @@
 package crossword;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +88,7 @@ public class MatchTest {
      *      Word to challenge is same as word you are proposing
      *      Proposed word is incorrect length
      *      ID inserted does not exist
+     *      Word to challenge has not been entered yet
      *      
      *  
      * Test getMatchName()
@@ -107,6 +103,11 @@ public class MatchTest {
      *  not finished
      *      no moves made yet (this is untouched)
      *      this not untouched
+     *  if finished:
+     *      doesn't confirm any unconfirmed words
+     *      confirms unconfirmed words (all words are unconfirmed)
+     *      confirms unconfirmed words (some words are already confirmed)
+     *      
      * 
      * Test containsPlayer()
      *  contains player, does not contain
@@ -1133,6 +1134,32 @@ public class MatchTest {
  
     }
     
+    //covers challenge() invalid challenge 
+    //      word hasn't been entered yet
+    @Test
+    public void testChallengeNotEntered() {
+
+        List<WordTuple> words = new ArrayList<>();
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "cat", "DOWN");
+        words.add(firstWordTuple);
+        
+        Match currentMatch = new Match("Match name", "Match description", words);
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        
+        assertTrue(!currentMatch.challenge(yo, 1, "cat"));
+        
+        String expected = "3x11\n" + 
+                "##########?\n" + 
+                "##########?\n" +
+                "##########?\n" +
+                "1\n" + 
+                "0 10 DOWN 1 false false \n" + 
+                "hint\n";
+        assertEquals(expected, currentMatch.toString());
+ 
+    }
+    
     
     
     //////////////////////////////////////////////GET MATCH NAME TESTS////////////////////////////////////////////
@@ -1240,6 +1267,71 @@ public class MatchTest {
     }
     
     
+    
+    //covers isFinished()
+    //  doesn't confirm any unconfirmed words
+    @Test
+    public void testIsFinishedConfirmsNone() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        
+        currentMatch.tryInsert(yo, 2, "mab");
+        currentMatch.challenge(dude, 2, "hii");
+        currentMatch.tryInsert(yo, 1, "cat");
+        
+        assertTrue(currentMatch.isFinished());
+        assertEquals(2, currentMatch.getScore(yo));
+        assertEquals(-1, currentMatch.getScore(dude));
+        
+    }
+    
+    //covers isFinished()
+    //  confirms unconfirmed words (all words unconfirmed)
+    @Test
+    public void testIsFinishedConfirmsAll() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        
+        currentMatch.tryInsert(yo, 2, "mab");
+        currentMatch.tryInsert(yo, 1, "cat");
+        
+        assertTrue(currentMatch.isFinished());
+        assertEquals(2, currentMatch.getScore(yo));
+        assertEquals(0, currentMatch.getScore(dude));
+        
+    }
+    
+    //covers isFinished()
+    //  confirms unconfirmed words (some words unconfirmed)
+    @Test
+    public void testIsFinishedConfirmsSome() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        currentMatch.addPlayer(yo);
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        
+        currentMatch.tryInsert(yo, 2, "aaa");
+        currentMatch.challenge(dude, 2, "mab");
+        currentMatch.tryInsert(yo, 1, "cat");
+        
+        assertTrue(currentMatch.isFinished());
+        assertEquals(1, currentMatch.getScore(yo));
+        assertEquals(3, currentMatch.getScore(dude));
+        
+    }
+    
+    
+    
     //covers containsPlayer()
     //      contains player
     @Test
@@ -1279,7 +1371,7 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
         currentMatch.addPlayer(yo);
         
-        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+        assertEquals(yo, currentMatch.getOtherPlayer(dude));
     }
     
     //covers getOtherPlayer
@@ -1294,7 +1386,7 @@ public class MatchTest {
         currentMatch.addPlayer(yo);
         currentMatch.addPlayer(dude);
         
-        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+        assertEquals(yo, currentMatch.getOtherPlayer(dude));
     }
     
     
