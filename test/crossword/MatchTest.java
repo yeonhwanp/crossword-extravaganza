@@ -1,9 +1,14 @@
 package crossword;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +63,7 @@ public class MatchTest {
      * Test getScore()
      *  normal score only, challenge score only, both normal and challenge
      * 
-     * Test getChallengePoints
+     * Test getChallengePoints()
      *  has been incremented by two, has been decreased
      * 
      * Test tryInsert()
@@ -110,7 +115,14 @@ public class MatchTest {
      *  check 0th index player (pass in first index player as parameter)
      *  check first index player
      * 
-     * Methods oneDimensionOverlap and verticalHorizontalConsistent are fully covered within checkConsistency() partition
+     * 
+     * Test oneDimensionOverlap()
+     *  Does overlap, does not overlap
+     * 
+     * 
+     * Concurrency tests:
+     *      tryInsert: threads entering same word at same time, threads entering different word at same time
+     *      challenge: threads challenging different words at same time
      * 
      */
 
@@ -1286,6 +1298,156 @@ public class MatchTest {
     }
     
     
+    
+    
+    
+    
+    
+    
+    //covers concurrency for try method - different words
+    @Test
+    public void testTryInsertConcurrencyDifferent() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(yo, 1, "dod");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(dude, 2, "boa");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+        String expected = "3x3\n" + 
+                "#d#\n" + 
+                "boa\n" + 
+                "#d#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
+                "hint\n";
+        
+        assertEquals(expected, currentMatch.toString());
+        
+    }
+    
+    //covers concurrency for try method - same word
+    @Test
+    public void testTryInsertConcurrencySame() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(yo, 1, "aaa");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(dude, 2, "bbb");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+        String expected = "3x3\n" + 
+                "#a#\n" + 
+                "?a?\n" + 
+                "#a#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 false false \n" + 
+                "hint\n";
+        
+        String expected2 = "3x3\n" + 
+                "#?#\n" + 
+                "bbb\n" + 
+                "#?#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 false false \n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
+                "hint\n";
+        
+        assertTrue(expected.equals(currentMatch.toString()) || expected2.equals(currentMatch.toString()));
+        
+    }
+    
+   
+    
+    
+    //covers concurrency for challenge method - different words are challenged
+    //      one challenge is valid, the other becomes invalid
+    @Test
+    public void testChallengeConcurrencyDifferent() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        currentMatch.tryInsert(yo, 1, "bbb");
+        currentMatch.tryInsert(dude, 2, "dbb");
+        
+
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.challenge(yo, 2, "mab");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.challenge(dude, 1, "cat");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+       
+        assertTrue((currentMatch.getChallengePoints(yo) == 2 && currentMatch.getChallengePoints(dude) == 0) ||
+                (currentMatch.getChallengePoints(dude) == 2 && currentMatch.getChallengePoints(yo) == 0));
+        
+        
+    }
+    
+    
+    
     /**
      * Helper method to make a new match with two words, cat and map, that  overlap at letter 'a'.
      * @return match stated above
@@ -1301,9 +1463,7 @@ public class MatchTest {
         return currentMatch;
     }
     
-    
-    
-    
+
     
     @Test
     public void testAssertionsEnabled() {
