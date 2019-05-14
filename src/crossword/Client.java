@@ -387,6 +387,8 @@ public class Client {
      *  - play, update, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *  - play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
+     *  
+     *  Should only receive true/false when challenge. New should only be sent on initial CHOOSE/PLAY request. Otherwise, always update.
      */
     private synchronized void receivePlay(String[] response, String lastInput) {
         int lineCount = 0;
