@@ -1119,7 +1119,7 @@ public class Server {
     
     
     /**
-     * RECEIVES: watch request in the form of: watchBoard matchID
+     * RECEIVES: watch request in the form of: watchBoard playerID matchID
      * Wait until the board changes, and when it does, show the newly changed board to the client
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be sent
@@ -1135,7 +1135,10 @@ public class Server {
             // it will always start with the base path from server.createContext():
             final String base = exchange.getHttpContext().getPath();
             assert path.startsWith(base);
-            final String matchID = path.substring(base.length());
+            final String playerAndMatch = path.substring(base.length());
+            String[] ids = playerAndMatch.split("/");
+            final String playerID = ids[0];
+            final String matchID = ids[1];
             
             
             
@@ -1167,9 +1170,16 @@ public class Server {
                         
                         if (mapIDToWinners.containsKey(matchID)) {
                             
+                            Player currentPlayer = getPlayer(playerID);
+                            String otherPlayerID = matchToWatch.getOtherPlayer(currentPlayer);
+                            Player otherPlayer = getPlayer(otherPlayerID);
+                            
+                            
                             
                             String winnerID = mapIDToWinners.get(matchID);
-                            response = "show_score\n" + winnerID + "\n" + matchToWatch.toString();
+                            response = "show_score\n" + winnerID + "\n" + playerID + "\n" + matchToWatch.getScore(currentPlayer) + "\n" +
+                                    matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayerID + "\n" + matchToWatch.getScore(otherPlayer) + "\n" +
+                                    matchToWatch.getChallengePoints(otherPlayer);
                         }
                         
                         
