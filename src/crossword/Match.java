@@ -185,11 +185,11 @@ public class Match {
         
         assert checkSetEquality(new HashSet<>(words), new HashSet<>(idToWordMap.values()));
         
-        if(this.isGameStarted()) {
-            assert this.getNumberPlayers() == 2;
+        if(this.gameStarted) {
+            assert this.players.size() == 2;
         }
         else {
-            assert this.getNumberPlayers() <= 1;
+            assert this.players.size() <= 1;
         }
         
         assert checkSetEquality(scores.keySet(), new HashSet<>(players));
