@@ -175,7 +175,7 @@ public class Match {
      */
     private synchronized void checkRep() {
         assert matchName.matches("\"[^\"\r\n\t\\]*\"");
-        assert matchDescription.matches("\"([^\"\\r\\n\\\\]|'\\\\'[\\\\nrt])*\"");
+        assert matchDescription.matches("\"([^\"\r\n\\]|'\\'[\\nrt])*\"");
         assert rows >= 0;
         assert columns >= 0;
         
@@ -185,11 +185,11 @@ public class Match {
         
         assert checkSetEquality(new HashSet<>(words), new HashSet<>(idToWordMap.values()));
         
-        if(this.isGameStarted()) {
-            assert this.getNumberPlayers() == 2;
+        if(this.gameStarted) {
+            assert this.players.size() == 2;
         }
         else {
-            assert this.getNumberPlayers() <= 1;
+            assert this.players.size() <= 1;
         }
         
         assert checkSetEquality(scores.keySet(), new HashSet<>(players));
