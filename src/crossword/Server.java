@@ -523,7 +523,7 @@ public class Server {
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         out.print(response);
         out.flush();
-        System.out.println("sent back start, new game - client should now choose playerID");
+//        System.out.println("sent back start, new game - client should now choose playerID");
 
         // if you do not close the exchange, the response will not be sent!
         exchange.close();
@@ -575,7 +575,7 @@ public class Server {
             out.print(response);
             out.flush();
             
-            System.out.println("sent back choose, (new or try again), allMatches - client should now see all the available matches to choose");
+//            System.out.println("sent back choose, (new or try again), allMatches - client should now see all the available matches to choose");
 
             // if you do not close the exchange, the response will not be sent!
             exchange.close();
@@ -639,7 +639,7 @@ public class Server {
                 out.print(waitResponse);
                 out.flush();
                 exchange.close();
-                System.out.println("sent back wait, so server is waiting until another player joins match");
+//                System.out.println("sent back wait, so server is waiting until another player joins match");
                 
                 folderPath.notifyAll();
                 
@@ -718,7 +718,7 @@ public class Server {
             
             exchange.close();
             
-            System.out.println("sent back play, new, match, so the client should now see the match to play");
+//            System.out.println("sent back play, new, match, so the client should now see the match to play");
             
         }
         
@@ -782,7 +782,7 @@ public class Server {
                 final String validResponse = validTemporary;
                 out.print(validResponse);
                 out.flush();
-                System.out.println("sent back play, new , match, so client should now see the match that they just joined");
+//                System.out.println("sent back play, new , match, so client should now see the match that they just joined");
                 
                 folderPath.notifyAll();
     
@@ -792,8 +792,8 @@ public class Server {
                 final String invalidResponse = getChooseResponse("try again");
                 out.print(invalidResponse);
                 out.flush();
-                System.out.println("sent back choose, try again, allmatches. client should choose a valid match to start/play this time");
-                System.out.println("client should now see available matches to choose from");
+//                System.out.println("sent back choose, try again, allmatches. client should choose a valid match to start/play this time");
+//                System.out.println("client should now see available matches to choose from");
             }
      
             exchange.close();
@@ -850,7 +850,7 @@ public class Server {
                 out.print(response);
                 out.flush();
                 exchange.close();
-                System.out.println("sent choose, new, allmatchesclient should now see list of matches to choose from.");
+//                System.out.println("sent choose, new, allmatchesclient should now see list of matches to choose from.");
                 
                 folderPath.notifyAll();
 
@@ -863,42 +863,37 @@ public class Server {
                 
                 String finishedResponse = "show_score\n";
                 Match currentMatch = twoPlayerMatches.get(matchID);
-                Player winner = currentMatch.getOtherPlayer(quittingPlayer); //since you're quitting, the other player automatically wins!
-                String winnerID = winner.getID();
                 
-                twoPlayerMatches.remove(matchID);
-                finishedMatches.put(matchID, currentMatch);
-                mapIDToWinners.put(matchID, winnerID);
+                synchronized (currentMatch) {
                 
-//                System.out.println("aaaaaaa");
-                
-                synchronized (currentMatch) { //TODO RUN THIS BY WILLIAM!
+                    Player winner = currentMatch.getOtherPlayer(quittingPlayer); //since you're quitting, the other player automatically wins!
+                    String winnerID = winner.getID();
+                    
+                    twoPlayerMatches.remove(matchID);
+                    finishedMatches.put(matchID, currentMatch);
+                    mapIDToWinners.put(matchID, winnerID);
+                    
                     currentMatch.notifyAll();
+    
 
-                
-                
-//                System.out.println("first checkpoint");
-                
-                finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
-                        currentMatch.getChallengePoints(quittingPlayer) + "\n" + winnerID + "\n" + currentMatch.getScore(winner) + "\n" +
-                        currentMatch.getChallengePoints(winner);
-                final String finished = finishedResponse;
-                
-//                System.out.println("made it this far");
+                    
+                    finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
+                            currentMatch.getChallengePoints(quittingPlayer) + "\n" + winnerID + "\n" + currentMatch.getScore(winner) + "\n" +
+                            currentMatch.getChallengePoints(winner);
+                    final String finished = finishedResponse;
 
-                out.print(finished);
-                out.flush();
-                exchange.close();
-                System.out.println("sent showScore, score (includes match toString). so client should see the winner's playerID of the match");
+    
+                    out.print(finished);
+                    out.flush();
+                    exchange.close();
+//                    System.out.println("sent showScore, score (includes match toString). so client should see the winner's playerID of the match");  
                 
                 }
 
             } else if (gameState.equals("showScore")) {
                 exchange.close();
             }
-
         }
-        
     }
     
     /**
@@ -938,66 +933,65 @@ public class Server {
 
             if (twoPlayerMatches.containsKey(matchID)) {
                 Match currentMatch = twoPlayerMatches.get(matchID);
-                System.out.println(currentMatch);
                 
-                synchronized (currentMatch) {//TODO concurrency design
-                
-                Player currentPlayer = getPlayer(playerID);
-                
-                if (currentMatch.containsPlayer(currentPlayer)) {
-
-                    boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
-                    boolean matchFinished = currentMatch.isFinished();
-                   
-
-                    if (validTry && matchFinished) {
-                        
-                        Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
-//                        Player otherPlayer = getPlayer(otherPlayerID);
-                        
-                        String finishedResponse = "show_score\n";
-                        String winnerID = currentMatch.calculateWinner();
-                        
-                        twoPlayerMatches.remove(matchID);
-                        mapIDToWinners.put(matchID, winnerID);
-                        
-                        
-                        
-                        currentMatch.notifyAll();
-   
-                        
-//                        System.out.println("laaa");
-                        
-                        finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
-                                currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
-                                currentMatch.getChallengePoints(otherPlayer);
-                        final String finished = finishedResponse;
-
-                        out.print(finished);
-                        out.flush();
-                        exchange.close();
-                        System.out.println("sent showScore, score (includes match toString). client made a finishing move, so client should see winner");
-
-                    } else {
-                        
-                        Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
-//                        Player otherPlayer = getPlayer(otherPlayerID);
-
-                        String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n" + currentMatch.toString();
-                        ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
-                                otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
-                        
-                        final String ongoing = ongoingResponse;
-
-                        out.print(ongoing);
-                        out.flush();
-                        exchange.close();
-                        
-                        System.out.println("sent play, true/false, match. client made a valid/invalid move, so choose another move");
-
+                synchronized (currentMatch) {
+                    
+                    Player currentPlayer = getPlayer(playerID);
+                    
+                    if (currentMatch.containsPlayer(currentPlayer)) {
+    
+                        boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
+                        boolean matchFinished = currentMatch.isFinished();
+                       
+    
+                        if (validTry && matchFinished) {
+                            
+                            Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+    //                        Player otherPlayer = getPlayer(otherPlayerID);
+                            
+                            String finishedResponse = "show_score\n";
+                            String winnerID = currentMatch.calculateWinner();
+                            
+                            twoPlayerMatches.remove(matchID);
+                            mapIDToWinners.put(matchID, winnerID);
+                            
+                            
+                            
+                            currentMatch.notifyAll();
+       
+                            
+    //                        System.out.println("laaa");
+                            
+                            finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
+                                    currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
+                                    currentMatch.getChallengePoints(otherPlayer);
+                            final String finished = finishedResponse;
+    
+                            out.print(finished);
+                            out.flush();
+                            exchange.close();
+//                            System.out.println("sent showScore, score (includes match toString). client made a finishing move, so client should see winner");
+    
+                        } else {
+                            
+                            Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+    //                        Player otherPlayer = getPlayer(otherPlayerID);
+    
+                            String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n" + currentMatch.toString();
+                            ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
+                                    otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
+                            
+                            final String ongoing = ongoingResponse;
+    
+                            out.print(ongoing);
+                            out.flush();
+                            exchange.close();
+                            
+//                            System.out.println("sent play, true/false, match. client made a valid/invalid move, so choose another move");
+    
+                        }
+    
                     }
-
-                }
                 }
             }
         }
@@ -1044,56 +1038,58 @@ public class Server {
 
             if (twoPlayerMatches.containsKey(matchID)) {
                 Match currentMatch = twoPlayerMatches.get(matchID);
-                Player currentPlayer = getPlayer(playerID);
-                if (currentMatch.containsPlayer(currentPlayer)) {
-
-                    boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
-                    boolean matchFinished = currentMatch.isFinished();
-
-                    if (validChallenge && matchFinished) {
-                        
-                        
-                        Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
-//                        Player otherPlayer = getPlayer(otherPlayerID);
-                        
-                        String finishedResponse = "show_score\n";
-                        String winnerID = currentMatch.calculateWinner();
-                        
-                        twoPlayerMatches.remove(matchID);
-                        mapIDToWinners.put(matchID, winnerID);
-                        
-                        synchronized (currentMatch) { //TODO concurrency design
+                
+                synchronized (currentMatch) {
+                
+                    Player currentPlayer = getPlayer(playerID);
+                    if (currentMatch.containsPlayer(currentPlayer)) {
+    
+                        boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
+                        boolean matchFinished = currentMatch.isFinished();
+    
+                        if (validChallenge && matchFinished) {
+                            
+                            
+                            Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+    //                        Player otherPlayer = getPlayer(otherPlayerID);
+                            
+                            String finishedResponse = "show_score\n";
+                            String winnerID = currentMatch.calculateWinner();
+                            
+                            twoPlayerMatches.remove(matchID);
+                            mapIDToWinners.put(matchID, winnerID);
+                            
                             currentMatch.notifyAll();
+                            
+                            finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
+                                    currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
+                                    currentMatch.getChallengePoints(otherPlayer);
+                            final String finished = finishedResponse;
+    
+                            out.print(finished);
+                            out.flush();
+                            exchange.close();
+//                            System.out.println("sent show_score, score, match. client made a valid challenge that finished the game, should now see score.");
+    
+                        } else {
+                            
+                            Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+    //                        Player otherPlayer = getPlayer(otherPlayerID);
+    
+                            String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n" + currentMatch.toString();
+                            ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
+                                    otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
+                            
+                            final String ongoing = ongoingResponse;
+    
+                            out.print(ongoing);
+                            out.flush();
+                            exchange.close();
+//                            System.out.println("sent play, true/false, match. client made a valid or invalid challenge, and should now see board again. ");
+    
                         }
-                        
-                        finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
-                                currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
-                                currentMatch.getChallengePoints(otherPlayer);
-                        final String finished = finishedResponse;
-
-                        out.print(finished);
-                        out.flush();
-                        exchange.close();
-                        System.out.println("sent show_score, score, match. client made a valid challenge that finished the game, should now see score.");
-
-                    } else {
-                        
-                        Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
-//                        Player otherPlayer = getPlayer(otherPlayerID);
-
-                        String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n" + currentMatch.toString();
-                        ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
-                                otherPlayer.getID() + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
-                        
-                        final String ongoing = ongoingResponse;
-
-                        out.print(ongoing);
-                        out.flush();
-                        exchange.close();
-                        System.out.println("sent play, true/false, match. client made a valid or invalid challenge, and should now see board again. ");
-
+    
                     }
-
                 }
             }
         }
@@ -1131,7 +1127,7 @@ public class Server {
             out.print(response);
             
             out.flush();
-            System.out.println("sent over updated available matches (it just changed)");
+//            System.out.println("sent over updated available matches (it just changed)");
 
             // if you do not close the exchange, the response will not be sent!
             exchange.close();
@@ -1195,20 +1191,13 @@ public class Server {
                             
                             Player currentPlayer = getPlayer(playerID);
                             Player otherPlayer = matchToWatch.getOtherPlayer(currentPlayer);
-//                            Player otherPlayer = getPlayer(otherPlayerID);
-                            
-                            System.out.println("current: " + currentPlayer);
-                            System.out.println("other: " + otherPlayer);
-                            
-                            System.out.println(matchToWatch.toString());
-                            
+
                             
                             String winnerID = mapIDToWinners.get(matchID);
                             response = "show_score\n" + winnerID + "\n" + playerID + "\n" + matchToWatch.getScore(currentPlayer) + "\n" +
                                     matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n" + matchToWatch.getScore(otherPlayer) + "\n" +
                                     matchToWatch.getChallengePoints(otherPlayer);
                             
-                            System.out.println("wtf: " + matchToWatch.getScore(otherPlayer));
                         }
                         
                         
@@ -1221,7 +1210,7 @@ public class Server {
                         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
                         out.print(response);
                         out.flush();
-                        System.out.println("sent over updated board (it just changed by someone making a move), or sent over automatic winner");
+//                        System.out.println("sent over updated board (it just changed by someone making a move), or sent over automatic winner");
             
                         // if you do not close the exchange, the response will not be sent!
                         exchange.close();
