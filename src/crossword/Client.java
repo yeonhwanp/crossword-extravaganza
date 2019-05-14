@@ -75,8 +75,6 @@ public class Client {
      * Check for proper client representation.
      */
     private void checkRep() {
-        assert playerID.matches("^[a-zA-Z0-9]+$");
-        assert matchID.matches("^[a-zA-Z0-9]+$");
     }
 
     /**
