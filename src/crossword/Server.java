@@ -841,7 +841,8 @@ public class Server {
                 exchange.close();
             } else if (gameState.equals("wait")) {
 
-                String matchID = states[1];
+                String matchID = states[2];
+                
                 mapIDToDescription.remove(matchID);
                 mapIDToMatch.remove(matchID);
 
@@ -1093,6 +1094,7 @@ public class Server {
 
             while (availableMatches.equals(getChooseResponse("new"))) {
                 folderPath.wait();
+                System.out.println("hi");
             }
             
             response = getChooseResponse("new");
