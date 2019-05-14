@@ -117,6 +117,7 @@ public class ClientManager {
 
                         // Send GET request
                         URL test = new URL("http://" + host + ":" + port + extension);
+                        System.out.println("DEBUG: "+test);
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
 
                         // Get the response into one big line then parse it
@@ -204,7 +205,6 @@ public class ClientManager {
     //                canvas.repaint();
     //            }
     //        }).start();
-}
 
 /**
  * Constructs the response into one big string, properly formatted with newlines like it should be.
