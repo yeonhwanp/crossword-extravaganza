@@ -68,7 +68,7 @@ public class ClientManager {
      * @throws UnknownHostException if the server/socket is unknown host.
      * @throws IOException if we cannot connect with URL, or by socket.
      */
-    private synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
+    private void connectToServer(String[] args) throws UnknownHostException, IOException {
 
         // ========= PARSING LAUNCH ARGUMENTS ========= //
         final Queue<String> arguments = new LinkedList<>(List.of(args));
@@ -101,29 +101,49 @@ public class ClientManager {
 
         new Thread(() -> {
             while (true) {
+                    try {
+                        if (client.getState() == ClientState.CHOOSE) {
+                            URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
+                            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                            // Get the response into one big line then parse it
+                            String response = receiveResponse(responseBuffer);
+                            synchronized(client) {
+                                if (client.getState() == ClientState.CHOOSE) {
+                                    client.parseResponse(response, "");
+                                    responseBuffer.close();
+                                    client.repaint();  
+                                }
+                            }
+                            
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }).start();
+        
+        new Thread(() -> {
+            while (true) {
                 try {
-                    URL sendURL = null;
-                    if (client.getState() == ClientState.CHOOSE) {
-                        sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
-                    }
-                    else if (client.getState() == ClientState.PLAY) {
-                        sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getMatchID());
-                    }
-                    
-                    if (client.getState() == ClientState.CHOOSE || client.getState() == ClientState.PLAY) {
+                    if (client.getState() == ClientState.PLAY) {
+                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getMatchID());
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
-
                         // Get the response into one big line then parse it
-                        String response = ClientManager.receiveResponse(responseBuffer);
-                        client.parseResponse(response, "");
-                        responseBuffer.close();
-                        client.repaint(); 
+                        String response = receiveResponse(responseBuffer);
+                        synchronized(client) {
+                            if (client.getState() == ClientState.PLAY) {
+                                client.parseResponse(response, "");
+                                responseBuffer.close();
+                                client.repaint();  
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
+        
     }
 
     //        

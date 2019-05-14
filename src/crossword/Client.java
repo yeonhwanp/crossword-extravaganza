@@ -110,7 +110,7 @@ public class Client {
             String response = ClientManager.receiveResponse(responseBuffer);
             System.out.println("RESPONSE");
             System.out.println("-----------------------");
-            System.out.println(test);
+            System.out.println(response);
             System.out.println("-----------------------");
             parseResponse(response, userInput);
             responseBuffer.close();
@@ -367,7 +367,7 @@ public class Client {
             this.repaint(); 
         }
 
-        // Send back response
+        // Send back response (TODO potentially not threadsafe getUserID() and getMatchID())
         URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getUserID() + "/" + getMatchID());
         BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
         // Get the response into one big line then parse it
