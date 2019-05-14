@@ -354,7 +354,7 @@ public class Client {
         }
         
         // Send back response
-        URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getMatchID());
+        URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getUserID() + "/" + getMatchID());
         BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
 
         // Get the response into one big line then parse it
