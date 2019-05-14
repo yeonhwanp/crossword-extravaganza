@@ -1115,7 +1115,8 @@ public class Server {
                         
                         String currentMatchState = matchToWatch.toString();
             
-                        while (currentMatchState.equals(matchToWatch.toString()) || !mapIDToWinners.containsKey(matchID)) {
+//                        while (currentMatchState.equals(matchToWatch.toString()) || !mapIDToWinners.containsKey(matchID)) {
+                        while (currentMatchState.equals(matchToWatch.toString())) {
                             try {
                                 matchToWatch.wait();
                             } catch (InterruptedException e) {
