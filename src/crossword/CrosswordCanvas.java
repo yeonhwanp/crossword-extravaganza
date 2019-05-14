@@ -169,7 +169,7 @@ class CrosswordCanvas extends JComponent {
         // was.
         Color oldColor = g.getColor();
         g.setColor(new Color(100, 0, 0));
-        g.drawString(s, originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        g.drawString(s, originX + 400, originY + line * fm.getAscent() * 6 / 5);
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
@@ -352,25 +352,31 @@ class CrosswordCanvas extends JComponent {
         // This is for the START state
         if (state == ClientState.START) {
             if (request.equals("new game")) {
-                printlnCenterBig("Welcome to Crossword Extravaganza!", g);
-                printlnCenterBig("Please enter a user ID with only: ALPHANUMERICS", g);
+                printStartInstructions(g);
             }
-            else if (request.equals("try again")) {
-                printlnCenterBig("That was an invalid request or the ID already exists.", g);
-                printlnCenterBig("Try again!", g);
+            else if (request.equals("try again")) {     
+                printStartInstructions(g);
+                
+                line += 10;
+                printlnCenterBold("That was an invalid request or the ID already exists.", g);
+                printlnCenterBold("Try again!", g);
             }
         }
         else if (state == ClientState.CHOOSE) {
             if (request.equals("new")) {
+                printChooseInstructions(g);
                 printMatchList(g);
             }
             else if (request.equals("try again")) {
-                printlnCenterBig("That was an invalid request. Try again!", g);
+                printChooseInstructions(g);
                 printMatchList(g);
+                printlnCenterBold("That was an invalid request. Try again!", g);
             }
         }
         else if (state == ClientState.WAIT) {
-            printlnCenterBig("Waiting for other player to join...", g);
+            printlnCenterBold("Waiting for other player to join...", g);
+            ++line;
+            printlnCenterBig("Enter EXIT to go back to the lobby.", g);
         }
         else if (state == ClientState.PLAY) {
             //... Conditionals based on PLAY stuff ...// 
@@ -379,6 +385,32 @@ class CrosswordCanvas extends JComponent {
         else if (state == ClientState.SHOW_SCORE) {
             printScores(g);
         }
+    }
+    
+    private void printStartInstructions(Graphics g) {
+        printlnCenterBig("Welcome to Crossword Extravaganza!", g);
+        ++line;
+        printlnCenterBig("Interact with the UI by entering text then clicking on the ENTER button.", g);
+        printlnCenterBig("Words in ALLCAPS should be entered as-is.", g);
+        printlnCenterBig("Otherwise, follow the instructions on the screen.", g);
+        ++line;
+        printlnCenterBold("Please enter into the textbox: START player_ID", g);
+        printlnCenterBig("player_ID should only be composed of alphanumerics.", g);
+    }
+    
+    private void printChooseInstructions(Graphics g) {
+        printlnCenterBold("Valid Commands:", g);
+        ++line;
+        printlnCenter("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
+        ++line;
+        printlnCenter("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be a unique alphanumeric identifier", g);
+        ++line;
+        printlnCenter("EXIT", g);
+        line -= 2;
+    }
+    
+    private void printWaitInsturctions(Graphics g) {
+        
     }
     
     private void printScores(Graphics g) {
@@ -411,7 +443,7 @@ class CrosswordCanvas extends JComponent {
         
         // Printing valid puzzles
         printlnCenterBold("Valid Puzzles To Choose From:", g);
-        line += 1;
+        line += 6;
         int validPuzzleCount = Integer.valueOf(lines[lineCounter]);
         lineCounter++;
         for (int i = 0; i < validPuzzleCount; i++) {
@@ -420,9 +452,10 @@ class CrosswordCanvas extends JComponent {
             lineCounter++;
         }
         
+        line -= 5;
         // Printing valid Matches
         printlnCenterBold("Valid Matches To Connect To:", g);
-        line += 5; // To space out the title and the list
+        line += 10; // To space out the title and the list
         int validMatchCount = Integer.valueOf(lines[lineCounter]);
         lineCounter++;
         for (int i = 0; i < validMatchCount; i++) {
@@ -459,12 +492,14 @@ class CrosswordCanvas extends JComponent {
         // Put in IDs 
         int numCount = 2 * Integer.valueOf(lines[lineCounter]);
         lineCounter++;
-        for (; lineCounter < Integer.valueOf(dimensions[0]) + numCount + 1;) {
+        while (lineCounter < Integer.valueOf(dimensions[0]) + numCount + 1) {
             String wordString = "";
             
             // Each word is formatted with two lines. The first line has details and second has hints.
             // Add ID and Hint from the two lines then print onto the board
             for (int i = 0; i < 2; i++) {
+                
+                // First line
                 if (i == 0) {
                     String[] split = lines[lineCounter].split(" ");
                     if (split[2].equals("ACROSS")) {
@@ -473,12 +508,14 @@ class CrosswordCanvas extends JComponent {
                     else if (split[2].equals("DOWN")) {
                         verticalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
-                    wordString += split[3] + ". ";
+                    wordString += "ID: " + split[3];
                 }
+                // Second line
                 else if (i == 1) {
-                    wordString += " " + lines[lineCounter].substring(1, lines[lineCounter].length()-1);
+                    wordString += "     Hint: " + lines[lineCounter].substring(1, lines[lineCounter].length()-1);
                 }
                 lineCounter++;
+                
             }
             println(wordString, g);
         }

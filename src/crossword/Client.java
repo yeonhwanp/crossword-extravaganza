@@ -373,6 +373,8 @@ public class Client {
         // Get the response into one big line then parse it
         String joinedResponse = ClientManager.receiveResponse(joinedBuffer);
 
+        
+        // MAKE SURE YOU DIDNT CHANGE STATE
         synchronized (thisLock) {
             this.parseResponse(joinedResponse, lastInput);
             joinedBuffer.close(); 
@@ -381,10 +383,10 @@ public class Client {
 
     /**
      * RECEIVES:
-     *  - play, new, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
-     *  - play, update, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
-     *  - play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
-     *  - play, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
+     *  - play, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - play, update, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
+     *  - play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      */
     private synchronized void receivePlay(String[] response, String lastInput) {
         int lineCount = 0;
