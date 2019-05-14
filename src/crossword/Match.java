@@ -175,7 +175,7 @@ public class Match {
      */
     private synchronized void checkRep() {
         assert matchName.matches("\"[^\"\r\n\t\\]*\"");
-        assert matchDescription.matches("\"([^\"\\r\\n\\\\]|'\\\\'[\\\\nrt])*\"");
+        assert matchDescription.matches("\"([^\"\r\n\\]|'\\'[\\nrt])*\"");
         assert rows >= 0;
         assert columns >= 0;
         
