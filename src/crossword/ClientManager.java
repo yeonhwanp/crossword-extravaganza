@@ -92,14 +92,15 @@ public class ClientManager {
         client.launchGameWindow();
         socketIn.close();
 
+        // watch match list
         new Thread(() -> {
             while (true) {
                 try {
                     if (client.getState() == ClientState.CHOOSE) {
-                        URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
-                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                        final URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
+                        final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                         // Get the response into one big line then parse it
-                        String response = receiveResponse(responseBuffer);
+                        final String response = receiveResponse(responseBuffer);
                         synchronized(client) {
                             if (client.getState() == ClientState.CHOOSE) {
                                 client.parseResponse(response, "");
@@ -115,14 +116,15 @@ public class ClientManager {
             }
         }).start();
 
+        // watch board
         new Thread(() -> {
             while (true) {
                 try {
                     if (client.getState() == ClientState.PLAY) {
-                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getUserID() + "/" + client.getMatchID());
-                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                        final URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getUserID() + "/" + client.getMatchID());
+                        final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                         // Get the response into one big line then parse it
-                        String response = receiveResponse(responseBuffer);
+                        final String response = receiveResponse(responseBuffer);
                         synchronized(client) {
                             if (client.getState() == ClientState.PLAY) {
                                 client.parseResponse(response, "");
@@ -144,7 +146,7 @@ public class ClientManager {
      * @return the constructed response in a string form, with newlines kept
      * @throws IOException if the response line cannot be read
      */
-    public static String receiveResponse(BufferedReader response) throws IOException {
+    public static String receiveResponse(final BufferedReader response) throws IOException {
         String fullString = "";
         String line;
         while ((line = response.readLine()) != null) {
