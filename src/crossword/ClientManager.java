@@ -93,49 +93,9 @@ public class ClientManager {
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
         String initialRequest = receiveResponse(socketIn);
 
-        client.parseResponse(initialRequest);
+        client.parseResponse(initialRequest, ""); // TODO check this line "" is ok?
         client.launchGameWindow();
         socketIn.close();
-
-        new Thread (() -> {
-            while (true) {
-                synchronized(client) {
-
-                    // Waiting for button press to send message
-                    try {
-                        client.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Sending URL stuffs
-                    try {
-                        String userInput = client.getUserInput();
-                        String extension = client.parseUserInput(userInput);
-
-                        // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
-
-                        // Send GET request
-                        URL test = new URL("http://" + host + ":" + port + extension);
-                        System.out.println("-----------------------");
-                        System.out.println(test);
-                        System.out.println("-----------------------");
-                        BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-
-                        // Get the response into one big line then parse it
-                        String response = receiveResponse(responseBuffer);
-                        System.out.println("RESPONSE: " + response);
-                        client.parseResponse(response);
-                        responseBuffer.close();
-
-                        client.repaint();
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
     }
 
     //        
@@ -211,6 +171,8 @@ public class ClientManager {
 
 /**
  * Constructs the response into one big string, properly formatted with newlines like it should be.
+ * @response hello
+ * @throws IOException "hello"
  */
 public static String receiveResponse(BufferedReader response) throws IOException {
     String fullString = "";
