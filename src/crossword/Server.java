@@ -71,18 +71,20 @@ public class Server {
     private final Map<String, String> mapIDToDescription;
     private final Map<String, Match> mapIDToMatch;
     private final Map<String, Match> twoPlayerMatches;
+    private final Map<String, String> mapIDToWinners;
     
     
     
     /*
      * Abstraction Function:
-     * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches) =
+     * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches, mapIDToWinners) =
      *  Server that is played on server, using path folderPath to the folder to read puzzles from. Puzzles that are valid
      *  puzzles (according to project handout) have IDs in validPuzzleNames. All the players that are playing on this server
      *  have their identifiers stored in allPlayers. The server contains a map mapIDToDescription mapping match ID's to the match description,
      *  where these matches only have one player and are waiting for another. The server also has a map mapIDToMatch
      *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
      *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
+     *  Any matches where a player has forfeited has its map ID in mapIDToWinner, where values are the player who didn't forfeit
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
@@ -148,8 +150,8 @@ public class Server {
         this.allPlayers = new HashSet<>();
         this.mapIDToDescription = new HashMap<>();
         this.mapIDToMatch = new HashMap<>();
-        
         this.twoPlayerMatches = new HashMap<>();
+        this.mapIDToWinners = new HashMap<>();
 
         // handle concurrent requests with multiple threads
         server.setExecutor(Executors.newCachedThreadPool());
@@ -850,8 +852,9 @@ public class Server {
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
                 
-                
                 twoPlayerMatches.remove(matchID);
+//                String automaticWinner = currentMatch.getOtherPlayer(player); //TODO TELL BRIAN
+                currentMatch.notifyAll();
                 
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
                 final String finished = finishedResponse;
@@ -999,7 +1002,8 @@ public class Server {
 
                     if (validChallenge && matchFinished) {
                         String finishedResponse = "show score\n";
-                        // finishedResponse += currentMatch.getMatchScore();
+                        String winnerID = currentMatch.calculateWinner();
+                        finishedResponse += winnerID + "\n" + currentMatch.toString();
                         final String finished = finishedResponse;
 
                         out.print(finished);
@@ -1109,7 +1113,7 @@ public class Server {
                         
                         String currentMatchState = matchToWatch.toString();
             
-                        while (currentMatchState.equals(matchToWatch.toString())) {
+                        while (currentMatchState.equals(matchToWatch.toString()) || !mapIDToWinners.containsKey(matchID)) {
                             try {
                                 matchToWatch.wait();
                             } catch (InterruptedException e) {
@@ -1117,15 +1121,23 @@ public class Server {
                             }
                         }
                         
-                        response = "play\nupdate\n" + matchToWatch.toString();
+                        if (mapIDToWinners.containsKey(matchID)) {
+                            
+                            
+                            String winnerID = mapIDToWinners.get(matchID);
+                            response = "show score\n" + winnerID + "\n" + matchToWatch.toString();
+                        }
                         
+                        else {
+                            response = "play\nupdate\n" + matchToWatch.toString();
+                        }
             
                         // write the response to the output stream using UTF-8 character encoding
                         OutputStream body = exchange.getResponseBody();
                         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
                         out.print(response);
                         out.flush();
-                        System.out.println("sent over updated board (it just changed by someone making a move)");
+                        System.out.println("sent over updated board (it just changed by someone making a move), or sent over automatic winner");
             
                         // if you do not close the exchange, the response will not be sent!
                         exchange.close();
