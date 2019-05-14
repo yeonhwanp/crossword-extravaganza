@@ -285,7 +285,9 @@ public class Client {
             receiveEnd(rest);
             break;
         default:
-            System.out.println(splitResponse[0]);
+            //TODO
+            System.out.println(splitResponse[0]); //Piazza says that if they enter incorrect command, project spec
+                                // is unspecified. However, they said we should still give the user a human-readable message.
             throw new RuntimeException("Should never reach here");
         }
     }

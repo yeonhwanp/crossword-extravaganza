@@ -556,12 +556,12 @@ public class Match {
     
     
     /**
-     * Get the other player string (identifier) that is currently playing, where the other player is the player that is NOT the
+     * Get the other player that is currently playing, where the other player is the player that is NOT the
      * passed in player. It is required that this match has two players (alternatively, the game has started)
      * @param player player to match player against
-     * @return other player's identifier that does not match player
+     * @return other player that does not match player
      */
-    public synchronized String getOtherPlayer(Player player) {
+    public synchronized Player getOtherPlayer(Player player) {
         
         this.notifyAll();
         checkRep();
@@ -569,10 +569,10 @@ public class Match {
         assert this.gameIsStarted();
         
         if (players.get(0).equals(player)) {
-            return players.get(1).getID();
+            return players.get(1);
         }
         else {
-            return players.get(0).getID();
+            return players.get(0);
         }
         
     }
