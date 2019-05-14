@@ -812,7 +812,7 @@ public class Server {
      *      - SEND: choose, "new", allMatches
      *   ELSE IF gameState == play:
      *      - Terminate game
-     *      - SEND: show score, score
+     *      - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      *   ELSE IF gameState == showScore:
      *      - Close connection
      * @param exchange exchange to communicate with client
@@ -860,7 +860,7 @@ public class Server {
                 
                 Player quittingPlayer = getPlayer(playerID);
                 
-                String finishedResponse = "show score\n";
+                String finishedResponse = "show_score\n";
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
                 
@@ -870,11 +870,16 @@ public class Server {
                 mapIDToWinners.put(matchID, automaticWinner);
                 
                 
-                synchronized (currentMatch) {
+                synchronized (currentMatch) { //TODO RUN THIS BY WILLIAM!
                     currentMatch.notifyAll();
                 }
                 
-                finishedResponse += winnerID + "\n" + currentMatch.toString();
+                String otherPlayerID = currentMatch.getOtherPlayer(quittingPlayer);
+                Player otherPlayer = getPlayer(otherPlayerID);
+                
+                finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
+                        currentMatch.getChallengePoints(quittingPlayer) + "\n" + otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
+                        currentMatch.getChallengePoints(otherPlayer);
                 final String finished = finishedResponse;
 
                 out.print(finished);
@@ -898,7 +903,7 @@ public class Server {
      * IF VALID REQUEST -> Ongoing (game logic):
      *          - SEND: play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * IF VALID_REQUEST -> Finish (game logic):
-     *     - SEND: show score, winner, board
+     *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF INVALID (game logic):
      *     - SEND: STATE, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * @param exchange exchange to communicate with client
@@ -939,9 +944,14 @@ public class Server {
                         twoPlayerMatches.remove(matchID);
                         finishedMatches.put(matchID, currentMatch);
                         
-                        String finishedResponse = "show score\n";
+                        String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
+                        Player otherPlayer = getPlayer(otherPlayerID);
+                        
+                        String finishedResponse = "show_score\n";
                         String winnerID = currentMatch.calculateWinner();
-                        finishedResponse += winnerID + "\n" + currentMatch.toString();
+                        finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
+                                currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
+                                currentMatch.getChallengePoints(otherPlayer);
                         final String finished = finishedResponse;
 
                         out.print(finished);
@@ -984,7 +994,7 @@ public class Server {
      * IF VALID CHALLENGE -> Ongoing (game logic):
      *          - SEND: play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * IF VALID_CHALLENGE -> Finish (game logic):
-     *     - SEND: show score, winner, board
+     *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF FAILED_CHALLENGE (game logic):
      *     - SEND: play, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * @param exchange exchange to communicate with client
@@ -1024,9 +1034,14 @@ public class Server {
                         twoPlayerMatches.remove(matchID);
                         finishedMatches.put(matchID, currentMatch);
                         
-                        String finishedResponse = "show score\n";
+                        String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
+                        Player otherPlayer = getPlayer(otherPlayerID);
+                        
+                        String finishedResponse = "show_score\n";
                         String winnerID = currentMatch.calculateWinner();
-                        finishedResponse += winnerID + "\n" + currentMatch.toString();
+                        finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" +
+                                currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" +
+                                currentMatch.getChallengePoints(otherPlayer);
                         final String finished = finishedResponse;
 
                         out.print(finished);
@@ -1075,8 +1090,6 @@ public class Server {
             exchange.sendResponseHeaders(VALID, 0);
             
             String availableMatches = getChooseResponse("new");
-            
-            System.out.println(availableMatches);
 
             while (availableMatches.equals(getChooseResponse("new"))) {
                 folderPath.wait();
