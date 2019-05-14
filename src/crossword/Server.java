@@ -151,6 +151,7 @@ public class Server {
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
         this.folderPath = folderPath;
         this.allPlayers = new HashSet<>();
+        this.validPuzzleNames = new HashSet<>();
         this.mapIDToDescription = new HashMap<>();
         this.mapIDToMatch = new HashMap<>();
         this.twoPlayerMatches = new HashMap<>();
