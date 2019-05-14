@@ -163,7 +163,7 @@ public class Match {
         checkRep();
     }
     
-    private synchronized boolean isGameStarted() {
+    private synchronized boolean gameIsStarted() {
         this.notifyAll();
         checkRep();
         
@@ -492,7 +492,8 @@ public class Match {
     
     /**
      * Determines if this current match is finished, where finished is defined by project handout rules
-     * @return true iff match is finished
+     * If the current match is finished, then it sets all words with owners to be confirmed and updates the scores of the players accordingly
+     * @return true iff match is finished (and all words with owners 
      */
     public synchronized boolean isFinished() {
         for(Word word : this.words) {
@@ -503,6 +504,16 @@ public class Match {
                 checkRep();
                 
                 return false;
+            }
+        }
+        
+        // at this point, we know that the match is done for sure, so we confirm all unconfirmed words and update the score
+        
+        for(Word word : this.words) {
+            if(word.hasOwner() && !word.isConfirmed()) {
+                word.setConfirmed();
+                final int previousScore = scores.get(word.getOwner());
+                scores.put(word.getOwner(), previousScore+1);
             }
         }
         
@@ -555,6 +566,8 @@ public class Match {
         
         this.notifyAll();
         checkRep();
+        
+        assert this.gameIsStarted();
         
         if (players.get(0).equals(player)) {
             return players.get(1).getID();
