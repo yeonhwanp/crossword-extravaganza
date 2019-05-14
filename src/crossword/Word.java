@@ -74,7 +74,7 @@ public class Word {
     
     
     /**
-     * TODO fix this up
+     * Check the rep invariant for Word
      */
     private void checkRep() {
         assert this.startRow >= 0 && this.startCol >= 0;

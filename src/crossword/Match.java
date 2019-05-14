@@ -15,36 +15,15 @@ import crossword.Cell.Exist;
  */
 public class Match {
     
-    // Rep: Map<String ID, Player player>
-    //      Map<Player player, int score>
-    //      Map<Player player, int challengePts>
-    //      Cell[][] board
-    //      Map<String ID, Word word> words
-    //      State state
-    
-    // Methods: decreaseChallenge()
-    //          increaseChallenge()
-    //          incrementScore()
-    //          getState()
-    //          checkValidInsert()
-    //          insertWord()
-    //          checkValidChallenge()
-    //          challenge()
-    //          toString() [Need this in this implementation to send over the server]
-    
-    // Handlers: tryWord()
-    //           challengeWord()
-    //           exit()
-    //           watch()
-    // These handlers should all return the updated board after completion
-    
     // Abstraction function:
-    //    AF(matchName, matchDescription, words, gameBoard, players, scores, challengePts, state, rows, columns) = 
+    //    AF(matchName, matchDescription, words, idToWordMap, gameBoard, rows, columns, players, scores, challengePts, gameStarted) = 
     //      A [rows x columns] crossword match with the name & description matchName/matchDescription respectively and a board with
     //      contents specified by gameBoard and words -- players, scores, challengePts represent the players and their respective
-    //      points that they've accumulated throughout the game. Finally, the state represents the state of the match
-    //      as specified in the final project handout.
-    // Representation invariant:
+    //      points that they've accumulated throughout the game, so we have that:
+    //      (scores.get(i) is the number of correct words entered by player i, challengePts is # challenge points the player i has).
+    //      We also have that the game is started if and only if gameStarted is true.
+    
+    // Rep invariant: 
     //    matchName cannot contain newlines, or tabs
     //    rows >= 0 && col >= 0
     //    ids in idToWordMap are >= 1, unique, and increasingly sequential.
@@ -53,6 +32,7 @@ public class Match {
     //    scores.keySet().size() == 2
     //    challengePts.keySet().size() == 2
     //    same players in players, scores, and challengePts
+    //    if gameStarted is true, must have two players, otherwise must have at most 1 player
     //    
     //
     // Safety from rep exposure:
@@ -77,7 +57,7 @@ public class Match {
     private final List<Player> players;
     private final Map<Player, Integer> scores;
     private final Map<Player, Integer> challengePts;
-//    private GameState state;
+    private boolean gameStarted;
     
     /**
      * Constructor for the Match object
@@ -153,6 +133,13 @@ public class Match {
         players.add(player);
         scores.put(player, 0);
         challengePts.put(player, 0);
+        
+        if(players.size() == 2) {
+            this.startGame();
+        }
+        
+        this.notifyAll();
+        checkRep();
     }
     
     /**
@@ -160,16 +147,35 @@ public class Match {
      * @return number of current players.
      */
     public synchronized int getNumberPlayers() {
+        this.notifyAll();
+        checkRep();
+        
         return players.size();
     }
     
+    /**
+     * Start the game.
+     */
+    private synchronized void startGame() {
+        this.gameStarted = true;
+        
+        this.notifyAll();
+        checkRep();
+    }
+    
+    private synchronized boolean isGameStarted() {
+        this.notifyAll();
+        checkRep();
+        
+        return this.gameStarted;
+    }
     
     /**
-     * Check for valid match rep
-     * TODO fix this up, include some stuff for checking match description and name
+     * Check for valid match rep invariant
      */
     private synchronized void checkRep() {
-//        assert matchName.matches("\" [^\"\r\n\t\\]* \"");
+        assert matchName.matches("\"[^\"\r\n\t\\]*\"");
+        assert matchDescription.matches("\"([^\"\\r\\n\\\\] | '\\\\' [\\\\nrt] )*\"");
         assert rows >= 0;
         assert columns >= 0;
         
@@ -177,29 +183,14 @@ public class Match {
             assert idToWordMap.containsKey(i);
         }
         
-//        final Set<Word> wordsSet = new HashSet<>(words);
-//        assert wordsSet.size() == words.size();
-//        
-//        System.out.println(wordsSet);
-//        System.out.println(idToWordMap.values());
-//        System.out.println(wordsSet.equals(idToWordMap.values()));
-//        System.out.println(idToWordMap.values().size());
-//        System.out.println(wordsSet.size());
-//
-//        assert wordsSet.size() == idToWordMap.values().size();
-//        
-//        for(Word w : wordsSet) {
-//            assert idToWordMap.values().contains(w);
-//        }
-        
         assert checkSetEquality(new HashSet<>(words), new HashSet<>(idToWordMap.values()));
         
-//        assert players.size() == 2;
-//        assert scores.keySet().size() == 2;
-//        assert challengePts.keySet().size() == 2;
-//        
-//        assert scores.keySet().equals(new HashSet<>(players));
-//        assert scores.keySet().equals(challengePts.keySet());
+        if(this.isGameStarted()) {
+            assert this.getNumberPlayers() == 2;
+        }
+        else {
+            assert this.getNumberPlayers() <= 1;
+        }
         
         assert checkSetEquality(scores.keySet(), new HashSet<>(players));
         assert checkSetEquality(scores.keySet(), challengePts.keySet());
@@ -226,6 +217,9 @@ public class Match {
     public synchronized void decreaseChallenge(Player player) {
         final int currentChallenge = challengePts.get(player);
         challengePts.put(player, currentChallenge-1);
+        
+        this.notifyAll();
+        checkRep();
     }
     
     /**
@@ -235,6 +229,9 @@ public class Match {
     public synchronized void incrementChallengeByTwo(Player player) {
         final int currentChallenge = challengePts.get(player);
         challengePts.put(player, currentChallenge+2);
+        
+        this.notifyAll();
+        checkRep();
     }
     
     /**
@@ -244,13 +241,19 @@ public class Match {
     public synchronized void incrementScore(Player player) {
         final int currentScore = scores.get(player);
         scores.put(player, currentScore+1);
+        
+        this.notifyAll();
+        checkRep();
     }
     
     /**
-     * @param player the player we want to get the score for
+     * @param player the player we want to get the (cumulative, including challenge points) score for
      * @return the score of the given player (which is number of words confirmed correct + challenge points)
      */
     public synchronized int getScore(Player player) {
+        this.notifyAll();
+        checkRep();
+        
         return scores.get(player) + challengePts.get(player);
     }
     
@@ -259,6 +262,9 @@ public class Match {
      * @return the number of challenge points of the given player
      */
     public synchronized int getChallengePoints(Player player) {
+        this.notifyAll();
+        checkRep();
+        
         return challengePts.get(player);
     }
     
@@ -273,6 +279,10 @@ public class Match {
         if(!idToWordMap.containsKey(wordID)) return false;
         
         final Word word = idToWordMap.get(wordID);
+        
+        this.notifyAll();
+        checkRep();
+        
         return word.tryInsertNewWord(player, tryWord);
     }
     
@@ -287,6 +297,10 @@ public class Match {
         if(!idToWordMap.containsKey(wordID)) return false;
 
         final Word word = idToWordMap.get(wordID);
+        
+        this.notifyAll();
+        checkRep();
+        
         return word.tryChallenge(player, challengeGuess, this);
     }
     
@@ -459,6 +473,9 @@ public class Match {
      * @return the name of the match
      */
     public synchronized String getMatchName() {
+        this.notifyAll();
+        checkRep();
+        
         return matchName;
     }
     
@@ -467,6 +484,9 @@ public class Match {
      * @return the description of the match
      */
     public synchronized String getMatchDescription() {
+        this.notifyAll();
+        checkRep();
+        
         return matchDescription;
     }
     
@@ -479,16 +499,22 @@ public class Match {
             final String currentValue = word.getCurrentValue();
             final String correctValue = word.getCorrectValue();
             if(!currentValue.equals(correctValue)) {
+                this.notifyAll();
+                checkRep();
+                
                 return false;
             }
         }
+        
+        this.notifyAll();
+        checkRep();
         
         return true;
     }
     
     /**
      * Find the winner's player ID of a finished match. If there's a tie, returns "TIE"
-     * @return the winner of the match, based on total points
+     * @return the ID of the winner of the match, based on total points
      */
     public synchronized String calculateWinner() { 
         
@@ -512,18 +538,24 @@ public class Match {
      * @return if match contains given player
      */
     public synchronized boolean containsPlayer(Player player) {
+        this.notifyAll();
+        checkRep();
+        
         return players.contains(player);
     }
     
     
     /**
      * Get the other player string (identifier) that is currently playing, where the other player is the player that is NOT the
-     * passed in player
+     * passed in player. It is required that this match has two players (alternatively, the game has started)
      * @param player player to match player against
      * @return other player's identifier that does not match player
      */
     public synchronized String getOtherPlayer(Player player) {
-
+        
+        this.notifyAll();
+        checkRep();
+        
         if (players.get(0).equals(player)) {
             return players.get(1).getID();
         }
