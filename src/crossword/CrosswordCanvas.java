@@ -386,7 +386,6 @@ class CrosswordCanvas extends JComponent {
         int lineCounter = 1;
         
         Color oldColor = g.getColor();
-        g.setFont(textFont);
         FontMetrics fm = g.getFontMetrics();
         
         printlnCenterBold("The game is over! Winner: " + request, g);
@@ -394,17 +393,14 @@ class CrosswordCanvas extends JComponent {
         ++line;
         // Print out my score
         g.setColor(new Color(100, 0, 0));
-        g.drawString("Your total score: " + lines[lineCounter], originX + 500, originY + line * fm.getAscent() * 6 / 5);
-        ++line;
-        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + 500, originY + line * fm.getAscent() * 6 / 5);
-        ++line;
+        g.setFont(textFont);
         
-        // Print out other player score
-        lineCounter += 3;
-        g.drawString(lines[lineCounter] + "'s total score: " + lines[lineCounter+1], originX + 250, originY + line * fm.getAscent() * 6 / 5);
+        line += 3;
+        g.drawString("Your total score: " + lines[lineCounter], originX + 250, originY + line * fm.getAscent() * 6 / 5);
+        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+1], originX + 500, originY + line * fm.getAscent() * 6 / 5);
         ++line;
-        g.drawString(lines[lineCounter] + "'s challenge points: " + lines[lineCounter+2], originX + 250, originY + line * fm.getAscent() * 6 / 5);
-        ++line;
+        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + 250, originY + line * fm.getAscent() * 6 / 5);
+        g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+4], originX + 500, originY + line * fm.getAscent() * 6 / 5);
 
         g.setColor(oldColor);
     }

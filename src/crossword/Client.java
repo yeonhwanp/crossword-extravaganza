@@ -425,8 +425,10 @@ public class Client {
         
         for (int i = 0; i < 6; i++) {
             endString += response[lineCount] + "\n";
+            lineCount++;
         }
-        canvas.setList(endString);
+        System.out.println(endString);
+        canvas.setScore(endString);
     }
 
     /**

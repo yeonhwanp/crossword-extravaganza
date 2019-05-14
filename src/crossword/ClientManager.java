@@ -129,7 +129,7 @@ public class ClientManager {
             while (true) {
                 try {
                     if (client.getState() == ClientState.PLAY) {
-                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getMatchID());
+                        URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + "/" + client.getUserID() + "/" + client.getMatchID());
                         BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                         // Get the response into one big line then parse it
                         String response = receiveResponse(responseBuffer);
