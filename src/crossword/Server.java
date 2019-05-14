@@ -768,7 +768,7 @@ public class Server {
                 
                 String validTemporary = "play\n"
                         + "new\n";
-                validTemporary += playerID + "\n" + matchToPlay.toString() + matchToPlay.getScore(secondPlayer) + "\n" + matchToPlay.getChallengePoints(secondPlayer) +
+                validTemporary +=  matchToPlay.toString() + playerID + "\n" + matchToPlay.getScore(secondPlayer) + "\n" + matchToPlay.getChallengePoints(secondPlayer) +
                         "\n" + otherPlayerID + "\n" + matchToPlay.getScore(otherPlayer) + "\n" + matchToPlay.getChallengePoints(secondPlayer);
                 
                 final String validResponse = validTemporary;
