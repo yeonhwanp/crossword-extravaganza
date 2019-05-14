@@ -72,12 +72,13 @@ public class Server {
     private final Map<String, Match> mapIDToMatch;
     private final Map<String, Match> twoPlayerMatches;
     private final Map<String, String> mapIDToWinners;
+    private final Map<String, Match> finishedMatches;
     
     
     
     /*
      * Abstraction Function:
-     * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches, mapIDToWinners) =
+     * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches, mapIDToWinners, finishedMatches) =
      *  Server that is played on server, using path folderPath to the folder to read puzzles from. Puzzles that are valid
      *  puzzles (according to project handout) have IDs in validPuzzleNames. All the players that are playing on this server
      *  have their identifiers stored in allPlayers. The server contains a map mapIDToDescription mapping match ID's to the match description,
@@ -85,6 +86,7 @@ public class Server {
      *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
      *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
      *  Any matches where a player has forfeited has its map ID in mapIDToWinner, where values are the player who didn't forfeit
+     *  Any matches that are finished reside in finishedMatches;
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
@@ -107,6 +109,7 @@ public class Server {
      *          It is not mutated, taken in as a parameter, or returned in any other method.
      *      twoPlayerMatches is mutated in playMatch and exit, but this is expected client behavior, so it is not rep exposure.
      *          It is not mutated, taken in as a parameter, or returned in any other method.
+     *          //TODO finish the two fields i added
      *        
      * Thread safety argument:
      *  Every method that is non-static is locked by the rep folderPath. Therefore, all accesses to our rep are guarded by
@@ -152,6 +155,7 @@ public class Server {
         this.mapIDToMatch = new HashMap<>();
         this.twoPlayerMatches = new HashMap<>();
         this.mapIDToWinners = new HashMap<>();
+        this.finishedMatches = new HashMap<>();
 
         // handle concurrent requests with multiple threads
         server.setExecutor(Executors.newCachedThreadPool());
@@ -846,14 +850,19 @@ public class Server {
 
             } else if (gameState.equals("play")) {
 
-                String matchID = states[1];
+                String playerID = states[1];
+                String matchID = states[2];
+                
+                Player quittingPlayer = getPlayer(playerID);
                 
                 String finishedResponse = "show score\n";
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 String winnerID = currentMatch.calculateWinner();
                 
                 twoPlayerMatches.remove(matchID);
-//                String automaticWinner = currentMatch.getOtherPlayer(player); //TODO TELL BRIAN
+                finishedMatches.put(matchID, currentMatch);
+                String automaticWinner = currentMatch.getOtherPlayer(quittingPlayer);
+                mapIDToWinners.put(matchID, automaticWinner);
                 currentMatch.notifyAll();
                 
                 finishedResponse += winnerID + "\n" + currentMatch.toString();
@@ -918,6 +927,9 @@ public class Server {
                    
 
                     if (validTry && matchFinished) {
+                        twoPlayerMatches.remove(matchID);
+                        finishedMatches.put(matchID, currentMatch);
+                        
                         String finishedResponse = "show score\n";
                         String winnerID = currentMatch.calculateWinner();
                         finishedResponse += winnerID + "\n" + currentMatch.toString();
@@ -1000,6 +1012,9 @@ public class Server {
                     boolean matchFinished = currentMatch.isFinished();
 
                     if (validChallenge && matchFinished) {
+                        twoPlayerMatches.remove(matchID);
+                        finishedMatches.put(matchID, currentMatch);
+                        
                         String finishedResponse = "show score\n";
                         String winnerID = currentMatch.calculateWinner();
                         finishedResponse += winnerID + "\n" + currentMatch.toString();
@@ -1111,8 +1126,7 @@ public class Server {
                         
                         String currentMatchState = matchToWatch.toString();
             
-//                        while (currentMatchState.equals(matchToWatch.toString()) || !mapIDToWinners.containsKey(matchID)) {
-                        while (currentMatchState.equals(matchToWatch.toString())) {
+                        while (currentMatchState.equals(matchToWatch.toString()) && !mapIDToWinners.containsKey(matchID)) {
                             try {
                                 matchToWatch.wait();
                             } catch (InterruptedException e) {
@@ -1126,6 +1140,7 @@ public class Server {
                             String winnerID = mapIDToWinners.get(matchID);
                             response = "show score\n" + winnerID + "\n" + matchToWatch.toString();
                         }
+                        
                         
                         else {
                             response = "play\nupdate\n" + matchToWatch.toString();
