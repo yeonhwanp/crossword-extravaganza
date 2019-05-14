@@ -22,6 +22,9 @@ import org.junit.jupiter.api.Test;
  *
  */
 public class ClientTest {
+    
+    private static String HOST = "localhost";
+    private static int PORT = 4949;
 
     /*
      * Testing Strategy
@@ -190,4 +193,25 @@ public class ClientTest {
     }
     
     // more tests for receiveChoose's TRY AGAIN
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+     * EXAMPLE TEST
+     */
+    @Test
+    public void testExampleInput() {
+        final Client testClient = new Client();
+    }
 }

@@ -397,7 +397,7 @@ class CrosswordCanvas extends JComponent {
         
         line += 3;
         g.drawString("Your total score: " + lines[lineCounter], originX + 250, originY + line * fm.getAscent() * 6 / 5);
-        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+1], originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+3], originX + 500, originY + line * fm.getAscent() * 6 / 5);
         ++line;
         g.drawString("Your challenge points: " + lines[lineCounter+1], originX + 250, originY + line * fm.getAscent() * 6 / 5);
         g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+4], originX + 500, originY + line * fm.getAscent() * 6 / 5);
