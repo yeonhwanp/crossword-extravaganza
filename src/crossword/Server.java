@@ -724,7 +724,7 @@ public class Server {
      *  STATE:
      *      - IF precondition:
      *          - STATE = play
-     *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *          - SEND: STATE, new, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *      - ELSE:
      *          - STATE = choose
      *          - SEND: STATE, "try again", allMatches
@@ -768,9 +768,8 @@ public class Server {
                 
                 String validTemporary = "play\n"
                         + "new\n";
-                validTemporary += playerID + matchToPlay.getScore(secondPlayer) + matchToPlay.getChallengePoints(secondPlayer) +
-                        otherPlayerID + matchToPlay.getScore(otherPlayer) + matchToPlay.getChallengePoints(secondPlayer) +
-                        matchToPlay.toString() ;
+                validTemporary += playerID + matchToPlay.toString() + matchToPlay.getScore(secondPlayer) + "\n" + matchToPlay.getChallengePoints(secondPlayer) +
+                        "\n" + otherPlayerID + "\n" + matchToPlay.getScore(otherPlayer) + "\n" + matchToPlay.getChallengePoints(secondPlayer);
                 
                 final String validResponse = validTemporary;
                 out.print(validResponse);
@@ -880,11 +879,11 @@ public class Server {
      *     - MATCH_ID must exist in currently playing matches
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
-     *          - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *          - SEND: play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show score, winner, board
      * IF INVALID (game logic):
-     *     - SEND: STATE, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: STATE, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
@@ -935,10 +934,9 @@ public class Server {
                         String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
                         Player otherPlayer = getPlayer(otherPlayerID);
 
-                        String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n";
-                        ongoingResponse += playerID + currentMatch.getScore(currentPlayer) + currentMatch.getChallengePoints(currentPlayer) +
-                                otherPlayerID + currentMatch.getScore(otherPlayer) + currentMatch.getChallengePoints(currentPlayer) +
-                                currentMatch.toString() ;
+                        String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n" + currentMatch.toString();
+                        ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
+                                otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
                         
                         final String ongoing = ongoingResponse;
 
@@ -964,11 +962,11 @@ public class Server {
      *     - matchID must exist
      *     - playerID must be one of the players in the match
      * IF VALID CHALLENGE -> Ongoing (game logic):
-     *          - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *          - SEND: play, true, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * IF VALID_CHALLENGE -> Finish (game logic):
      *     - SEND: show score, winner, board
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, false, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be properly sent
      */
@@ -1018,10 +1016,9 @@ public class Server {
                         String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
                         Player otherPlayer = getPlayer(otherPlayerID);
 
-                        String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n";
-                        ongoingResponse += playerID + currentMatch.getScore(currentPlayer) + currentMatch.getChallengePoints(currentPlayer) +
-                                otherPlayerID + currentMatch.getScore(otherPlayer) + currentMatch.getChallengePoints(currentPlayer) +
-                                currentMatch.toString() ;
+                        String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n" + currentMatch.toString();
+                        ongoingResponse += playerID + "\n" + currentMatch.getScore(currentPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" +
+                                otherPlayerID + "\n" + currentMatch.getScore(otherPlayer) + "\n" + currentMatch.getChallengePoints(currentPlayer);
                         
                         final String ongoing = ongoingResponse;
 
