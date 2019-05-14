@@ -21,7 +21,7 @@ public class Word {
     //      
     // Representation invariant:
     //    startRow >= 0 && startCol >= 0
-    //    id >= 0 && id should be unique
+    //    id >= 1
     //    direction == "DOWN" or direction == "ACROSS"
     //    we must also have that the cells in involvedCells are sequential to the word, so involvedCells.get(0) + involvedCells.get(1) + .... forms the word
     //          in other words, we must have that (involvedCells.get(i).getRow() == involvedCells.get(i+1).getRow() AND involvedCells.get(i).getCol() < involvedCells.get(i+1).getCol())

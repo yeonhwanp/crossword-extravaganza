@@ -26,7 +26,7 @@ public class ParserGrammerTest {
      * Testing strategy for parser:
      * 
      * No whitespace, no comments anywhere
-     * Whitespace, newlines between literals of puzzle (between description, entry, wordname, clue)
+     * Whitespace, newlines between literals of puzzle
      *      single newlines, multiple newlines
      * Comments
      *      comments following text (inside a literal)
@@ -41,8 +41,7 @@ public class ParserGrammerTest {
      */
     
     
-    
-    //covers whitespace between literals of puzzle
+    //covers no whitespace or comments anywhere
     @Test public void testParserSimple() throws UnableToParseException, IOException {
         final File puzzleFile = new File("test-puzzles/warmup.puzzle");
         final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
@@ -51,8 +50,32 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
-        expectedWords.add(new WordTuple(0, 2, "\"Farmers ______\"", 2, "market", "DOWN"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
+        expectedWords.add(new WordTuple(0, 2, "\"Farmers ______\"", "market", "DOWN"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
+            assertTrue(w.equals(expW));
+        }
+        
+
+    }
+    
+    //covers whitespace between literals of puzzle
+    @Test public void testParserSimpleWhitespace() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/warmup.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
+        expectedWords.add(new WordTuple(0, 2, "\"Farmers ______\"", "market", "DOWN"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -75,7 +98,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\\\n ot\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle \\\\\\n ot\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -97,7 +120,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment \\\\\\n\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle //comment \\\\\\n\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -119,7 +142,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -141,7 +164,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -163,7 +186,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -184,7 +207,7 @@ public class ParserGrammerTest {
         final List<WordTuple> words = getWordTuples(parseTree);
         
         List<WordTuple> expectedWords = new ArrayList<>();
-        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", 1, "star", "ACROSS"));
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "star", "ACROSS"));
         
         assertEquals("\"Easy\"", name);
         assertEquals("\"An easy puzzle to get started\"", description);
@@ -241,7 +264,7 @@ public class ParserGrammerTest {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
 
-            WordTuple currentWord = new WordTuple(row, col, hint, i - 2, wordname, direction);
+            WordTuple currentWord = new WordTuple(row, col, hint, wordname, direction);
 
             allWords.add(currentWord);
         }
