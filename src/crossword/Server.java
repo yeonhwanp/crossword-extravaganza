@@ -271,8 +271,8 @@ public class Server {
         });
         challengeRequest.getFilters().addAll(filters);
         
-        // handle requests for paths that start with /watchBoard/
-        HttpContext watchRequest = server.createContext("/watchBoard/", new HttpHandler() {
+        // handle requests for paths that start with /watchboard/
+        HttpContext watchRequest = server.createContext("/watchboard/", new HttpHandler() {
 
             public void handle(HttpExchange exchange) throws IOException {
 
@@ -1121,6 +1121,8 @@ public class Server {
             final String base = exchange.getHttpContext().getPath();
             assert path.startsWith(base);
             final String matchID = path.substring(base.length());
+            
+            
             
             Match matchToWatch = twoPlayerMatches.get(matchID);
             
