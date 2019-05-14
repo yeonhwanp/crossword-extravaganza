@@ -1,9 +1,14 @@
 package crossword;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +63,7 @@ public class MatchTest {
      * Test getScore()
      *  normal score only, challenge score only, both normal and challenge
      * 
-     * Test getChallengePoints
+     * Test getChallengePoints()
      *  has been incremented by two, has been decreased
      * 
      * Test tryInsert()
@@ -106,8 +111,18 @@ public class MatchTest {
      * Test containsPlayer()
      *  contains player, does not contain
      * 
+     * Test getOtherPlayer()
+     *  check 0th index player (pass in first index player as parameter)
+     *  check first index player
      * 
-     * Methods oneDimensionOverlap and verticalHorizontalConsistent are fully covered within checkConsistency() partition
+     * 
+     * Test oneDimensionOverlap()
+     *  Does overlap, does not overlap
+     * 
+     * 
+     * Concurrency tests:
+     *      tryInsert: threads entering same word at same time, threads entering different word at same time
+     *      challenge: threads challenging different words at same time
      * 
      */
 
@@ -125,7 +140,7 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyOneWord() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", "cat", "ACROSS");
         words.add(firstWordTuple);
         
         
@@ -138,8 +153,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossAcossDifferentRows() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(3, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(3, 2, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -153,8 +168,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossAcossSameRowsNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 200, "hint", 1, "splat", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 200, "hint", "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -168,8 +183,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossAcossSameRowsYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 1, "splat", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", "splat", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -183,8 +198,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownDownDifferentColumns() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", 1, "splat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 1, "hint", "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -198,8 +213,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownDownSameColumnsNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(100, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(100, 2, "hint", "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -213,8 +228,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownDownSameColumnsYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(5, 2, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(5, 2, "hint", "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -229,8 +244,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossDownNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(100, 200, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(100, 200, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -245,8 +260,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossDownYesOverlapDifferentLetter() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", 1, "splat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(1, 2, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(1, 2, "hint", "splat", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -260,8 +275,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyAcrossDownYesOverlapSameLetter() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple secondWordTuple = new WordTuple(0, 1, "hint", 1, "daa", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(1, 0, "hint", "cat", "ACROSS");
+        WordTuple secondWordTuple = new WordTuple(0, 1, "hint", "daa", "DOWN");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -275,8 +290,8 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownAcrossYesOverlapDifferentLetter() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", "cat", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -291,9 +306,9 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownAcrossMoreWordTuplesYesOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 1, "hey", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", "cat", "ACROSS");
+        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", "hey", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -310,9 +325,9 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownAcrossMoreWordTuplesNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(3, 1, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 1, "cat", "ACROSS");
-        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", 1, "bad", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(3, 1, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", "cat", "ACROSS");
+        WordTuple thirdWordTuple = new WordTuple(2, 0, "hint", "bad", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -329,9 +344,9 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownAcrossMoreWordTuplesBothOverlapInvalid() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bad", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", "bad", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -349,9 +364,9 @@ public class MatchTest {
     @Test
     public void testCheckConsistencyDownAcrossMoreWordTuplesMultipleOverlapValid() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bab", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", "bab", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -372,9 +387,9 @@ public class MatchTest {
     @Test
     public void testToStringSimple() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", 1, "cat", "DOWN");
-        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", 1, "bab", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(0, 9, "hint", "cat", "DOWN");
+        WordTuple thirdWordTuple = new WordTuple(1, 8, "hint", "bab", "ACROSS");
         
         words.add(firstWordTuple);
         words.add(secondWordTuple);
@@ -389,11 +404,11 @@ public class MatchTest {
                 "########???\n" + 
                 "#########??\n" + 
                 "3\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "0 9 DOWN 1\n" + 
+                "0 9 DOWN 2 false false \n" + 
                 "hint\n" + 
-                "1 8 ACROSS 1\n" + 
+                "1 8 ACROSS 3 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -405,7 +420,7 @@ public class MatchTest {
     @Test
     public void testToStringEmptyStringEmptyDescription() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
         
         words.add(firstWordTuple);
 
@@ -416,7 +431,7 @@ public class MatchTest {
                 "##########?\n" + 
                 "##########?\n" + 
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -604,7 +619,7 @@ public class MatchTest {
     @Test
     public void testTryInsertValidNoOverlap() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -618,7 +633,7 @@ public class MatchTest {
                 "##########b\n" +
                 "##########a\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true false yo\n" + 
                 "hint\n";
         
         assertEquals(expected, currentMatch.toString());
@@ -644,9 +659,9 @@ public class MatchTest {
                 "obo\n" + 
                 "#a#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -669,9 +684,9 @@ public class MatchTest {
                 "?b?\n" + 
                 "#a#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -683,7 +698,7 @@ public class MatchTest {
     @Test
     public void testTryInsertInvalidOthers() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -700,7 +715,7 @@ public class MatchTest {
                 "##########o\n" +
                 "##########w\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -712,7 +727,7 @@ public class MatchTest {
     @Test
     public void testTryInsertInvalidConfirmed() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "dba", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "dba", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -731,7 +746,7 @@ public class MatchTest {
                 "##########b\n" +
                 "##########a\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -757,9 +772,9 @@ public class MatchTest {
                 "?o?\n" + 
                 "#w#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -770,7 +785,7 @@ public class MatchTest {
     @Test
     public void testTryInsertInvalidLength() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "cat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "cat", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -784,7 +799,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -795,7 +810,7 @@ public class MatchTest {
     @Test
     public void testTryInsertInvalidID() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "cat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "cat", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -809,7 +824,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         
@@ -842,9 +857,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(2, currentMatch.getChallengePoints(dude));
@@ -872,9 +887,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true dude\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(2, currentMatch.getChallengePoints(dude));
@@ -901,9 +916,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -931,9 +946,9 @@ public class MatchTest {
                 "???\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -962,9 +977,9 @@ public class MatchTest {
                 "hia\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -992,9 +1007,9 @@ public class MatchTest {
                 "aia\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1023,9 +1038,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true true yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(-1, currentMatch.getChallengePoints(dude));
@@ -1054,9 +1069,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1083,9 +1098,9 @@ public class MatchTest {
                 "mab\n" + 
                 "#?#\n" + 
                 "2\n" + 
-                "0 1 DOWN 1\n" + 
+                "0 1 DOWN 1 false false \n" + 
                 "hint\n" + 
-                "1 0 ACROSS 2\n" + 
+                "1 0 ACROSS 2 true false yo\n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
         assertEquals(0, currentMatch.getChallengePoints(dude));
@@ -1098,7 +1113,7 @@ public class MatchTest {
     public void testChallengeInvalidID() {
 
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", 1, "cat", "DOWN");
+        WordTuple firstWordTuple = new WordTuple(0, 10, "hint", "cat", "DOWN");
         words.add(firstWordTuple);
         
         Match currentMatch = new Match("Match name", "Match description", words);
@@ -1112,7 +1127,7 @@ public class MatchTest {
                 "##########?\n" +
                 "##########?\n" +
                 "1\n" + 
-                "0 10 DOWN 1\n" + 
+                "0 10 DOWN 1 false false \n" + 
                 "hint\n";
         assertEquals(expected, currentMatch.toString());
  
@@ -1241,7 +1256,7 @@ public class MatchTest {
     
     
     //covers containsPlayer()
-    //      contains player
+    //      does not contain player
     @Test
     public void testContainsPlayerNo() {
 
@@ -1253,6 +1268,185 @@ public class MatchTest {
         assertTrue(!currentMatch.containsPlayer(yo));
     }
     
+    //covers getOtherPlayer
+    //  check 0th index
+    @Test
+    public void testGetOtherPlayer() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+        currentMatch.addPlayer(dude);
+        currentMatch.addPlayer(yo);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+    }
+    
+    //covers getOtherPlayer
+    //  check 1st index
+    @Test
+    public void testGetOtherPlayer1stIndex() {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        assertEquals("yo", currentMatch.getOtherPlayer(dude));
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    //covers concurrency for try method - different words
+    @Test
+    public void testTryInsertConcurrencyDifferent() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(yo, 1, "dod");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(dude, 2, "boa");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+        String expected = "3x3\n" + 
+                "#d#\n" + 
+                "boa\n" + 
+                "#d#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
+                "hint\n";
+        
+        assertEquals(expected, currentMatch.toString());
+        
+    }
+    
+    //covers concurrency for try method - same word
+    @Test
+    public void testTryInsertConcurrencySame() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(yo, 1, "aaa");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.tryInsert(dude, 2, "bbb");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+        String expected = "3x3\n" + 
+                "#a#\n" + 
+                "?a?\n" + 
+                "#a#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 true false yo\n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 false false \n" + 
+                "hint\n";
+        
+        String expected2 = "3x3\n" + 
+                "#?#\n" + 
+                "bbb\n" + 
+                "#?#\n" + 
+                "2\n" + 
+                "0 1 DOWN 1 false false \n" + 
+                "hint\n" + 
+                "1 0 ACROSS 2 true false dude\n" + 
+                "hint\n";
+        
+        assertTrue(expected.equals(currentMatch.toString()) || expected2.equals(currentMatch.toString()));
+        
+    }
+    
+   
+    
+    
+    //covers concurrency for challenge method - different words are challenged
+    //      one challenge is valid, the other becomes invalid
+    @Test
+    public void testChallengeConcurrencyDifferent() throws InterruptedException {
+
+        Match currentMatch = makeTwoWordMatch();
+        
+        Player yo = new Player("yo");
+        Player dude = new Player("dude");
+
+        currentMatch.addPlayer(yo);
+        currentMatch.addPlayer(dude);
+        
+        currentMatch.tryInsert(yo, 1, "bbb");
+        currentMatch.tryInsert(dude, 2, "dbb");
+        
+
+        
+        Thread first = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.challenge(yo, 2, "mab");
+            }
+        });
+        
+        Thread second = new Thread(new Runnable() {
+            public void run() {
+                    currentMatch.challenge(dude, 1, "cat");
+            }
+        });
+        
+        first.start();
+        second.start();
+        
+        first.join();
+        second.join();
+        
+       
+        assertTrue((currentMatch.getChallengePoints(yo) == 2 && currentMatch.getChallengePoints(dude) == 0) ||
+                (currentMatch.getChallengePoints(dude) == 2 && currentMatch.getChallengePoints(yo) == 0));
+        
+        
+    }
+    
+    
     
     /**
      * Helper method to make a new match with two words, cat and map, that  overlap at letter 'a'.
@@ -1260,8 +1454,8 @@ public class MatchTest {
      */
     private static Match makeTwoWordMatch() {
         List<WordTuple> words = new ArrayList<>();
-        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", 1, "cat", "DOWN");
-        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", 2, "mab", "ACROSS");
+        WordTuple firstWordTuple = new WordTuple(0, 1, "hint", "cat", "DOWN");
+        WordTuple secondWordTuple = new WordTuple(1, 0, "hint", "mab", "ACROSS");
         words.add(firstWordTuple);
         words.add(secondWordTuple);
         
@@ -1269,9 +1463,7 @@ public class MatchTest {
         return currentMatch;
     }
     
-    
-    
-    
+
     
     @Test
     public void testAssertionsEnabled() {

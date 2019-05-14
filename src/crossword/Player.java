@@ -41,6 +41,12 @@ public class Player {
         return id;
     }
     
+    
+    @Override
+    public String toString() {
+        return id;
+    }
+    
     /**
      * Performs observational equality between two objects.
      * @return true iff the IDs of the two Player objects match exactly

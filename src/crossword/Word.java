@@ -24,8 +24,10 @@ public class Word {
     //    id >= 0 && id should be unique
     //    direction == "DOWN" or direction == "ACROSS"
     //    we must also have that the cells in involvedCells are sequential to the word, so involvedCells.get(0) + involvedCells.get(1) + .... forms the word
-    //          in other words, we must have that 
+    //          in other words, we must have that (involvedCells.get(i).getRow() == involvedCells.get(i+1).getRow() AND involvedCells.get(i).getCol() < involvedCells.get(i+1).getCol())
+    //          OR (involvedCells.get(i).getRow() < involvedCells.get(i+1).getRow() AND involvedCells.get(i).getCol() == involvedCells.get(i+1).getCol())
     //    involvedCells.size() == correctValue.length()
+    //    if a cell is confirmed, it must have an owner, and the getValue must be the correctValue
     //
     // Safety from rep exposure:
     //    startRow, startCol, id, hint, correctValue, and direction are all private and final
@@ -62,19 +64,40 @@ public class Word {
         this.hint = inputHint;
         this.id = pID;
         this.correctValue = pValue;
-        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN; //fix this(???)
         assert pDirection.equals("ACROSS") || pDirection.equals("DOWN");
-        this.involvedCells = new ArrayList<>(); //change this later
+        this.direction = pDirection.equals("ACROSS") ? Direction.ACROSS : Direction.DOWN;
+        this.involvedCells = new ArrayList<>();
         
         this.confirmed = false;
         this.owner = Optional.empty();
     }
     
+    
     /**
-     * TODO fix this up
+     * Check the rep invariant for Word
      */
     private void checkRep() {
+        assert this.startRow >= 0 && this.startCol >= 0;
+        assert this.id >= 1;
+        assert this.direction != null;
+        assert involvedCells.size() == correctValue.length();
+        if(this.isConfirmed()) {
+            assert this.hasOwner();
+        }
         
+        for(int i = 0; i < involvedCells.size()-1; i++) {
+            if(this.direction == Direction.ACROSS) {
+                assert (involvedCells.get(i).getRow() == involvedCells.get(i+1).getRow() && involvedCells.get(i).getCol() + 1 == involvedCells.get(i+1).getCol());
+            }
+            else {
+                assert (involvedCells.get(i).getRow() + 1 == involvedCells.get(i+1).getRow() && involvedCells.get(i).getCol() == involvedCells.get(i+1).getCol());
+            }
+        }
+        
+        if(this.isConfirmed()) {
+            assert correctValue.equals(this.getCurrentValue());
+        }
+                
     }
     
     /**

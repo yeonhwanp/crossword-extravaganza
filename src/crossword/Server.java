@@ -441,7 +441,7 @@ public class Server {
             int row = Integer.valueOf(entryTree.children().get(3).text());
             int col = Integer.valueOf(entryTree.children().get(4).text());
             
-            WordTuple currentWord = new WordTuple(row, col, hint, i-2, wordname, direction);
+            WordTuple currentWord = new WordTuple(row, col, hint, wordname, direction);
           
             allWords.add(currentWord);
         }
@@ -649,14 +649,14 @@ public class Server {
     }
     
     /**
-     * RECEIVE: A request in the form of: "waitforjoin matchID
+     * RECEIVE: A request in the form of: "waitforjoin playerID matchID"
      *  PRECONDITION:
      *      - matchID must exist in twoPlayerMatches
      *  STATE:
      *      - If precondition:
      *      THEN: folderPath.wait() until someone else connects to the board 
      *          STATE: play
-     *          SEND: STATE, new, board
+     *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange
      * @throws IOException
      * @throws InterruptedException 
@@ -671,12 +671,20 @@ public class Server {
             // it will always start with the base path from server.createContext():
             final String base = exchange.getHttpContext().getPath();
             assert path.startsWith(base);
-            final String matchID = path.substring(base.length());
+            final String playerAndMatchID = path.substring(base.length());
+            
+            String[] names = playerAndMatchID.split("/");
+            String playerID = names[0];
+            String matchID = names[1];
             
             
-            Match puzzle = mapIDToMatch.get(matchID);
+            Match matchToPlay = mapIDToMatch.get(matchID);
+            Player player = getPlayer(playerID);
             
-            while(puzzle.getNumberPlayers() < 2) {
+            String otherPlayerID = matchToPlay.getOtherPlayer(player);
+            Player otherPlayer = getPlayer(otherPlayerID);
+            
+            while(matchToPlay.getNumberPlayers() < 2) {
                 folderPath.wait();
             }
 
@@ -686,7 +694,12 @@ public class Server {
             
             final String playResponse;
             String playResult = "play\nnew\n";
-            playResult += puzzle.toString();
+            
+            playResult += playerID + matchToPlay.getScore(player) + matchToPlay.getChallengePoints(player) +
+                    otherPlayerID + matchToPlay.getScore(otherPlayer) + matchToPlay.getChallengePoints(player) +
+                    matchToPlay.toString() ;
+            
+ 
             playResponse = playResult;
             out.print(playResponse);
             out.flush();
@@ -707,7 +720,7 @@ public class Server {
      *  STATE:
      *      - IF precondition:
      *          - STATE = play
-     *          - SEND: STATE, new, board, challengepoints
+     *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *      - ELSE:
      *          - STATE = choose
      *          - SEND: STATE, "try again", allMatches
@@ -736,7 +749,7 @@ public class Server {
             
             if (mapIDToMatch.containsKey(matchID)) { // valid precondition, so play an existing match
                 
-                Player secondPlayer = getPlayer(playerID);
+                Player secondPlayer = getPlayer(playerID); //second player to join the match
                 Match matchToPlay = mapIDToMatch.get(matchID);
                 
                 matchToPlay.addPlayer(secondPlayer);
@@ -746,9 +759,14 @@ public class Server {
                 
                 twoPlayerMatches.put(matchID, matchToPlay);
                 
+                String otherPlayerID = matchToPlay.getOtherPlayer(secondPlayer);
+                Player otherPlayer = getPlayer(otherPlayerID);
+                
                 String validTemporary = "play\n"
                         + "new\n";
-                validTemporary += matchToPlay.toString();
+                validTemporary += playerID + matchToPlay.getScore(secondPlayer) + matchToPlay.getChallengePoints(secondPlayer) +
+                        otherPlayerID + matchToPlay.getScore(otherPlayer) + matchToPlay.getChallengePoints(secondPlayer) +
+                        matchToPlay.toString() ;
                 
                 final String validResponse = validTemporary;
                 out.print(validResponse);
@@ -857,11 +875,11 @@ public class Server {
      *     - MATCH_ID must exist in currently playing matches
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - SEND: play, true, board
+     *          - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show score, winner, board
      * IF INVALID (game logic):
-     *     - SEND: play, false, board
+     *     - SEND: STATE, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
@@ -889,10 +907,12 @@ public class Server {
             if (twoPlayerMatches.containsKey(matchID)) {
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 Player currentPlayer = getPlayer(playerID);
+                
                 if (currentMatch.containsPlayer(currentPlayer)) {
 
                     boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
                     boolean matchFinished = currentMatch.isFinished();
+                   
 
                     if (validTry && matchFinished) {
                         String finishedResponse = "show score\n";
@@ -906,9 +926,15 @@ public class Server {
                         System.out.println("sent showScore, score (includes match toString). client made a finishing move, so client should see winner");
 
                     } else {
+                        
+                        String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
+                        Player otherPlayer = getPlayer(otherPlayerID);
 
-                        String ongoingResponse = "play\n";
-                        ongoingResponse += String.valueOf(validTry) + "\n" + currentMatch.toString();
+                        String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n";
+                        ongoingResponse += playerID + currentMatch.getScore(currentPlayer) + currentMatch.getChallengePoints(currentPlayer) +
+                                otherPlayerID + currentMatch.getScore(otherPlayer) + currentMatch.getChallengePoints(currentPlayer) +
+                                currentMatch.toString() ;
+                        
                         final String ongoing = ongoingResponse;
 
                         out.print(ongoing);
@@ -933,11 +959,11 @@ public class Server {
      *     - matchID must exist
      *     - playerID must be one of the players in the match
      * IF VALID CHALLENGE -> Ongoing (game logic):
-     *     - SEND: play, true, board
+     *          - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_CHALLENGE -> Finish (game logic):
      *     - SEND: show score, winner, board
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: play, false, board
+     *     - SEND: play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be properly sent
      */
@@ -982,9 +1008,15 @@ public class Server {
                         System.out.println("sent show score, score, match. client made a valid challenge that finished the game, should now see score.");
 
                     } else {
+                        
+                        String otherPlayerID = currentMatch.getOtherPlayer(currentPlayer);
+                        Player otherPlayer = getPlayer(otherPlayerID);
 
-                        String ongoingResponse = "play\n";
-                        ongoingResponse += String.valueOf(validChallenge) + "\n" + currentMatch.toString();
+                        String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n";
+                        ongoingResponse += playerID + currentMatch.getScore(currentPlayer) + currentMatch.getChallengePoints(currentPlayer) +
+                                otherPlayerID + currentMatch.getScore(otherPlayer) + currentMatch.getChallengePoints(currentPlayer) +
+                                currentMatch.toString() ;
+                        
                         final String ongoing = ongoingResponse;
 
                         out.print(ongoing);
@@ -1062,27 +1094,50 @@ public class Server {
             Match matchToWatch = twoPlayerMatches.get(matchID);
             
             
-            final String response;
-            exchange.sendResponseHeaders(VALID, 0);
-            
-            String currentMatchState = matchToWatch.toString();
+            new Thread(new Runnable() {
+                public void run() {
 
-            while (currentMatchState.equals(matchToWatch.toString())) {
-                folderPath.wait();
-            }
+                    synchronized (matchToWatch) {
+                        
+                        
+                        final String response;
+                        try {
+                            exchange.sendResponseHeaders(VALID, 0);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        
+                        String currentMatchState = matchToWatch.toString();
             
-            response = "play\nupdate\n" + matchToWatch.toString();
+                        while (currentMatchState.equals(matchToWatch.toString())) {
+                            try {
+                                matchToWatch.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        
+                        response = "play\nupdate\n" + matchToWatch.toString();
+                        
             
-
-            // write the response to the output stream using UTF-8 character encoding
-            OutputStream body = exchange.getResponseBody();
-            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-            out.print(response);
-            out.flush();
-            System.out.println("sent over updated board (it just changed by someone making a move)");
-
-            // if you do not close the exchange, the response will not be sent!
-            exchange.close();
+                        // write the response to the output stream using UTF-8 character encoding
+                        OutputStream body = exchange.getResponseBody();
+                        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+                        out.print(response);
+                        out.flush();
+                        System.out.println("sent over updated board (it just changed by someone making a move)");
+            
+                        // if you do not close the exchange, the response will not be sent!
+                        exchange.close();
+                    }
+                    
+                    
+                }
+            }).start();
+            
+            
+            
+            
 
         }
     }
@@ -1149,6 +1204,8 @@ public class Server {
             return new Player("");
         }
     }
+    
+
     
     
     /**
