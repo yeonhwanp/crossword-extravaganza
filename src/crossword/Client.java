@@ -63,81 +63,6 @@ public class Client {
         this.host = host;
         this.port = port;
     }
-    
-    public static void main(String[] args) throws UnknownHostException, IOException {
-        // Create a new client object and have it connect
-        connectToServer(args);
-    }
-    
-    
-    // TESTING ANYWAYS //
-    
-    private static synchronized void connectToServer(String[] args) throws UnknownHostException, IOException {
-
-        // ========= PARSING LAUNCH ARGUMENTS ========= //
-        final Queue<String> arguments = new LinkedList<>(List.of(args));
-        final String host;
-        final int port;
-        try {
-            host = arguments.remove();
-        } catch (NoSuchElementException nse) {
-            throw new IllegalArgumentException("missing HOST", nse);
-        }
-        try {
-            port = Integer.parseInt(arguments.remove());
-        } catch (NoSuchElementException | NumberFormatException e) {
-            throw new IllegalArgumentException("missing or invalid PORT", e);
-        }
-        
-        Client client = new Client(host, port);
-        
-        // ========= PARSING LAUNCH ARGUMENTS ========= //
-
-        // Send initial GET request and parse the response
-        final URL loadRequest = new URL("http://" + host + ":" + port + "/init/");
-        BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
-        String initialRequest = receiveResponse(socketIn);
-
-        client.parseResponse(initialRequest);
-        client.launchGameWindow();
-        socketIn.close();
-    }
-    
-    private synchronized void hello() {
-        // Sending URL stuffs
-        try {
-            String userInput = getUserInput();
-            String extension = parseUserInput(userInput);
-
-            // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
-
-            // Send GET request
-            URL test = new URL("http://" + host + ":" + port + extension);
-            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-
-            // Get the response into one big line then parse it
-            String response = receiveResponse(responseBuffer);
-            parseResponse(response);
-            responseBuffer.close();
-
-            repaint();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * Constructs the response into one big string, properly formatted with newlines like it should be.
-     */
-    public static String receiveResponse(BufferedReader response) throws IOException {
-        String fullString = "";
-        String line;
-        while ((line = response.readLine()) != null) {
-            fullString += line + "\n";
-        }
-        return fullString;
-    }
 
     /*
      * Abstraction Function
@@ -187,15 +112,11 @@ public class Client {
             // button. Recall from reading 24 that this code runs on the
             // Event Dispatch Thread, which is different from the main
             // thread.
-//            synchronized (thisLock) {
-//                textboxInput = textbox.getText();
-//                textbox.setText("");
-//                thisLock.notifyAll();
-//            }
-            
-              textboxInput = textbox.getText();
-              textbox.setText("");
-              hello();
+            synchronized (thisLock) {
+                textboxInput = textbox.getText();
+                textbox.setText("");
+                thisLock.notifyAll();
+            }
         });
 
         enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
