@@ -285,6 +285,7 @@ public class Client {
             receiveEnd(rest);
             break;
         default:
+            System.out.println(splitResponse[0]);
             throw new RuntimeException("Should never reach here");
         }
     }
@@ -410,10 +411,22 @@ public class Client {
     }
 
     /**
-     * RECEIVES: show_score, winner, board
+     * RECEIVES: show_score, winner, myPlayer, score, challengePts, otherPlayer, score2, challengePts2
      */
     private synchronized void receiveEnd(String[] response) {
-        canvas.setRequest("show_score", "");
+        int lineCount = 0;
+
+        // Set the state of the canvas
+        String winner = response[lineCount];
+        canvas.setRequest("show_score", winner);
+        lineCount++;
+
+        String endString = "";
+        
+        for (int i = 0; i < 6; i++) {
+            endString += response[lineCount] + "\n";
+        }
+        canvas.setList(endString);
     }
 
     /**

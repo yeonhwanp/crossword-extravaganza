@@ -25,6 +25,7 @@ class CrosswordCanvas extends JComponent {
     private String request;
     private String currentBoard;
     private String currentPuzzleMatches;
+    private String endString;
     
     /*
      * Abstraction Function
@@ -295,6 +296,14 @@ class CrosswordCanvas extends JComponent {
     }
     
     /**
+     * Sets the score to the last updated
+     * @param scoreString the string holding the score information
+     */
+    public void setScore(String scoreString) {
+        endString = scoreString;
+    }
+    
+    /**
      * @return The state of the client gameside
      */
     public ClientState getState() {
@@ -367,6 +376,37 @@ class CrosswordCanvas extends JComponent {
             //... Conditionals based on PLAY stuff ...// 
             printBoard(g);
         }
+        else if (state == ClientState.SHOW_SCORE) {
+            printScores(g);
+        }
+    }
+    
+    private void printScores(Graphics g) {
+        String[] lines = endString.split("\\n");
+        int lineCounter = 1;
+        
+        Color oldColor = g.getColor();
+        g.setFont(textFont);
+        FontMetrics fm = g.getFontMetrics();
+        
+        printlnCenterBold("The game is over! Winner: " + request, g);
+        
+        ++line;
+        // Print out my score
+        g.setColor(new Color(100, 0, 0));
+        g.drawString("Your total score: " + lines[lineCounter], originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        ++line;
+        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        ++line;
+        
+        // Print out other player score
+        lineCounter += 3;
+        g.drawString(lines[lineCounter] + "'s total score: " + lines[lineCounter+1], originX + 250, originY + line * fm.getAscent() * 6 / 5);
+        ++line;
+        g.drawString(lines[lineCounter] + "'s challenge points: " + lines[lineCounter+2], originX + 250, originY + line * fm.getAscent() * 6 / 5);
+        ++line;
+
+        g.setColor(oldColor);
     }
     
     private void printMatchList(Graphics g) {
