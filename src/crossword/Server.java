@@ -1070,6 +1070,8 @@ public class Server {
             exchange.sendResponseHeaders(VALID, 0);
             
             String availableMatches = getChooseResponse("new");
+            
+            System.out.println(availableMatches);
 
             while (availableMatches.equals(getChooseResponse("new"))) {
                 folderPath.wait();
@@ -1082,6 +1084,7 @@ public class Server {
             OutputStream body = exchange.getResponseBody();
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             out.print(response);
+            
             out.flush();
             System.out.println("sent over updated available matches (it just changed)");
 
