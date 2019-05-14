@@ -658,7 +658,7 @@ public class Server {
      *      - If precondition:
      *      THEN: folderPath.wait() until someone else connects to the board 
      *          STATE: play
-     *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *          - SEND: STATE, new, board, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts
      * @param exchange
      * @throws IOException
      * @throws InterruptedException 
@@ -699,9 +699,8 @@ public class Server {
             final String playResponse;
             String playResult = "play\nnew\n";
             
-            playResult += playerID + matchToPlay.getScore(player) + matchToPlay.getChallengePoints(player) +
-                    otherPlayerID + matchToPlay.getScore(otherPlayer) + matchToPlay.getChallengePoints(player) +
-                    matchToPlay.toString() ;
+            playResult += matchToPlay.toString() + playerID + "\n" + matchToPlay.getScore(player) + "\n" + matchToPlay.getChallengePoints(player) + "\n" +
+                    otherPlayerID + "\n" + matchToPlay.getScore(otherPlayer) + "\n" + matchToPlay.getChallengePoints(player);
             
  
             playResponse = playResult;
