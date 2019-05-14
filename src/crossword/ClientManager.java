@@ -24,8 +24,6 @@ import javax.swing.WindowConstants;
 
 public class ClientManager {
 
-    private final Client client;
-
     /*
      * Abstraction Function: TODO
      * Rep Invariant: TODO
@@ -61,14 +59,7 @@ public class ClientManager {
         ClientManager thisClient = new ClientManager();
         thisClient.connectToServer(args);
     }
-
-    /**
-     * Creates a new ClientManager object
-     */
-    public ClientManager() {
-        client = new Client();
-    }
-
+    
     /**
      * Connects to server, sends requests and receives responses from the server.
      * @param args command line arguments that should include only the server address.
@@ -91,6 +82,10 @@ public class ClientManager {
         } catch (NoSuchElementException | NumberFormatException e) {
             throw new IllegalArgumentException("missing or invalid PORT", e);
         }
+        
+        // Create a new client object to use
+        Client client = new Client(host, port);
+        
         // ========= PARSING LAUNCH ARGUMENTS ========= //
 
         // Send initial GET request and parse the response
@@ -129,20 +124,6 @@ public class ClientManager {
                     responseBuffer.close();
 
                     client.repaint();
-
-                    // Waiting for a player
-                    if (client.isWaiting()) {
-                        URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + client.getMatchID());
-                        BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
-
-                        // Get the response into one big line then parse it
-                        String joinedResponse = receiveResponse(joinedBuffer);
-                        client.parseResponse(joinedResponse);
-                        joinedBuffer.close();
-                        client.repaint();
-
-                        System.out.println("in here!");
-                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -225,7 +206,7 @@ public class ClientManager {
     /**
      * Constructs the response into one big string, properly formatted with newlines like it should be.
      */
-    private static String receiveResponse(BufferedReader response) throws IOException {
+    public static String receiveResponse(BufferedReader response) throws IOException {
         String fullString = "";
         String line;
         while ((line = response.readLine()) != null) {
