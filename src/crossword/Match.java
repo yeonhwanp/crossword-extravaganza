@@ -512,8 +512,7 @@ public class Match {
         for(Word word : this.words) {
             if(word.hasOwner() && !word.isConfirmed()) {
                 word.setConfirmed();
-                final int previousScore = scores.get(word.getOwner());
-                scores.put(word.getOwner(), previousScore+1);
+                incrementScore(word.getOwner());
             }
         }
         
