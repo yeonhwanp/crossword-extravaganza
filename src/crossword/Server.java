@@ -683,12 +683,14 @@ public class Server {
             Match matchToPlay = mapIDToMatch.get(matchID);
             Player player = getPlayer(playerID);
             
-            String otherPlayerID = matchToPlay.getOtherPlayer(player);
-            Player otherPlayer = getPlayer(otherPlayerID);
+            
             
             while(matchToPlay.getNumberPlayers() < 2) {
                 folderPath.wait();
             }
+            
+            String otherPlayerID = matchToPlay.getOtherPlayer(player);
+            Player otherPlayer = getPlayer(otherPlayerID);
 
             exchange.sendResponseHeaders(VALID, 0);
             OutputStream body = exchange.getResponseBody();
@@ -794,7 +796,7 @@ public class Server {
     }
 
     /**
-     * RECEIVE: An exist request in the form "exit gameState (matchID)", where matchID only is in the request if state
+     * RECEIVE: An exist request in the form "exit gameState (playerID matchID)", where playerID and matchID only are in the request if state
      * is wait or play
      *   IF gameState == choose:
      *      - Close connection
