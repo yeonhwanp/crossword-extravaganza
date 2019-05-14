@@ -281,6 +281,7 @@ public class Client {
             receiveEnd(rest);
             break;
         default:
+            System.out.println(splitResponse[0]);
             throw new RuntimeException("Should never reach here");
         }
     }
@@ -417,31 +418,11 @@ public class Client {
         lineCount++;
 
         String endString = "";
-
-        // Parsing through available puzzles
-        String numberOfNew = response[lineCount];
-        puzzleMatchString += numberOfNew + "\n";
-        lineCount++;
-        for (int i = 0; i < Integer.valueOf(numberOfNew); i++) {
-            puzzleMatchString += response[lineCount] + "\n";
-            lineCount++;
+        
+        for (int i = 0; i < 6; i++) {
+            endString += response[lineCount] + "\n";
         }
-
-        // Parsing through available matches
-        String numberOfCurrent = response[lineCount];
-        lineCount++;
-
-        puzzleMatchString += numberOfCurrent + "\n";
-        for (int i = 0; i < Integer.valueOf(numberOfCurrent) * 2; i++) {
-            if (i != Integer.valueOf(numberOfCurrent)*2 - 1) {
-                puzzleMatchString += response[lineCount] + "\n";
-            }
-            else {
-                puzzleMatchString += response[lineCount];
-            }
-            lineCount++;
-        }
-        canvas.setList(puzzleMatchString);
+        canvas.setList(endString);
     }
 
     /**
