@@ -48,23 +48,23 @@ public class Client {
 
     /*
      * Abstraction Function
-     * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
+     * AF(host, port, playerID, matchID, canvas, exit) = A client interacting with a CrosswordExtravagnaza client through
      *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnaza 
      *                                             server at the url http://host:port with a unique identifying playerID 
-     *                                             and a matchID if currently in a game. exit represents whether the user
+     *                                             and a matchID if currently in an ongoing game. exit represents whether the user
      *                                             has terminated the connection between the server or not.
      * 
      * Rep Invariant:
-     *  The host is alphanumeric
+     *  host is alphanumeric
      *  port >= 0
      *  The chosen playerID is alphanumeric
-     *  The chosen matchID is only alphanumeric
+     *  The chosen matchID is alphanumeric
      * 
      * Safety from Rep Exposure:
      *  host and port are private, final, and immutable
      *  playerID and matchID are private and immutable
-     *  canvas is a mutable rep but is never returned to the client or taken in from the client
-     *  all public methods take in and return immutable types
+     *  canvas is a mutable type but is never returned to the client or taken in as a parameter, so it is safe from rep exposure
+     *  all public methods take in and return immutable types, so it's safe to directly alias them
      *  
      * Thread safety argument:
      *  host and port are private, final, and immutable
@@ -86,7 +86,7 @@ public class Client {
     //NOTE: on my 15 inch macbook pro (2016), the message for incorrect commands is pretty visible. However,
     //      on a 13 inch macbook pro (2015 and prior) the message barely peeks out through the bottom.
 
-    private void checkRep() {
+    private synchronized void checkRep() {
         assert host.matches("^[a-zA-Z0-9]+$");
         assert port >= 0;
         if (!playerID.equals("")) {
