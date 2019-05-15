@@ -324,6 +324,22 @@ public class Match {
         return word.tryChallenge(player, challengeGuess, this);
     }
     
+    /**
+     * @return a human readable string in the following format:
+     * 
+     * first line: dimensions (rxc)
+     * next r lines: the board with "#" representing cells that don't exist, "?" for empty cells, and characters for cells currently filled in
+     * next line: how many pairs of lines follow (n)
+     * next 2*n lines: starting location (row column), direction (ACROSS/DOWN), word ID, has owner, is confirmed (then owner ID if has owner)
+     * 
+     * example:
+     * 2x3
+     * #?#
+     * #ab
+     * 2
+     * 1 0 DOWN 1 false false
+     * 1 1 ACROSS 2 true false iAmOwner
+     */
     @Override
     public synchronized String toString() {
         String resultString = "";

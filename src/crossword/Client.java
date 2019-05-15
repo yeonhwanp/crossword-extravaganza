@@ -264,15 +264,7 @@ public class Client {
     public synchronized String getMatches() {
         return canvas.getListOfMatches();
     }
-
-    /**
-     * @return a string representation of the substate that the current state is in.
-     *         To be used for testing.
-     */
-    public synchronized String getRequestState() {
-        return canvas.getRequestState();
-    }
-
+    
     // ========= OBSERVER METHODS ========= // 
 
     // ========= PUBLIC METHODS ========= //
@@ -372,9 +364,6 @@ public class Client {
 //            });
             break;
         default:
-            //TODO
-            System.out.println(splitResponse[0]); //Piazza says that if they enter incorrect command, project spec
-            // is unspecified. However, they said we should still give the user a human-readable message.
             throw new RuntimeException("Should never reach here");
         }
         checkRep();
@@ -425,8 +414,6 @@ public class Client {
         canvas.setRequest(ClientState.CHOOSE, chooseState);
         lineCount++;
         
-        System.out.println("here: " + chooseState);
-
         // Set the player ID
         if (chooseState.equals("new")) {
             playerID = lastInput.split(" ")[1];
@@ -515,7 +502,6 @@ public class Client {
 
         // Set the state of the canvas
         String chooseState = response[lineCount];
-        System.out.println("CHOOSE STATE:" + chooseState);
         canvas.setRequest(ClientState.PLAY, chooseState);
         lineCount++;
 
@@ -551,7 +537,6 @@ public class Client {
             endString += response[lineCount] + "\n";
             lineCount++;
         }
-        System.out.println(endString);
         canvas.setScore(endString);
         checkRep();
     }
@@ -669,7 +654,6 @@ public class Client {
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
-            System.out.println(String.valueOf(inputStrings.length) + inputStrings[1].matches("^[A-Za-z]+$"));
             throw new IllegalArgumentException();
         }
         checkRep();

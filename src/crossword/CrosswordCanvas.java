@@ -547,7 +547,6 @@ class CrosswordCanvas extends JComponent {
             }
         }
         else if (state == ClientState.CHOOSE) {
-            System.out.println(currentPuzzleMatches);
             if (request.equals("new") || request.equals("update")) {
                 printChooseInstructions(g);
                 printMatchList(g);
@@ -723,7 +722,7 @@ class CrosswordCanvas extends JComponent {
                 if (thisChar == '?') {
                     drawCell(i, j, g);
                 }
-                else if (Character.isLetter(thisChar)) {
+                else if (Character.isLetter(thisChar) || thisChar == '-') {
                     drawCell(i, j, g);
                     letterInCell(Character.toString(thisChar).toLowerCase(), i, j, g);
                 }

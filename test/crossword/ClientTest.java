@@ -27,191 +27,20 @@ import crossword.Client.ClientState;
  */
 public class ClientTest {
     
-    private static String HOST = "localhost";
-    private static int PORT = 4949;
-
-    /*
-     * Testing Strategy
-     * 
-     * receiveChoose:
-     *  - NEW:
-     *      - number of matches: 0, 1, >1
-     *      - ongoing matches: 0, 1, >1
-     *  - TRY AGAIN:
-     *      - number of matches: 0, 1, >1
-     *      
-     * 
-     * Manual test:
-     *  - connect to server at port 4949
-     *  - verify that the displayed board is consistent with the warmup.puzzle in one-puzzle
-     *  - verify that for each word on the board, the number of cells in that direction are exactly the length of the word
-     *  - verify that the hints are displayed
-     */
+    private static final String HOST = "localhost";
+    private static final int PORT = 4949;
     
     @Test
     public void testAssertionsEnabled() {
         assertThrows(AssertionError.class, () -> { assert false; },
                 "make sure assertions are enabled with VM argument '-ea'");
     }
-    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (0, 0)
-//     */
-//    @Test
-//    public void testNew00() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n0\n0";
-//        final String expected = "0\n0\n";
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (1, 0)
-//     */
-//    @Test
-//    public void testNew10() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n1\nHello.PUZZLE\n0";
-//        final String expected = "1\nHello.PUZZLE\n0\n";
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (>1, 0)
-//     */
-//    @Test
-//    public void testNewG10() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n0";
-//        final String expected = "3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n0\n";
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (0, 1)
-//     */
-//    @Test
-//    public void testNew01() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n0\n1\nwow_running.pi";
-//        final String expected = "0\n1\nwow_running.pi\n";
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (0, >1)
-//     */
-//    @Test
-//    public void testNew0G1() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n0\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img";
-//        final String expected = "0\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img\n";
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (>1, >1)
-//     */
-//    @Test
-//    public void testNewG1G1() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img";
-//        final String expected = "3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img\n";
-//        
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-//    
-//    /*
-//     * Partitions covered:
-//     * receiveChoose: NEW (>1, >1)
-//     */
-//    @Test
-//    public void testChooseTryAgainG1G1() throws IOException {
-//        final Client testClient = new Client();
-//        
-//        final String input = "NEW\n3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img";
-//        final String expected = "3\nHello.PUZZLE\nlmao.hi\nPLSgiveA\n4\nwow_running.pi\nitIS5AM\nsleep.isgood\nPLEASEhelp.img\n";
-//        
-//        final Reader inputReader = new StringReader(input);
-//        
-//        final BufferedReader reader = new BufferedReader(inputReader);
-//        
-//        testClient.receiveChoose(reader);
-//        final String response = testClient.getMatchList();
-//        
-//        assertEquals(expected, response);
-//    }
-    
-    // more tests for receiveChoose's TRY AGAIN
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     /*
      * Testing Strategy
      * 
-     * receiveResponse:
+     * parseResponse:
      *  - receiveChoose:
      *    a. new game - 0, 1, >1 files in server responses
      *    b. try again - 0, 1, >1 matches in server responses
@@ -219,9 +48,17 @@ public class ClientTest {
      *    a. MANUAL TEST: check to make sure that it waits for another player to connect
      *    b. MANUAL TEST: check to make sure that the only valid command is exit
      *  - receivePlay:
-     *    a. 
+     *    a. Provided parameter:
+     *      - new
+     *      - update
+     *      - wrong_id
+     *      - incorrect_length
+     *      - inconsistent_current
+     *      - success
+     *      - wonch
+     *      - lostch
+     *      - invalidch
      *  - receiveEnd:
-     *    a. 
      *    
      * 
      */
@@ -254,32 +91,16 @@ public class ClientTest {
      */
     @Test
     public void testReceiveStart1() throws IOException {
-        
-        SwingUtilities.invokeLater(() -> {
         // Always need this
         final Client testClient = new Client(HOST, PORT);
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START player23";
         testClient.parseUserInput(userInput);
         
         String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        assertEquals("player23", testClient.getUserID(), "Expected correct id");
-        assertEquals("1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao", testClient.getMatches(), "Expected correct matches");
-        });
+        testClient.parseResponse(serverResponse, userInput);
     }
     
     /*
@@ -287,32 +108,20 @@ public class ClientTest {
      */
     @Test
     public void testReceiveStartG1() throws IOException {
-        
-        SwingUtilities.invokeLater(() -> {
+       
         // Always need this
         final Client testClient = new Client(HOST, PORT);
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START hmmm";
         testClient.parseUserInput(userInput);
         
         String serverResponse = "choose\nnew\n3\nthisIsgreat.puzzle\nHELLO.puzzle\nPlsGiveUsA.puzzle\n2\nCURRENT\nlmao\nTESTing\nMhm\n";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(serverResponse, userInput);
         
         assertEquals("hmmm", testClient.getUserID(), "Expected correct id");
         assertEquals("3\nthisIsgreat.puzzle\nHELLO.puzzle\nPlsGiveUsA.puzzle\n2\nCURRENT\nlmao\nTESTing\nMhm", testClient.getMatches(), "Expected correct matches");
-        });
     }
     
     /*
@@ -320,42 +129,25 @@ public class ClientTest {
      */
     @Test
     public void testReceiveChooseTryAgain0() throws IOException {
-        
-        SwingUtilities.invokeLater(() -> {
+
         // Always need this
         final Client testClient = new Client(HOST, PORT);
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START hmmm";
         testClient.parseUserInput(userInput);
         
         String serverResponse = "choose\nnew\n3\nthisIsgreat.puzzle\nHELLO.puzzle\nPlsGiveUsA.puzzle\n2\nCURRENT\nlmao\nTESTing\nMhm\n";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(serverResponse, userInput);
         
         String userInput2 = "PLAY whatever.puzzle";
         String serverResponse2 = "choose\ntry again\n0\n0\n";
-        
-        try {
-            testClient.parseResponse(serverResponse2, userInput2);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+           
+        testClient.parseResponse(serverResponse2, userInput2);
 
         assertEquals("hmmm", testClient.getUserID(), "Expected correct id");
         assertEquals("0\n0\n", testClient.getMatches(), "Expected correct matches");
-        });
     }
     
     /*
@@ -363,43 +155,25 @@ public class ClientTest {
      */
     @Test
     public void testReceiveChooseTryAgain1() throws IOException {
-        
-        SwingUtilities.invokeLater(() -> {
-        
         // Always need this
         final Client testClient = new Client(HOST, PORT);
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START Player3";
         testClient.parseUserInput(userInput);
         
         String serverResponse = "choose\nnew\n0\n0";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        
+        testClient.parseResponse(serverResponse, userInput);
         
         String userInput2 = "PLAY whatever.puzzle";
         String serverResponse2 = "choose\ntry again\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
-        
-        try {
-            testClient.parseResponse(serverResponse2, userInput2);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            
+        testClient.parseResponse(serverResponse2, userInput2);
         
         assertEquals("Player3", testClient.getUserID(), "Expected correct id");
         assertEquals("1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao", testClient.getMatches(), "Expected correct matches");
-        });
     }
     
     /*
@@ -408,68 +182,333 @@ public class ClientTest {
     @Test
     public void testReceiveChooseTryAgainG1() throws IOException {
         
-        SwingUtilities.invokeLater(() -> {
-        
         // Always need this
         final Client testClient = new Client(HOST, PORT);
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START player23";
         testClient.parseUserInput(userInput);
         
         String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(serverResponse, userInput);
         
         String userInput2 = "PLAY WHaaTTTEee.puzzle";
         String serverResponse2 = "choose\ntry again\n3\nthisIsgreat.puzzle\nHELLO.puzzle\nPlsGiveUsA.puzzle\n2\nCURRENT\nlmao\nTESTing\nMhm\n";
         
-        try {
-            testClient.parseResponse(serverResponse2, userInput2);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        testClient.parseResponse(serverResponse2, userInput2);
         
         assertEquals("player23", testClient.getUserID(), "Expected correct id");
         assertEquals("3\nthisIsgreat.puzzle\nHELLO.puzzle\nPlsGiveUsA.puzzle\n2\nCURRENT\nlmao\nTESTing\nMhm", testClient.getMatches(), "Expected correct matches");
-        });
     }
     
-//    /*
-//     * receiveWait: check updated game state
-//     */
-//    @Test
-//    public void testReceiveWait() throws IOException {
-//        
-//        // Always need this
-//        final Client testClient = new Client(HOST, PORT);
-//        String receiveInit = "start\nnew game";
-//        testClient.parseResponse(receiveInit, "");
-//        
-//        String userInput = "START player23";
-//        testClient.parseUserInput(userInput);
-//        
-//        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
-//        testClient.parseResponse(serverResponse, userInput);
-//        
-//        String userInput2 = "NEW WHaaTTTEee.puzzle";
-//        String serverResponse2 = "wait";
-//        
-//        testClient.parseResponse(serverResponse2, userInput2);
-//        
-//        assertEquals(ClientState.WAIT, testClient.getState(), "Expected correct state");
-//    }
+    /*
+     * receivePlay: new
+     */
+    @Test
+    public void testReceivePlayNew() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: update
+     */
+    @Test
+    public void testReceivePlayUpdate() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nupdate\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: wrong_id
+     */
+    @Test
+    public void testReceivePlayWrongID() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nwrong_id\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: incorrect_length
+     */
+    @Test
+    public void testReceivePlayIncorrectLength() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nincorrect_length\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: inconsistent_current
+     */
+    @Test
+    public void testReceivePlayInconsistent() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\ninconsistent_current\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: success
+     */
+    @Test
+    public void testReceivePlaySuccess() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nsuccess\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: success
+     */
+    @Test
+    public void testReceivePlayWonch() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player23";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player23", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nwonch\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: lostch
+     */
+    @Test
+    public void testReceivePlayLostch() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START christopher";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("christopher", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\nlostch\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receivePlay: lostch
+     */
+    @Test
+    public void testReceivePlayInvalidch() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player25", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "play\ninvalidch\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    /*
+     * receiveEnd
+     */
+    @Test
+    public void testReceivePlayRecieveEnd() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY thisIsgreatpuzzle";
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        assertEquals("player25", testClient.getUserID(), "Expected correct id");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        String serverResponse3 = "show_score\nwilly\nwilly\n3\n0\nchris\n0\n0";
+        testClient.parseResponse(serverResponse3, userInput2);
+        
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+    }
+    
+    
+    
     
     
 }
