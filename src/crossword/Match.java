@@ -77,15 +77,19 @@ public class Match {
         for (WordTuple wordTuple : wordTuples) {
             Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter,
                     wordTuple.getWord(), wordTuple.getDirection());
+
+            
             this.words.add(newWord);
+           
             this.idToWordMap.put(newWord.getID(), newWord);
             counter++;
         }
                 
         int maxRow = 0;
         int maxColumn = 0;
-        
+
         for(Word word : words) {
+            
             maxRow = Math.max(maxRow, word.getRowUpperBound()+1);
             maxColumn = Math.max(maxColumn, word.getColumnUpperBound()+1);
         }
@@ -106,6 +110,7 @@ public class Match {
             final int rowHigher = word.getRowUpperBound();
             final int colLower = word.getColumnLowerBound();
             final int colHigher = word.getColumnUpperBound();
+            
             
             // CAUTION CAUTION CAUTION: DO *NOT* CHANGE THIS
             for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant, CANNOT CHANGE THIS
