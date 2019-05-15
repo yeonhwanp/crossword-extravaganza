@@ -71,6 +71,8 @@ public class Word {
         
         this.confirmed = false;
         this.owner = Optional.empty();
+        
+//        checkRep();
     }
     
     
@@ -82,7 +84,7 @@ public class Word {
         assert this.id >= 1;
         assert this.direction != null;
         assert involvedCells.size() == correctValue.length();
-        if(this.isConfirmed()) {
+        if(this.confirmed) {
             assert this.hasOwner();
         }
         
@@ -307,7 +309,7 @@ public class Word {
      */
     public void addInvolvedCell(Cell cell) {
         involvedCells.add(cell);
-        checkRep();
+//        checkRep();
     }
     
     /**
@@ -321,7 +323,6 @@ public class Word {
             wordValue += cell.getCurrentValue();
         }
         
-        checkRep();
         return wordValue;
     }
     
