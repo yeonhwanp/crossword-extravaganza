@@ -83,11 +83,9 @@ public class Word {
         assert this.startRow >= 0 && this.startCol >= 0;
         assert this.id >= 1;
         assert this.direction != null;
-        System.out.println(involvedCells.size());
-        System.out.println(correctValue.length());
         assert involvedCells.size() == correctValue.length();
         if(this.confirmed) {
-            assert this.hasOwner();
+            assert this.owner.isPresent();
         }
         
         for(int i = 0; i < involvedCells.size()-1; i++) {
@@ -141,7 +139,6 @@ public class Word {
      * @return whether or not the word is down
      */
     public boolean isVertical() {
-        checkRep();
 
         return direction == Direction.DOWN;
     }
@@ -151,8 +148,7 @@ public class Word {
      * @return whether or not the word is across
      */
     public boolean isHorizontal() {
-        checkRep();
-
+        
         return direction == Direction.ACROSS;
     }
     
@@ -181,8 +177,6 @@ public class Word {
      * @return the smallest row index
      */
     public int getRowLowerBound() {
-        checkRep();
-
         return startRow;
     }
     
@@ -191,7 +185,6 @@ public class Word {
      * @return the largest row index
      */
     public int getRowUpperBound() {
-        checkRep();
         if (this.isVertical()) {
             return startRow + this.getLength() - 1;
         }
@@ -205,7 +198,6 @@ public class Word {
      * @return the smallest column index
      */
     public int getColumnLowerBound() {
-        checkRep();
         return startCol;
     }
     
@@ -214,7 +206,6 @@ public class Word {
      * @return the largest column index
      */
     public int getColumnUpperBound() {
-        checkRep();
         if (this.isHorizontal()) {
             return startCol + this.getLength() - 1;
         }
@@ -228,7 +219,6 @@ public class Word {
      * @return the length of the correct word
      */
     public int getLength() {
-        checkRep();
         return correctValue.length();
     }
     
@@ -288,22 +278,22 @@ public class Word {
         checkRep();
     }
     
-    public void addInvolvedCells(Match currentMatch) {
-        final int rowLower = this.getRowLowerBound();
-        final int rowHigher = this.getRowUpperBound();
-        final int colLower = this.getColumnLowerBound();
-        final int colHigher = this.getColumnUpperBound();
-        
-        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
-            for(int j = colLower; j <= colHigher; j++) {
-                if(this.gameBoard[i][j].isAbsent()) {
-                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
-                }
-//                word.addInvolvedCell(this.gameBoard[i][j]);
-                this.gameBoard[i][j].addWord(word);
-            }
-        }
-    }
+//    public void addInvolvedCells(Match currentMatch) {
+//        final int rowLower = this.getRowLowerBound();
+//        final int rowHigher = this.getRowUpperBound();
+//        final int colLower = this.getColumnLowerBound();
+//        final int colHigher = this.getColumnUpperBound();
+//        
+//        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
+//            for(int j = colLower; j <= colHigher; j++) {
+//                if(this.gameBoard[i][j].isAbsent()) {
+//                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
+//                }
+////                word.addInvolvedCell(this.gameBoard[i][j]);
+//                this.gameBoard[i][j].addWord(word);
+//            }
+//        }
+//    }
     
     /**
      * Add a cell that corresponds to this given word.
