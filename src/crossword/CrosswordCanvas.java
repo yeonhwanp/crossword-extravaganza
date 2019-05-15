@@ -30,7 +30,8 @@ class CrosswordCanvas extends JComponent {
     private String currentBoard;
     private String currentPuzzleMatches;
     private String endString;
-    
+    private String playStatus = "";
+
     /*
      * Abstraction Function
      * AF(state, request, currentBoard, currentPuzzleMathces, endString) = a GUI representing a CrosswordExtravaganza
@@ -89,12 +90,12 @@ class CrosswordCanvas extends JComponent {
      * Font for small indices used to indicate an ID in the crossword.
      */
     private final Font textFont = new Font("Arial", Font.PLAIN, 16);
-    
+
     /**
      * Font for bold things
      */
     private final Font boldFont = new Font("Arial", Font.BOLD, 32);
-    
+
     /**
      * Generally big font
      */
@@ -109,7 +110,7 @@ class CrosswordCanvas extends JComponent {
     private void drawCell(int row, int col, Graphics g) {
         Color oldColor = g.getColor();
         g.drawRect(originX + col * delta,
-                   originY + row * delta, delta, delta);
+                originY + row * delta, delta, delta);
         g.setColor(Color.WHITE);
         g.fillRect(originX + col * delta,
                 originY + row * delta, delta, delta);
@@ -127,7 +128,7 @@ class CrosswordCanvas extends JComponent {
         g.setFont(mainFont);
         FontMetrics fm = g.getFontMetrics();
         g.drawString(letter, originX + col * delta + delta / 6,
-                             originY + row * delta + fm.getAscent() + delta / 10);
+                originY + row * delta + fm.getAscent() + delta / 10);
     }
 
     /**
@@ -140,7 +141,7 @@ class CrosswordCanvas extends JComponent {
     private void verticalId(String id, int row, int col, Graphics g) {
         g.setFont(indexFont);
         g.drawString(id, originX + col * delta + delta / 8,
-                         originY + row * delta - delta / 15);
+                originY + row * delta - delta / 15);
     }
 
     /**
@@ -155,7 +156,7 @@ class CrosswordCanvas extends JComponent {
         FontMetrics fm = g.getFontMetrics();
         int maxwidth = fm.charWidth('0') * id.length();
         g.drawString(id, originX + col * delta - maxwidth - delta / 8,
-                         originY + row * delta + fm.getAscent() + delta / 15);
+                originY + row * delta + fm.getAscent() + delta / 15);
     }
 
     // The three methods that follow are meant to show you one approach to writing
@@ -164,7 +165,7 @@ class CrosswordCanvas extends JComponent {
     // style and placement to convey information about the state of the game.
 
     private int line = 0;
-    
+
     // The Graphics interface allows you to place text anywhere in the component,
     // but it is useful to have a line-based abstraction to be able to just print
     // consecutive lines of text.
@@ -212,7 +213,7 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
         ++line;
     }
-    
+
     // Centered text
     private void printlnCenterBig(String s, Graphics g) {
         g.setFont(bigFont);
@@ -229,7 +230,7 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
         ++line;
     }
-    
+
     // Centered bolded text
     private void printlnCenterBold(String s, Graphics g) {
         g.setFont(boldFont);
@@ -246,7 +247,7 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
         ++line;
     }
-    
+
     // Centered regular text
     private void printlnCenter(String s, Graphics g) {
         g.setFont(textFont);
@@ -265,9 +266,9 @@ class CrosswordCanvas extends JComponent {
     }
 
     private int x = 1;
-    
+
     // =============== MY METHODS =============== /
-    
+
     /**
      * Sets the state of the canvas as well as the parameters for the state.
      * @param state the state of the game the canvas should currently be representing
@@ -295,7 +296,7 @@ class CrosswordCanvas extends JComponent {
         }
         request = input;
     }
-    
+
     /**
      * Sets the board string of the canvas 
      * @param input the string representation of a board to update the canvas with
@@ -303,7 +304,7 @@ class CrosswordCanvas extends JComponent {
     public void setBoard(String input) {
         currentBoard = input;
     }
-    
+
     /**
      * Sets the available puzzles to the string provided TODO bad spec?
      * @param puzzleMatchString the string of available puzzles and matches
@@ -311,7 +312,7 @@ class CrosswordCanvas extends JComponent {
     public void setList(String puzzleMatchString) {
         currentPuzzleMatches = puzzleMatchString;
     }
-    
+
     /**
      * Updates the endgame score
      * @param scoreString the string holding the score information of both players
@@ -319,35 +320,35 @@ class CrosswordCanvas extends JComponent {
     public void setScore(String scoreString) {
         endString = scoreString;
     }
-    
+
     /**
      * @return The state of the CrosswordCanvas game
      */
     public ClientState getState() {
         return state;
     }
-    
+
     /**
      * @return a text representation of the client gameboard along with the necessary information TODO william
      */
     public String getCurrentBoard() {
         return currentBoard;
     }
-    
+
     /**
      * @return a text representation of the list of valid/available matches.
      */
     public String getListOfMatches() {
         return currentPuzzleMatches;
     }
-    
+
     /**
      * @return the parameters of the state
      */
     public String getRequestState() {
         return request;
     }
-    
+
     // =============== MY METHODS =============== //
 
     /**
@@ -360,10 +361,10 @@ class CrosswordCanvas extends JComponent {
      */
     @Override
     public void paint(Graphics g) {
-        
+
         // Clear all the stuff?
         line = 0;
-        
+
         // This is for the START state
         if (state == ClientState.START) {
             if (request.equals("new game")) {
@@ -371,7 +372,7 @@ class CrosswordCanvas extends JComponent {
             }
             else if (request.equals("try again")) {     
                 printStartInstructions(g);
-                
+
                 line += 10;
                 printlnCenterBold("That was an invalid request or the ID already exists.", g);
                 printlnCenterBold("Try again!", g);
@@ -395,13 +396,47 @@ class CrosswordCanvas extends JComponent {
         }
         else if (state == ClientState.PLAY) {
             //... Conditionals based on PLAY stuff ...// 
+
             printBoard(g);
+
+            Color oldColor = g.getColor();
+            FontMetrics fm = g.getFontMetrics();
+            
+            g.setColor(Color.BLUE);
+            
+            switch (request) {
+            case "validtry":
+                playStatus = "Inserted guess.";
+                break;
+            case "invalidtry":
+                playStatus = "Invalid TRY command.";
+                break;
+            case "wonch":
+                //won challenge!
+                playStatus = "Successful Challenge!";
+                break;
+            case "lostch":
+                //lost challenge
+                playStatus = "You lost the challenge.";
+                break;
+            case "invalidch":
+                //invalid challenge
+                playStatus = "Invalid CHALLENGE command.";
+                break;
+            default:
+                break;
+            }
+            
+            System.out.println("PLAYSTATUS" + playStatus + "|" + request);
+            g.drawString(playStatus, (1200 - fm.stringWidth(playStatus)) / 20, originY + 150 + line * fm.getAscent() * 6 / 5);
+            
+            g.setColor(oldColor);
         }
         else if (state == ClientState.SHOW_SCORE) {
             printScores(g);
         }
     }
-    
+
     // Method to help print necessary information at the start state
     private void printStartInstructions(Graphics g) {
         printlnCenterBig("Welcome to Crossword Extravaganza!", g);
@@ -413,7 +448,7 @@ class CrosswordCanvas extends JComponent {
         printlnCenterBold("Please enter into the textbox: START player_ID", g);
         printlnCenterBig("player_ID should only be composed of alphanumerics.", g);
     }
-    
+
     // Method to help print necessary information at the choose state
     private void printChooseInstructions(Graphics g) {
         printlnCenterBold("Valid Commands:", g);
@@ -425,22 +460,22 @@ class CrosswordCanvas extends JComponent {
         printlnCenter("EXIT", g);
         line -= 2;
     }
-    
+
     // Method to print scores when the game is over
     private void printScores(Graphics g) {
         String[] lines = endString.split("\\n");
         int lineCounter = 1;
-        
+
         Color oldColor = g.getColor();
         FontMetrics fm = g.getFontMetrics();
-        
+
         printlnCenterBold("The game is over! Winner: " + request, g);
-        
+
         ++line;
         // Print out my score
         g.setColor(new Color(100, 0, 0));
         g.setFont(textFont);
-        
+
         line += 3;
         g.drawString("Your total score: " + lines[lineCounter], originX + 250, originY + line * fm.getAscent() * 6 / 5);
         g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+3], originX + 500, originY + line * fm.getAscent() * 6 / 5);
@@ -450,12 +485,12 @@ class CrosswordCanvas extends JComponent {
 
         g.setColor(oldColor);
     }
-    
+
     // Method to print the list of valid and available matches
     private void printMatchList(Graphics g) {
         String[] lines = currentPuzzleMatches.split("\\n");
         int lineCounter = 0;
-        
+
         // Printing valid puzzles
         printlnCenterBold("Valid Puzzles To Choose From:", g);
         line += 6;
@@ -466,7 +501,7 @@ class CrosswordCanvas extends JComponent {
             printlnCenter(listCounter + ". " + lines[lineCounter], g);
             lineCounter++;
         }
-        
+
         line -= 5;
         // Printing valid Matches
         printlnCenterBold("Valid Matches To Connect To:", g);
@@ -479,29 +514,31 @@ class CrosswordCanvas extends JComponent {
             lineCounter += 2;
         }
     }
-    
+
     // Method to help print the board
     private void printBoard(Graphics g) {
-        
+
         Map<String, Set<String>> ownedMap = new HashMap<>();
         Map<String, Set<String>> confirmedMap = new HashMap<>();
         Map<String, Integer> scoreMap = new HashMap<>();
         Map<String, Integer> challengeMap = new HashMap<>();
-        
+
         // First, split input string according to newlines
         String[] lines = currentBoard.split("\\n");
         int lineCounter = 0;
-        
+
         // Get first player
         ownedMap.put(lines[0], new HashSet<String>());
         confirmedMap.put(lines[lineCounter], new HashSet<String>());
+        String myName = lines[0];
         String myScore = lines[1];
         String myChallengePoints = lines[2];
         lineCounter += 3;
-        
+
         // Get second player
         ownedMap.put(lines[lineCounter], new HashSet<String>());
         confirmedMap.put(lines[lineCounter], new HashSet<String>());
+        String theirName = lines[lineCounter];
         String theirScore = lines[lineCounter+1];
         String theirChallengePoints = lines[lineCounter+2];
         lineCounter += 3;
@@ -527,7 +564,7 @@ class CrosswordCanvas extends JComponent {
         // Put in IDs 
         int numCount = 2 * Integer.valueOf(lines[lineCounter]);
         lineCounter++;
-        
+
         // There are 8 words. There are 2 lines for each word.
         for (int i = 0; i < numCount; i += 2) {
             int wordIndex = lineCounter + i;
@@ -535,13 +572,27 @@ class CrosswordCanvas extends JComponent {
             for (int j = 0; j < 2; j++) {
                 if (j == 0) {
                     String[] split = lines[wordIndex].split(" ");
+
+                    // Create the IDs
                     if (split[2].equals("ACROSS")) {
                         horizontalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
                     else if (split[2].equals("DOWN")) {
                         verticalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
+
+                    // Add the ID to the list of descriptions
                     wordString += "ID: " + split[3];
+
+                    // Add to the list of controlled words
+                    if (split[4].equals("true") && split[5].equals("false")) {
+                        ownedMap.get(split[6]).add(split[3]);
+                    }
+
+                    // Add to the list of confirmed words
+                    else if (split[4].equals("true") && split[5].equals("true")) {
+                        confirmedMap.get(split[6]).add(split[3]);
+                    }
                 }
                 else if (j == 1) {
                     wordString += "     Hint: " + lines[wordIndex+1];
@@ -549,7 +600,55 @@ class CrosswordCanvas extends JComponent {
             }
             println(wordString, g);
         }
-        
-        // Get score + challenge points.
+
+        String myOwnedIDs = "";
+        String myConfirmedIDs = "";
+
+        String theirOwnedIDs = "";
+        String theirConfirmedIDs = "";
+
+        for (String owned : ownedMap.get(myName)) {
+            myOwnedIDs += owned + " ";
+        }
+
+        for (String confirmed : confirmedMap.get(myName)) {
+            myConfirmedIDs += confirmed + " ";
+        }
+
+        for (String owned : ownedMap.get(theirName)) {
+            theirOwnedIDs += owned + " ";
+        }
+
+        for (String confirmed : confirmedMap.get(theirName)) {
+            theirConfirmedIDs += confirmed + " ";
+        }
+
+        // Printing scores + owned words
+
+        Color oldColor = g.getColor();
+        FontMetrics fm = g.getFontMetrics();
+        g.setColor(new Color(100, 0, 0));
+        g.setFont(textFont);
+
+        // Showing score/challenge
+        line += 3;
+        g.drawString("Your total score: " + myScore, originX + 250, originY + 150 + line * fm.getAscent() * 6 / 5);
+        g.drawString(theirName + "'s total score: " + theirScore, originX + 500, originY + 150 + line * fm.getAscent() * 6 / 5);
+        ++line;
+        g.drawString("Your challenge points: " + myChallengePoints, originX + 250, originY + 150 + line * fm.getAscent() * 6 / 5);
+        g.drawString(theirName + "'s challenge points: " + theirChallengePoints, originX + 500, originY + 150 + line * fm.getAscent() * 6 / 5);
+
+        // Showing owned/confirmed words
+        g.drawString("Words you control: " + myOwnedIDs, originX + 250, originY + 200 + line * fm.getAscent() * 6 / 5);
+        g.drawString("Words " + theirName + " controls: " + theirOwnedIDs, originX + 500, originY + 200 + line * fm.getAscent() * 6 / 5);
+        ++line;
+        g.drawString("Words you confirmed: " + myConfirmedIDs, originX + 250, originY + 200 + line * fm.getAscent() * 6 / 5);
+        g.drawString("Words " + theirName + " confirmed: " + theirConfirmedIDs, originX + 500, originY + 200 + line * fm.getAscent() * 6 / 5);
+
+
+        g.setColor(oldColor);
+
+        // Print score + challenge points
+
     }
 }

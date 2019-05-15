@@ -136,7 +136,7 @@ public class Client {
             textbox.setText("");
             new Thread(() -> {
                 handleCommand(textboxInput);
-            }).start();
+             }).start();
         });
 
         enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
@@ -183,7 +183,6 @@ public class Client {
             if (exit) {System.exit(0);}
             parseResponse(response, userInput);
             responseBuffer.close();
-            repaint(); 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
@@ -268,7 +267,8 @@ public class Client {
         String sendString = "";
         
         if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
-            sendString = "/start/player_ID";
+            sendString = "/start/" + playerID;
+            return sendString;
         }
 
         // Using the appropriate methods to send the request.
@@ -311,19 +311,31 @@ public class Client {
 
         switch (splitResponse[0]) {
         case "start":
+            SwingUtilities.invokeLater(() -> {
             receiveStart(rest);
+            repaint();
+            });
             break;
         case "choose":
+            SwingUtilities.invokeLater(() ->  {
             receiveChoose(rest, lastInput);
+            repaint();
+            });
             break;
         case "wait":
             receiveWait(lastInput);
             break;
         case "play":
+            SwingUtilities.invokeLater(() -> {
             receivePlay(rest, lastInput);
+            repaint();
+            });
             break;
         case "show_score":
+            SwingUtilities.invokeLater(() -> {
             receiveEnd(rest);
+            repaint();
+            });
             break;
         default:
             //TODO
@@ -337,13 +349,14 @@ public class Client {
      * Refreshes the GUI
      */
     public synchronized void repaint() {
-        try {
-            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        canvas.repaint();
+//        try {
+//            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
+//        } catch (InvocationTargetException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     // ========= PUBLIC METHODS ========= //
@@ -465,6 +478,7 @@ public class Client {
 
         // Set the state of the canvas
         String chooseState = response[lineCount];
+        System.out.println("CHOOSE STATE:" + chooseState);
         canvas.setRequest(ClientState.PLAY, chooseState);
         lineCount++;
 
