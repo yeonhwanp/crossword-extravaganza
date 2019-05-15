@@ -40,6 +40,7 @@ public class Client {
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
     private static final int CHOOSE_INPUT_LENGTH = 3;
+    private final boolean exit = false;
     private final String host;
     private final int port;
     private String playerID = "";
@@ -176,6 +177,9 @@ public class Client {
             System.out.println("-----------------------");
             parseResponse(response, userInput);
             responseBuffer.close();
+            
+            if (exit) {System.exit(0);}
+            
             repaint(); 
         } catch (IOException e) {
             e.printStackTrace();
@@ -578,7 +582,7 @@ public class Client {
             }
             else if (canvas.getState() == ClientState.CHOOSE || canvas.getState() == ClientState.SHOW_SCORE){
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID;
-                System.exit(0);
+                exit = true;
             }
         }
         else {
