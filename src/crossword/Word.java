@@ -71,6 +71,8 @@ public class Word {
         
         this.confirmed = false;
         this.owner = Optional.empty();
+        
+//        checkRep();
     }
     
     
@@ -81,8 +83,10 @@ public class Word {
         assert this.startRow >= 0 && this.startCol >= 0;
         assert this.id >= 1;
         assert this.direction != null;
+        System.out.println(involvedCells.size());
+        System.out.println(correctValue.length());
         assert involvedCells.size() == correctValue.length();
-        if(this.isConfirmed()) {
+        if(this.confirmed) {
             assert this.hasOwner();
         }
         
@@ -284,22 +288,22 @@ public class Word {
         checkRep();
     }
     
-//    public void addInvolvedCells(Match currentMatch) {
-//        final int rowLower = this.getRowLowerBound();
-//        final int rowHigher = this.getRowUpperBound();
-//        final int colLower = this.getColumnLowerBound();
-//        final int colHigher = this.getColumnUpperBound();
-//        
-//        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
-//            for(int j = colLower; j <= colHigher; j++) {
-//                if(this.gameBoard[i][j].isAbsent()) {
-//                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
-//                }
-////                word.addInvolvedCell(this.gameBoard[i][j]);
-//                this.gameBoard[i][j].addWord(word);
-//            }
-//        }
-//    }
+    public void addInvolvedCells(Match currentMatch) {
+        final int rowLower = this.getRowLowerBound();
+        final int rowHigher = this.getRowUpperBound();
+        final int colLower = this.getColumnLowerBound();
+        final int colHigher = this.getColumnUpperBound();
+        
+        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
+            for(int j = colLower; j <= colHigher; j++) {
+                if(this.gameBoard[i][j].isAbsent()) {
+                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
+                }
+//                word.addInvolvedCell(this.gameBoard[i][j]);
+                this.gameBoard[i][j].addWord(word);
+            }
+        }
+    }
     
     /**
      * Add a cell that corresponds to this given word.
@@ -307,7 +311,7 @@ public class Word {
      */
     public void addInvolvedCell(Cell cell) {
         involvedCells.add(cell);
-        checkRep();
+//        checkRep();
     }
     
     /**
@@ -321,7 +325,6 @@ public class Word {
             wordValue += cell.getCurrentValue();
         }
         
-        checkRep();
         return wordValue;
     }
     
