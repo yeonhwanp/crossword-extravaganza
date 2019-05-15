@@ -79,10 +79,10 @@ class CrosswordCanvas extends JComponent {
      *                                                                     
      * 
      * Rep Invariant:
-     *  currentBoard only contains ?, #, alphanumerics, and newlines.
      *  in currentPuzzleMatches, integers precede the lines of matches.
      *      For the first set of numbers lines = int.
      *      For the second set of numbers lines = int*2.
+     *      
      *  if state == ClientState.START:
      *      request == "new game" or "try again"
      *  if state == ClientState.CHOOSE:
@@ -91,6 +91,15 @@ class CrosswordCanvas extends JComponent {
      *      request == ""
      *  if state == ClientState.PLAY:
      *      request == new, update, validtry, invalidtry, wonch, lostch, invalidch
+     *      
+     *  if request == success: playstatus = "Inserted guess."
+     *  if request == inconsistent_current: playstatus = "Guess was inconsistent with the current board."
+     *  if request == incorrect_length: playstatus = "Guess was not of the correct length."
+     *  if request == wrong_id: playstatus = "ID was not valid."
+     *  if request == wonch: playstatus = "Successful Challenge!"
+     *  if request == lostch: playstatus = "You lost the challenge."
+     *  if request == invalidch: playstatus = "Invalid CHALLENGE command."
+     *  
      * 
      * Safety from Rep Exposure:
      *  All variables are private
@@ -100,6 +109,13 @@ class CrosswordCanvas extends JComponent {
      *  Threadsafe because Client is threadsafe and each crowssword canvas is unique to one Client.
      * 
      */
+
+    private void checkRep() {
+        if (!currentPuzzleMatches.equals("")) {
+            int line = 0;
+            for (int i )
+        }
+    }
 
     /**
      * Horizontal offset from corner for first cell.
