@@ -55,7 +55,6 @@ class CrosswordCanvas extends JComponent {
     private static final int END_INST_SPACE = 5;
     private static final int PLAYER_LINES = 3;
     private static final int MATCH_LIST_SPACING = 6;
-    private static final int GEN_LIST_SPACING = 10;
 
     private ClientState state;
     private String request;
@@ -709,8 +708,6 @@ class CrosswordCanvas extends JComponent {
 
         Map<String, Set<String>> ownedMap = new HashMap<>();
         Map<String, Set<String>> confirmedMap = new HashMap<>();
-        Map<String, Integer> scoreMap = new HashMap<>();
-        Map<String, Integer> challengeMap = new HashMap<>();
 
         // First, split input string according to newlines
         String[] lines = currentBoard.split("\\n");
