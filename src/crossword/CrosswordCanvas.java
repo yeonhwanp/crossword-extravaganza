@@ -7,6 +7,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JComponent;
 
@@ -479,41 +483,58 @@ class CrosswordCanvas extends JComponent {
     // Method to help print the board
     private void printBoard(Graphics g) {
         
+        Map<String, Set<String>> ownedMap = new HashMap<>();
+        Map<String, Set<String>> confirmedMap = new HashMap<>();
+        Map<String, Integer> scoreMap = new HashMap<>();
+        Map<String, Integer> challengeMap = new HashMap<>();
+        
         // First, split input string according to newlines
         String[] lines = currentBoard.split("\\n");
-        int lineCounter = 1;
+        int lineCounter = 0;
         
-        // First line is going to give us dimensions so split according to x
-        String[] dimensions = lines[0].split("x");
+        // Get first player
+        ownedMap.put(lines[0], new HashSet<String>());
+        confirmedMap.put(lines[lineCounter], new HashSet<String>());
+        String myScore = lines[1];
+        String myChallengePoints = lines[2];
+        lineCounter += 3;
         
+        // Get second player
+        ownedMap.put(lines[lineCounter], new HashSet<String>());
+        confirmedMap.put(lines[lineCounter], new HashSet<String>());
+        String theirScore = lines[lineCounter+1];
+        String theirChallengePoints = lines[lineCounter+2];
+        lineCounter += 3;
+        // First line after is going to give us dimensions so split according to x
+        String[] dimensions = lines[lineCounter].split("x");
+        lineCounter++;
+
         // Create the board with values
-        for (; lineCounter < Integer.valueOf(dimensions[0]) + 1; lineCounter++) {
+        for (int i = 0; i < Integer.valueOf(dimensions[0]); i++) {
             for (int j = 0; j <Integer.valueOf(dimensions[1]); j++) {
-                
                 char thisChar = lines[lineCounter].charAt(j);
                 if (thisChar == '?') {
-                    drawCell(lineCounter-1, j, g);
+                    drawCell(i, j, g);
                 }
                 else if (Character.isLetter(thisChar)) {
-                    drawCell(lineCounter-1, j, g);
-                    letterInCell(Character.toString(thisChar), lineCounter-1, j, g);
+                    drawCell(i, j, g);
+                    letterInCell(Character.toString(thisChar), i, j, g);
                 }
             }
+            lineCounter++;
         }
-        
+
         // Put in IDs 
         int numCount = 2 * Integer.valueOf(lines[lineCounter]);
         lineCounter++;
-        while (lineCounter < Integer.valueOf(dimensions[0]) + numCount + 1) {
+        
+        // There are 8 words. There are 2 lines for each word.
+        for (int i = 0; i < numCount; i += 2) {
+            int wordIndex = lineCounter + i;
             String wordString = "";
-            
-            // Each word is formatted with two lines. The first line has details and second has hints.
-            // Add ID and Hint from the two lines then print onto the board
-            for (int i = 0; i < 2; i++) {
-                
-                // First line
-                if (i == 0) {
-                    String[] split = lines[lineCounter].split(" ");
+            for (int j = 0; j < 2; j++) {
+                if (j == 0) {
+                    String[] split = lines[wordIndex].split(" ");
                     if (split[2].equals("ACROSS")) {
                         horizontalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
@@ -522,17 +543,13 @@ class CrosswordCanvas extends JComponent {
                     }
                     wordString += "ID: " + split[3];
                 }
-                // Second line
-                else if (i == 1) {
-                    wordString += "     Hint: " + lines[lineCounter].substring(1, lines[lineCounter].length()-1);
+                else if (j == 1) {
+                    wordString += "     Hint: " + lines[wordIndex+1];
                 }
-                lineCounter++;
-                
             }
             println(wordString, g);
         }
         
         // Get score + challenge points.
-        System.out.println(currentBoard);
     }
 }

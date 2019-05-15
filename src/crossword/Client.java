@@ -326,7 +326,7 @@ public class Client {
      */
     public synchronized void repaint() {
         try {
-            SwingUtilities.invokeAndWait(() -> {canvas.repaint();}); // TODO is this ok?
+            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -439,6 +439,7 @@ public class Client {
      * 
      * RECEIVES:
      *  - "play", "new", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - "play", "update", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *  - "play", "validtry", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - "play", "invalidtry", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - "play", "wonch", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
@@ -523,8 +524,8 @@ public class Client {
         if (canvas.getState() == ClientState.CHOOSE 
                 && inputStrings.length == CHOOSE_INPUT_LENGTH 
                 && inputStrings[0].matches("^[a-zA-Z0-9]+$") 
-                && inputStrings[1].matches("^[a-zA-Z0-9]+$") 
-                && inputStrings[2].matches("[^\n\r]*")) {
+                && inputStrings[1].matches("^[a-zA-Z0-9.]+$") 
+                && inputStrings[2].matches("[^\\n\\r]*")) { // TODO is this right?
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
@@ -592,7 +593,6 @@ public class Client {
      */
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
-        System.out.println(canvas.getState() + " STATE");
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$") // TODO is this integers only
