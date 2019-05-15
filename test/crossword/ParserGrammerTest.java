@@ -40,7 +40,7 @@ public class ParserGrammerTest {
      * Backslash
      *      backslash inside literal
      *      contains \n, \r, \t
-     * 
+     * Hyphens
      * 
      * 
      */
@@ -246,6 +246,27 @@ public class ParserGrammerTest {
         }
     }
     
+    //covers hyphens
+    @Test public void testParserHyphens() throws UnableToParseException, IOException {
+        final File puzzleFile = new File("test-puzzles/dash.puzzle");
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzleFile);
+        final String name = getName(parseTree);
+        final String description = getDescription(parseTree);
+        final List<WordTuple> words = getWordTuples(parseTree);
+        
+        List<WordTuple> expectedWords = new ArrayList<>();
+        expectedWords.add(new WordTuple(1, 0, "\"twinkle twinkle\"", "st-ar", "ACROSS"));
+        
+        assertEquals("\"Easy\"", name);
+        assertEquals("\"An easy puzzle to get started\"", description);
+        
+        for (int i = 0; i < words.size(); i++) {
+            WordTuple w = words.get(i);
+            WordTuple expW = expectedWords.get(i);
+            assertTrue(w.equals(expW));
+        }
+    }
+    
     /**
      * Find the name of the puzzle
      * @param parseTree tree to find the name of
@@ -297,6 +318,9 @@ public class ParserGrammerTest {
         }
         return allWords;
     }
+    
+    
+    
 
 
     @Test public void testAssertionsEnabled() {
@@ -305,23 +329,5 @@ public class ParserGrammerTest {
         }, "make sure assertions are enabled with VM argument '-ea'");
     }
 
-    /**
-     * Get string of an entire puzzle
-     * 
-     * @param puzzle file of puzzle to parse
-     * @return string of entire puzzle
-     * @throws IOException if puzzle cannot be read
-     */
-    private String getPuzzleString(File puzzle) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(puzzle));
-        String fullPuzzle = "";
-        String line = reader.readLine();
-        while (line != null) {
-            fullPuzzle += line;
-            line = reader.readLine();
-        }
-        reader.close();
-        return fullPuzzle;
-    }
 
 }

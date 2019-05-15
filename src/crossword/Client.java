@@ -574,8 +574,9 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == ClientState.CHOOSE 
                 && inputStrings.length == CHOOSE_INPUT_LENGTH 
-                && inputStrings[0].matches("^[a-zA-Z0-9]+$") 
-                && inputStrings[1].matches("^[a-zA-Z0-9.]+$")) { // TODO match the quotes
+                && inputStrings[0].matches("^[a-zA-Z0-9]+$")
+                && inputStrings[1].matches("^[a-zA-Z0-9.]+$")
+                && inputStrings[2].matches("\"[a-zA-Z0-9]+\"")) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
@@ -650,7 +651,7 @@ public class Client {
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$")
-                && inputStrings[1].matches("^[A-Za-z]+$")) { 
+                && inputStrings[1].matches("^[A-Za-z-]+$")) { 
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
@@ -673,7 +674,7 @@ public class Client {
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$") 
-                && inputStrings[1].matches("^[A-Za-z]+$")) { 
+                && inputStrings[1].matches("^[A-Za-z-]+$")) { 
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
