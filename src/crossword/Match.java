@@ -75,8 +75,7 @@ public class Match {
 
         for (WordTuple wordTuple : wordTuples) {
             Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter,
-                    wordTuple.getWord(), wordTuple.getDirection());
-
+                    wordTuple.getWord().toLowerCase(), wordTuple.getDirection());
             
             this.words.add(newWord);
            
@@ -180,8 +179,7 @@ public class Match {
      * Check for valid match rep invariant
      */
     private synchronized void checkRep() {
-//        assert matchName.matches("\"[^\"\r\n\t\\]*\"");
-//        assert matchDescription.matches("\"([^\"\\r\\n\\\\] | '\\\\' [\\\\nrt] )*\"");
+        assert matchName.indexOf("\n") == -1;
         assert rows >= 0;
         assert columns >= 0;
         
@@ -288,6 +286,8 @@ public class Match {
      * @return true iff the insert succeeded, false if the consistency check failed
      */
     public synchronized boolean tryInsert(Player player, int wordID, String tryWord) {
+        tryWord = tryWord.toLowerCase();
+        
         if(!idToWordMap.containsKey(wordID)) return false;
         
         final Word word = idToWordMap.get(wordID);
@@ -307,6 +307,8 @@ public class Match {
      * incorrect, and CORRECT if the challenge is correct)
      */
     public synchronized ChallengeResult challenge(Player player, int wordID, String challengeGuess) {
+        challengeGuess = challengeGuess.toLowerCase();
+        
         if(!idToWordMap.containsKey(wordID)) return ChallengeResult.INVALID;
 
         final Word word = idToWordMap.get(wordID);
