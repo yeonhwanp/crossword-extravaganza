@@ -259,6 +259,10 @@ public class Client {
         String[] inputStrings = userInput.split(" "); 
         String[] commandInfo = getSubarray(inputStrings, 1);
         String sendString = "";
+        
+        if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
+            sendString = "/start/player_ID";
+        }
 
         // Using the appropriate methods to send the request.
         switch (inputStrings[0]) {
@@ -294,6 +298,7 @@ public class Client {
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */
     public void parseResponse(String response, String lastInput) throws IOException {
+        
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
 
@@ -572,7 +577,8 @@ public class Client {
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID + "/" + matchID;
             }
             else if (canvas.getState() == ClientState.CHOOSE || canvas.getState() == ClientState.SHOW_SCORE){
-                sendString = "/exit/" + canvas.getState().toString().toLowerCase();
+                sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID;
+                System.exit(0);
             }
         }
         else {
