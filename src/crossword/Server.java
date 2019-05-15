@@ -28,6 +28,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import crossword.Word.ChallengeResult;
+import crossword.Word.TryResult;
 import crossword.web.ExceptionsFilter;
 import crossword.web.HeadersFilter;
 import crossword.web.LogFilter;
@@ -898,7 +899,8 @@ public class Server {
      * PRECONDITION:
      *     - MATCH_ID must exist in currently playing matches
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - SEND: play, validtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - type of try varies, call it typeOfTry (valid try)
+     *     - SEND: play, typeOfTry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF INVALID (game logic):
@@ -936,11 +938,11 @@ public class Server {
                     
                     if (currentMatch.containsPlayer(currentPlayer)) {
     
-                        boolean validTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
+                        TryResult typeOfTry = currentMatch.tryInsert(currentPlayer, Integer.valueOf(wordID), word);
                         boolean matchFinished = currentMatch.isFinished();
                        
     
-                        if (validTry && matchFinished) {
+                        if (typeOfTry == TryResult.SUCCESS && matchFinished) {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
                             
@@ -964,7 +966,8 @@ public class Server {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
                             
-                            String validTryStr = (validTry)? "validtry" : "invalidtry";
+                            
+                            String validTryStr = typeOfTry.name().toLowerCase();
     
                             final String ongoing = "play\n" + validTryStr + "\n" + playerID + "\n"
                                     + currentMatch.getScore(currentPlayer) + "\n"
