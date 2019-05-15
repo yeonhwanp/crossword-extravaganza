@@ -386,7 +386,7 @@ class CrosswordCanvas extends JComponent {
             else if (request.equals("try again")) {
                 printChooseInstructions(g);
                 printMatchList(g);
-                printlnCenterBold("That was an invalid request. Try again!", g);
+                printlnCenterBold("That was an invalid request or the match is already in progress. Try again!", g);
             }
         }
         else if (state == ClientState.WAIT) {
