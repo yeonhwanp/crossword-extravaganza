@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import crossword.Word.ChallengeResult;
+import crossword.Word.TryResult;
 
 /**
  * Tests for match and main game logic
@@ -633,7 +634,7 @@ public class MatchTest {
         Player yo = new Player("yo");
         currentMatch.addPlayer(yo);
 
-        assertTrue(currentMatch.tryInsert(yo, 1, "aba"));
+        assertEquals(TryResult.SUCCESS, currentMatch.tryInsert(yo, 1, "aba"));
         
         String expected = "3x11\n" + 
                 "##########a\n" + 
@@ -659,7 +660,7 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
 
         currentMatch.tryInsert(yo, 1, "aba");
-        assertTrue(currentMatch.tryInsert(dude, 2, "obo"));
+        assertEquals(TryResult.SUCCESS, currentMatch.tryInsert(dude, 2, "obo"));
         
         String expected = "3x3\n" + 
                 "#a#\n" + 
@@ -684,7 +685,7 @@ public class MatchTest {
         currentMatch.addPlayer(yo);
 
         currentMatch.tryInsert(yo, 1, "now");
-        assertTrue(currentMatch.tryInsert(yo, 1, "aba"));
+        assertEquals(TryResult.SUCCESS, currentMatch.tryInsert(yo, 1, "aba"));
         
         String expected = "3x3\n" + 
                 "#a#\n" + 
@@ -715,7 +716,7 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
 
         currentMatch.tryInsert(yo, 1, "now");
-        assertTrue(!currentMatch.tryInsert(dude, 1, "aba"));
+        assertEquals(TryResult.INCONSISTENT_CURRENT, currentMatch.tryInsert(dude, 1, "aba"));
         
         String expected = "3x11\n" + 
                 "##########n\n" + 
@@ -746,7 +747,7 @@ public class MatchTest {
         currentMatch.tryInsert(yo, 1, "now");
         currentMatch.challenge(dude, 1, "dba");
         
-        assertTrue(!currentMatch.tryInsert(dude, 1, "hey"));
+        assertEquals(TryResult.INCONSISTENT_CURRENT, currentMatch.tryInsert(dude, 1, "hey"));
         
         String expected = "3x11\n" + 
                 "##########d\n" + 
@@ -772,7 +773,7 @@ public class MatchTest {
         currentMatch.addPlayer(dude);
 
         currentMatch.tryInsert(yo, 1, "now");
-        assertTrue(!currentMatch.tryInsert(dude, 2, "aba"));
+        assertEquals(TryResult.INCONSISTENT_CURRENT, currentMatch.tryInsert(dude, 2, "aba"));
         
         String expected = "3x3\n" + 
                 "#n#\n" + 
@@ -799,7 +800,7 @@ public class MatchTest {
         Player yo = new Player("yo");
         currentMatch.addPlayer(yo);
         
-        assertTrue(!currentMatch.tryInsert(yo, 1, "a"));
+        assertEquals(TryResult.INCORRECT_LENGTH, currentMatch.tryInsert(yo, 1, "a"));
         
         String expected = "3x11\n" + 
                 "##########?\n" + 
@@ -824,7 +825,7 @@ public class MatchTest {
         Player yo = new Player("yo");
         currentMatch.addPlayer(yo);
         
-        assertTrue(!currentMatch.tryInsert(yo, 3, "a"));
+        assertEquals(TryResult.WRONG_ID, currentMatch.tryInsert(yo, 3, "a"));
         
         String expected = "3x11\n" + 
                 "##########?\n" + 

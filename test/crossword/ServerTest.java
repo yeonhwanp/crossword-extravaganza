@@ -497,7 +497,7 @@ public class ServerTest {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
 
         String expected = "play\n" + 
-                "validtry\n" + 
+                "success\n" + 
                 "player1\n" + 
                 "0\n" + 
                 "0\n" + 

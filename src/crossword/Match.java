@@ -45,7 +45,8 @@ public class Match {
     //   
     // Thread safety argument:
     //   We use the monitor pattern and synchronize every method with a lock on this object, which ensures thread safety 
-    //   because only one thread can be in a given method at any given time. 
+    //   because only one thread can be in a given method at any given time, so we accesses to our rep happen within
+    //   Match's methods, which are all guarded by Match's lock.
     
     
     private final String matchName;
