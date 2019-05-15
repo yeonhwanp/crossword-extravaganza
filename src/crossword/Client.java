@@ -97,8 +97,10 @@ public class Client {
      *      within that method.
      */
     
-    //NOTE: on my 15 inch macbook pro (2016), the message for incorrect commands is pretty visible. However,
-    //      on a 13 inch macbook pro (2015 and prior) the message barely peeks out through the bottom.
+    //NOTE: on my 15 inch macbook pro (2016), the message for incorrect commands is pretty visible. However, TODO
+    //      on a 13 inch macbook pro (2015 and prior) the message barely peeks out through the bottom. TODO
+    //      Not really a todo... just a note for Czarina! TODO
+
 
     private synchronized void checkRep() {
         assert host.matches("^[a-zA-Z0-9]+$");
@@ -211,10 +213,10 @@ public class Client {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             synchronized(thisLock) {
-                SwingUtilities.invokeLater(() -> {
+//                SwingUtilities.invokeLater(() -> {
                     canvas.setRequest(getState(), "try again");
                     repaint();
-                });
+//                });
             }
         }
         checkRep();
@@ -340,34 +342,34 @@ public class Client {
 
         switch (splitResponse[0]) {
         case "start":
-            SwingUtilities.invokeLater(() -> {
+//            SwingUtilities.invokeLater(() -> {
             receiveStart(rest);
             repaint();
-            });
+//            });
             break;
         case "choose":
-            SwingUtilities.invokeLater(() ->  {
+//            SwingUtilities.invokeLater(() ->  {
             receiveChoose(rest, lastInput);
             repaint();
-            });
+//            });
             break;
         case "wait":
             receiveWait(lastInput);
-            SwingUtilities.invokeLater(() -> {
+//            SwingUtilities.invokeLater(() -> {
                 repaint();
-            });
+//            });
             break;
         case "play":
-            SwingUtilities.invokeLater(() -> {
+//            SwingUtilities.invokeLater(() -> {
             receivePlay(rest, lastInput);
             repaint();
-            });
+//            });
             break;
         case "show_score":
-            SwingUtilities.invokeLater(() -> {
+//            SwingUtilities.invokeLater(() -> {
             receiveEnd(rest);
             repaint();
-            });
+//            });
             break;
         default:
             //TODO

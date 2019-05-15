@@ -231,37 +231,22 @@ public class ClientTest {
      * receiveChoose: new game with 0 files
      */
     @Test
-    public void testReceiveStart0() throws IOException {
+    public void testReceiveStart0() throws IOException, InterruptedException {
         
         final Client testClient = new Client(HOST, PORT);
         
         // Always need this
-        SwingUtilities.invokeLater(() -> {
         String receiveInit = "start\nnew game";
-        try {
-            testClient.parseResponse(receiveInit, "");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        });
+        testClient.parseResponse(receiveInit, "");
         
         String userInput = "START Player1";
-        SwingUtilities.invokeLater(() -> {
         testClient.parseUserInput(userInput);
-        });
         
-        SwingUtilities.invokeLater(() -> {
         String serverResponse = "choose\nnew\n0\n0";
-        try {
-            testClient.parseResponse(serverResponse, userInput);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        });
-        SwingUtilities.invokeLater(() -> {
+        testClient.parseResponse(serverResponse, userInput);
         assertEquals("Player1", testClient.getUserID(), "Expected correct id");
         assertEquals("0\n0\n", testClient.getMatches(), "Expected correct matches");
-        });
+        
     }
     
     /*

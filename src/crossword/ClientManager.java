@@ -102,14 +102,14 @@ public class ClientManager {
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
         String initialRequest = receiveResponse(socketIn);
 
-        SwingUtilities.invokeLater(() -> {
+//        SwingUtilities.invokeLater(() -> {
         try {
             client.parseResponse(initialRequest, "");
         } catch (IOException e) {
             e.printStackTrace();
         } 
         client.launchGameWindow();
-        });
+//        });
         
         socketIn.close();
 
@@ -122,7 +122,7 @@ public class ClientManager {
                             final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                             // Get the response into one big line then parse it
                             final String response = receiveResponse(responseBuffer);
-                            SwingUtilities.invokeLater( () -> {
+//                            SwingUtilities.invokeLater( () -> {
                             synchronized(client) {
                                 if (client.getState() == ClientState.CHOOSE) {
                                     try {
@@ -138,7 +138,7 @@ public class ClientManager {
                                     client.repaint();
                                 }
                             }
-                            });
+//                            });
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -155,7 +155,7 @@ public class ClientManager {
                             final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
                             // Get the response into one big line then parse it
                             final String response = receiveResponse(responseBuffer);
-                            SwingUtilities.invokeLater( () -> {
+//                            SwingUtilities.invokeLater( () -> {
                             synchronized(client) {
                                 if (client.getState() == ClientState.PLAY) {
                                     try {
@@ -171,7 +171,7 @@ public class ClientManager {
                                     client.repaint();
                                 }
                             }
-                            });
+//                            });
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
