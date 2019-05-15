@@ -39,6 +39,7 @@ public class Word {
     
     public enum Direction {ACROSS, DOWN}
     public enum ChallengeResult {INVALID, INCORRECT, CORRECT}
+    public enum TryResult {WRONG_ID, INCORRECT_LENGTH, INCONSISTENT_CURRENT, SUCCESS}
 
     private final List<Cell> involvedCells;
     private final int startRow;
@@ -322,30 +323,31 @@ public class Word {
      * Checks if an attempted word is consistent according to the final project handout
      * @param player the player attempting the word
      * @param tryWord the actual word inserted by the player
-     * @return if the insert is valid or not
+     * @return INCORRECT_LENGTH if the try failed because of incorrect length, INCONSISTENT_CURRENT if it was inconsistent with
+     * what was on the board (already confirmed, or owned by other player), SUCCESS if it is consistent
      */
-    public boolean checkConsistentInsert(Player player, String tryWord) {
+    public TryResult checkConsistentInsert(Player player, String tryWord) {
         checkRep();
         
         if(this.isConfirmed() || (this.hasOwner() && !player.equals(this.getOwner()))) { // check if it's already confirmed or has a different owner
-            return false;
+            return TryResult.INCONSISTENT_CURRENT;
         }
         
         if(this.getLength() != tryWord.length()) { // if the guess does not have the same length as this word, reject
-            return false;
+            return TryResult.INCORRECT_LENGTH;
         }
         
-        assert this.involvedCells.size() == this.getLength(); // just to check make sure that the sizes match up, we also need to check the ordering
+//        assert this.involvedCells.size() == this.getLength(); // just to check make sure that the sizes match up, we also need to check the ordering
         
         for(int i = 0; i < this.involvedCells.size(); i++) { // check that if the tried word has conflicts with words already on the board, that the player can change
             final Cell currentCell = this.involvedCells.get(i);
             
             if(currentCell.getCurrentValue() != tryWord.charAt(i) && !currentCell.canChangeValue(player)) {
-                return false;
+                return TryResult.INCONSISTENT_CURRENT;
             }
         }
         
-        return true;
+        return TryResult.SUCCESS;
     }
     
     /**
@@ -394,17 +396,21 @@ public class Word {
      * Try to insert a new word tryWord into this word by player 
      * @param player the player attempting to insert the word into this slot
      * @param tryWord the word we are attempting
-     * @return true iff the word was inserted (and was consistent, so it returns false iff it was inconsistent)
+     * @return INCORRECT_LENGTH if the try failed because of incorrect length, INCONSISTENT_CURRENT if it was inconsistent with
+     * what was on the board (already confirmed, or owned by other player), SUCCESS if it is consistent (and it was inserted onto the board)
      */
-    public boolean tryInsertNewWord(Player player, String tryWord) {
+    public TryResult tryInsertNewWord(Player player, String tryWord) {
         checkRep();
-        if(!checkConsistentInsert(player, tryWord)) {
-            return false;
+        
+        final TryResult consistencyCheck = checkConsistentInsert(player, tryWord);
+        
+        if(consistencyCheck != TryResult.SUCCESS) {
+            return consistencyCheck;
         }
         
         byPassInsert(player, tryWord);
         checkRep();
-        return true;
+        return consistencyCheck;
     }
     
     /**
