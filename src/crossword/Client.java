@@ -324,6 +324,9 @@ public class Client {
             break;
         case "wait":
             receiveWait(lastInput);
+            SwingUtilities.invokeLater(() -> {
+                repaint();
+            });
             break;
         case "play":
             SwingUtilities.invokeLater(() -> {
