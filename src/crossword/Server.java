@@ -656,7 +656,7 @@ public class Server {
      *      THEN: folderPath.wait() until someone else connects to the board 
      *          STATE: play
      *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
-     * @param exchange
+     * @param exchange exchange to communicate with client
      * @throws IOException if response headers cannot be sent
      * @throws InterruptedException if we close incorrectly while waiting
      */
@@ -792,7 +792,7 @@ public class Server {
      *      - Close connection
      *   ELSE IF gameState == wait:
      *      - Terminate game
-     *      - SEND: choose, "new", allMatches
+     *      - SEND: choose, "update", allMatches
      *   ELSE IF gameState == play:
      *      - Terminate game
      *      - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
@@ -836,7 +836,7 @@ public class Server {
                 mapIDToDescription.remove(matchID);
                 mapIDToMatch.remove(matchID);
 
-                final String response = getChooseResponse("new");
+                final String response = getChooseResponse("update");
                 out.print(response);
                 out.flush();
                 exchange.close();
@@ -881,7 +881,6 @@ public class Server {
      * RECEIVE: A try request in the form: "try playerID matchID wordID word"
      * PRECONDITION:
      *     - MATCH_ID must exist in currently playing matches
-     *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
      *     - SEND: play, validtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
@@ -968,6 +967,7 @@ public class Server {
                     }
                 }
             }
+            exchange.close();
         }
         
         

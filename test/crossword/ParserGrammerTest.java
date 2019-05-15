@@ -1,5 +1,6 @@
 package crossword;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +19,9 @@ import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
 import edu.mit.eecs.parserlib.UnableToParseException;
 
+/**
+ * Tests for parser grammar
+ */
 public class ParserGrammerTest {
 
     private Parser<PuzzleGrammar> parser = Server.makeParser();

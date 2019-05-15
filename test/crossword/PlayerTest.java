@@ -1,11 +1,14 @@
 package crossword;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-
+/**
+ * Tests for player of crossword
+ */
 public class PlayerTest {
 
     /*
