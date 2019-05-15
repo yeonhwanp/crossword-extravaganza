@@ -524,8 +524,7 @@ public class Client {
         if (canvas.getState() == ClientState.CHOOSE 
                 && inputStrings.length == CHOOSE_INPUT_LENGTH 
                 && inputStrings[0].matches("^[a-zA-Z0-9]+$") 
-                && inputStrings[1].matches("^[a-zA-Z0-9.]+$") 
-                && inputStrings[2].matches("[^\\n\\r]*")) { // TODO is this right?
+                && inputStrings[1].matches("^[a-zA-Z0-9.]+$")) { // TODO match the quotes
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
@@ -568,7 +567,7 @@ public class Client {
      */
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
-        if (inputStrings.length == 0 && inputStrings[0].equals("EXIT")) {
+        if (inputStrings.length == 0) {
             if (canvas.getState() == ClientState.WAIT || canvas.getState() == ClientState.PLAY) {
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID + "/" + matchID;
             }
@@ -595,7 +594,7 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
-                && inputStrings[0].matches("\\d+") // TODO is this integers only
+                && inputStrings[0].matches("^\\d+$")
                 && inputStrings[1].matches("^[A-Za-z]+$")) { 
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
@@ -618,7 +617,7 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
-                && inputStrings[0].matches("^\\d+$") // TODO is this integers only
+                && inputStrings[0].matches("^\\d+$") 
                 && inputStrings[1].matches("^[A-Za-z]+$")) { 
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }

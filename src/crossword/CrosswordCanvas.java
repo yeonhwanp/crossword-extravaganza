@@ -420,7 +420,7 @@ class CrosswordCanvas extends JComponent {
         ++line;
         printlnCenter("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
         ++line;
-        printlnCenter("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be a unique alphanumeric identifier", g);
+        printlnCenter("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be a unique alphanumeric identifier, Puzzle_ID Should be obtained from the available puzzles, and description must be encapsulated around quotes and contain no newlines.", g);
         ++line;
         printlnCenter("EXIT", g);
         line -= 2;
