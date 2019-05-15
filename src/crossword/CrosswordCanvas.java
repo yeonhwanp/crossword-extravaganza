@@ -66,7 +66,7 @@ class CrosswordCanvas extends JComponent {
 
     /*
      * Abstraction Function
-     * AF(state, request, currentBoard, currentPuzzleMathces, endString) = a GUI representing a CrosswordExtravaganza
+     * AF(state, request, currentBoard, currentPuzzleMathces, endString, playStatus) = a GUI representing a CrosswordExtravaganza
      *                                                                     user interface in the gamestate given by state.
      *                                                                     If the player is in the PLAY state, then they
      *                                                                     are playing on a board referened by currentBoard
@@ -74,7 +74,8 @@ class CrosswordCanvas extends JComponent {
      *                                                                     the list of matches referened by currentPuzzleMatches.
      *                                                                     Finally, if they are in the SHOW_SCORE state, then
      *                                                                     they hold the details to the results of the game in
-     *                                                                     endString.                                                           
+     *                                                                     endString. playStatus represents the success of the
+     *                                                                     user's last operation during the PLAY state.                                                           
      *                                                                     
      * 
      * Rep Invariant:
