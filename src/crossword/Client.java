@@ -42,11 +42,12 @@ public class Client {
     private static final int CHOOSE_INPUT_LENGTH = 3;
     private final String host;
     private final int port;
+    private boolean exit = false;
     private String playerID = "";
     private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
 
-    // A simple alias to this object
+    // A simple alias to this object for locking
     private final Client thisLock = this;
 
     /*
@@ -54,7 +55,8 @@ public class Client {
      * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
      *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnaza 
      *                                             server at the url http://host:port with a unique identifying playerID 
-     *                                             and a matchID if currently in session. 
+     *                                             and a matchID if currently in a game. exit represents whether the user
+     *                                             has terminated the connection between the server or not.
      * 
      * Rep Invariant:
      *  The host is alphanumeric
@@ -84,6 +86,9 @@ public class Client {
      *  Static methods do not touch any part of the rep and all variables inside of them are confined
      *      within that method.
      */
+    
+    //NOTE: on my 15 inch macbook pro (2016), the message for incorrect commands is pretty visible. However,
+    //      on a 13 inch macbook pro (2015 and prior) the message barely peeks out through the bottom.
 
     private void checkRep() {
         assert host.matches("^[a-zA-Z0-9]+$");
@@ -131,7 +136,7 @@ public class Client {
             textbox.setText("");
             new Thread(() -> {
                 handleCommand(textboxInput);
-            }).start();
+             }).start();
         });
 
         enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
@@ -174,9 +179,10 @@ public class Client {
             System.out.println("-----------------------");
             System.out.println(response);
             System.out.println("-----------------------");
+            
+            if (exit) {System.exit(0);}
             parseResponse(response, userInput);
             responseBuffer.close();
-            repaint(); 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
@@ -259,6 +265,11 @@ public class Client {
         String[] inputStrings = userInput.split(" "); 
         String[] commandInfo = getSubarray(inputStrings, 1);
         String sendString = "";
+        
+        if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
+            sendString = "/restart/";
+            return sendString;
+        }
 
         // Using the appropriate methods to send the request.
         switch (inputStrings[0]) {
@@ -294,24 +305,40 @@ public class Client {
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */
     public void parseResponse(String response, String lastInput) throws IOException {
+        
         String[] splitResponse = response.split("\n");
         String[] rest = getSubarray(splitResponse, 1);
 
         switch (splitResponse[0]) {
         case "start":
+            SwingUtilities.invokeLater(() -> {
             receiveStart(rest);
+            repaint();
+            });
             break;
         case "choose":
+            SwingUtilities.invokeLater(() ->  {
             receiveChoose(rest, lastInput);
+            repaint();
+            });
             break;
         case "wait":
             receiveWait(lastInput);
+            SwingUtilities.invokeLater(() -> {
+                repaint();
+            });
             break;
         case "play":
+            SwingUtilities.invokeLater(() -> {
             receivePlay(rest, lastInput);
+            repaint();
+            });
             break;
         case "show_score":
+            SwingUtilities.invokeLater(() -> {
             receiveEnd(rest);
+            repaint();
+            });
             break;
         default:
             //TODO
@@ -325,13 +352,14 @@ public class Client {
      * Refreshes the GUI
      */
     public synchronized void repaint() {
-        try {
-            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        canvas.repaint();
+//        try {
+//            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
+//        } catch (InvocationTargetException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     // ========= PUBLIC METHODS ========= //
@@ -453,6 +481,7 @@ public class Client {
 
         // Set the state of the canvas
         String chooseState = response[lineCount];
+        System.out.println("CHOOSE STATE:" + chooseState);
         canvas.setRequest(ClientState.PLAY, chooseState);
         lineCount++;
 
@@ -563,7 +592,7 @@ public class Client {
      * @param lastInput the last input from the player
      * @return a string with the format of: 
      *  - /exit/state/player_ID/match_ID (if there is an active game or is waiting for another player to join)
-     *  - /exit/state (if the player is currently viewing the list of games to play or at the end screen)
+     *  - /exit/state/player_ID (if the player is currently viewing the list of games to play or at the end screen)
      */
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
@@ -572,7 +601,8 @@ public class Client {
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID + "/" + matchID;
             }
             else if (canvas.getState() == ClientState.CHOOSE || canvas.getState() == ClientState.SHOW_SCORE){
-                sendString = "/exit/" + canvas.getState().toString().toLowerCase();
+                sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID;
+                exit = true;
             }
         }
         else {

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 public class ServerTest {
     
     /*
-     * Testing strategy for Server:
+     * Testing strategy for Server - these methods are private itself, but we can use URL's to execute them
      * 
      * Test init()
      * 
@@ -29,6 +29,8 @@ public class ServerTest {
      * Test chooseNewMatch()
      *  fails precondition, passes precondition
      *      failure: non-unique match ID, non-existing puzzle ID
+     *      
+     * Test waitForJoin()
      *  
      * Test playMatch()
      *  fails precondition, passes precondition
@@ -46,8 +48,10 @@ public class ServerTest {
      *  valid challenge: ongoing, finished board
      *  invalid challenge (game logic)
      * 
-     * Test showScore()
      * 
+     * Test watchMatches()
+     * 
+     * Test watchBoard()
      * 
      */
     
@@ -66,7 +70,7 @@ public class ServerTest {
 
         String result = getResult(reader);
         
-        assertEquals("start\nNEW GAME", result);
+        assertEquals("start\nnew game", result);
         
         
     }
@@ -89,17 +93,17 @@ public class ServerTest {
 
         String result = getResult(reader);
         
-        assertEquals("start\nTRY AGAIN", result);
+        assertEquals("start\ntry again", result);
         
         
     }
     
     //covers handleStart()
-    //      passes precondition with multiple players, no twoPlayerMatches yet
+    //      passes precondition with multiple players, no matches to join yet
     @Test 
     public void testHandleStartPassesOnlyNewGames() throws IOException {
         
-        final Server server = new Server("one-puzzle", 0);
+        final Server server = new Server("puzzles", 0);
         server.start();
         
         final URL valid = new URL("http://localhost:" + server.port() + "/start/player1");
@@ -112,7 +116,30 @@ public class ServerTest {
 
         String result = getResult(reader);
         
-        assertEquals("choose\nNEW\n2\ncomments.puzzle\nwarmup.puzzle\n0", result);
+        assertEquals("choose\nnew\n1\nsimple.puzzle\n0", result);
+        
+        
+    }
+    
+    //covers handleStart()
+    //      passes precondition with multiple players, some matches can be joined
+    @Test 
+    public void testHandleStartPassesMatchesExist() throws IOException {
+        
+        final Server server = new Server("puzzles", 0);
+        server.start();
+        
+        new URL("http://localhost:" + server.port() + "/start/player1").openStream();
+        new URL("http://localhost:" + server.port() + "/choose/player1/simple/simple.puzzle/yo").openStream();
+
+        final URL valid2 = new URL("http://localhost:" + server.port() + "/start/player2");
+        final InputStream input = valid2.openStream();
+        
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(input, UTF_8));
+
+        String result = getResult(reader);
+        
+        assertEquals("choose\nnew\n1\nsimple.puzzle\n1\nsimple\nyo", result);
         
         
     }

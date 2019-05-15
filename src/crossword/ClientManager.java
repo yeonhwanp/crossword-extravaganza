@@ -120,47 +120,70 @@ public class ClientManager {
         // watch match list
         new Thread(() -> {
             while (true) {
-                try {
-                    if (client.getState() == ClientState.CHOOSE) {
-                        final URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
-                        final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
-                        // Get the response into one big line then parse it
-                        final String response = receiveResponse(responseBuffer);
-                        synchronized(client) {
-                            if (client.getState() == ClientState.CHOOSE) {
-                                client.parseResponse(response, "");
-                                responseBuffer.close();
-                                client.repaint();
+                    try {
+                        if (client.getState() == ClientState.CHOOSE) {
+                            final URL sendURL = new URL("http://" + host + ":" + port + "/watchmatches/");
+                            final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                            // Get the response into one big line then parse it
+                            final String response = receiveResponse(responseBuffer);
+                            SwingUtilities.invokeLater( () -> {
+                            synchronized(client) {
+                                if (client.getState() == ClientState.CHOOSE) {
+                                    try {
+                                        client.parseResponse(response, "");
+                                    } catch (IOException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        responseBuffer.close();
+                                    } catch (IOException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                    client.repaint();
+                                }
                             }
+                            });
                         }
-
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } 
             }
         }).start();
 
         // watch board
         new Thread(() -> {
             while (true) {
-                try {
-                    if (client.getState() == ClientState.PLAY) {
-                        final URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getUserID() + "/" + client.getMatchID());
-                        final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
-                        // Get the response into one big line then parse it
-                        final String response = receiveResponse(responseBuffer);
-                        synchronized(client) {
-                            if (client.getState() == ClientState.PLAY) {
-                                client.parseResponse(response, "");
-                                responseBuffer.close();
-                                client.repaint();
+                    try {
+                        if (client.getState() == ClientState.PLAY) {
+                            final URL sendURL = new URL("http://" + host + ":" + port + "/watchboard/" + client.getUserID() + "/" + client.getMatchID());
+                            final BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(sendURL.openStream(), UTF_8));
+                            // Get the response into one big line then parse it
+                            final String response = receiveResponse(responseBuffer);
+                            SwingUtilities.invokeLater( () -> {
+                            synchronized(client) {
+                                if (client.getState() == ClientState.PLAY) {
+                                    try {
+                                        client.parseResponse(response, "");
+                                    } catch (IOException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        responseBuffer.close();
+                                    } catch (IOException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                    client.repaint();
+                                }
                             }
+                            });
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }).start();
 
