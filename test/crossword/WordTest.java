@@ -12,7 +12,11 @@ import org.junit.jupiter.api.Test;
 import crossword.Cell.Exist;
 import crossword.Word.Direction;
 
-
+/**
+ * Tests for mutable word object
+ * @author christophercheung
+ *
+ */
 public class WordTest {
 
     

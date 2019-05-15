@@ -1,8 +1,6 @@
 package crossword;
 
-/**
- * Client manager to receive responses and communicate with server
- */
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -20,6 +18,9 @@ import javax.swing.SwingUtilities;
 
 import crossword.Client.ClientState;
 
+/**
+ * Client manager to receive responses and communicate with server
+ */
 public class ClientManager {
 
     /*

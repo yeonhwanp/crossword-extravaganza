@@ -11,7 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import crossword.Word.ChallengeResult;
 
-
+/**
+ * Tests for match and main game logic
+ * @author christophercheung
+ *
+ */
 public class MatchTest {
 
 
