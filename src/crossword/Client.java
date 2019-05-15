@@ -397,6 +397,8 @@ public class Client {
         String chooseState = response[lineCount];
         canvas.setRequest(ClientState.CHOOSE, chooseState);
         lineCount++;
+        
+        System.out.println("here: " + chooseState);
 
         // Set the player ID
         if (chooseState.equals("new")) {

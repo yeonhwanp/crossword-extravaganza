@@ -132,13 +132,11 @@ public class ClientManager {
                                     try {
                                         client.parseResponse(response, "");
                                     } catch (IOException e) {
-                                        // TODO Auto-generated catch block
                                         e.printStackTrace();
                                     }
                                     try {
                                         responseBuffer.close();
                                     } catch (IOException e) {
-                                        // TODO Auto-generated catch block
                                         e.printStackTrace();
                                     }
                                     client.repaint();
@@ -167,13 +165,11 @@ public class ClientManager {
                                     try {
                                         client.parseResponse(response, "");
                                     } catch (IOException e) {
-                                        // TODO Auto-generated catch block
                                         e.printStackTrace();
                                     }
                                     try {
                                         responseBuffer.close();
                                     } catch (IOException e) {
-                                        // TODO Auto-generated catch block
                                         e.printStackTrace();
                                     }
                                     client.repaint();

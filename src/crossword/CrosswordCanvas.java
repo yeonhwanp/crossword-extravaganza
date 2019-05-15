@@ -379,7 +379,7 @@ class CrosswordCanvas extends JComponent {
             }
         }
         else if (state == ClientState.CHOOSE) {
-            if (request.equals("new")) {
+            if (request.equals("new") || request.equals("update")) {
                 printChooseInstructions(g);
                 printMatchList(g);
             }
