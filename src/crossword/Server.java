@@ -1148,54 +1148,59 @@ public class Server {
             new Thread(new Runnable() {
 
                 public void run() {
+                    try {
+                        synchronized (matchToWatch) {
 
-                    synchronized (matchToWatch) {
-
-                        final String response;
-                        try {
-                            exchange.sendResponseHeaders(VALID, 0);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        String currentMatchState = matchToWatch.toString();
-
-                        while (currentMatchState.equals(matchToWatch.toString())
-                                && !mapIDToWinners.containsKey(matchID)) {
+                            final String response;
                             try {
-                                matchToWatch.wait();
-                            } catch (InterruptedException e) {
+                                exchange.sendResponseHeaders(VALID, 0);
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
+                            String currentMatchState = matchToWatch.toString();
+
+                            while (currentMatchState.equals(matchToWatch.toString())
+                                    && !mapIDToWinners.containsKey(matchID)) {
+                                try {
+                                    matchToWatch.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            Player currentPlayer = getPlayer(playerID);
+                            Player otherPlayer = matchToWatch.getOtherPlayer(currentPlayer);
+
+                            if (mapIDToWinners.containsKey(matchID)) {
+
+                                String winnerID = mapIDToWinners.get(matchID);
+                                response = "show_score\n" + winnerID + "\n" + playerID + "\n"
+                                        + matchToWatch.getScore(currentPlayer) + "\n"
+                                        + matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID()
+                                        + "\n" + matchToWatch.getScore(otherPlayer) + "\n"
+                                        + matchToWatch.getChallengePoints(otherPlayer);
+
+                            }
+
+                            else {
+                                response = "play\nupdate\n" + playerID + "\n" + matchToWatch.getScore(currentPlayer)
+                                        + "\n" + matchToWatch.getChallengePoints(currentPlayer) + "\n"
+                                        + otherPlayer.getID() + "\n" + matchToWatch.getScore(otherPlayer) + "\n"
+                                        + matchToWatch.getChallengePoints(otherPlayer) + "\n" + matchToWatch.toString();
+                            }
+
+                            // write the response to the output stream using UTF-8 character encoding
+                            OutputStream body = exchange.getResponseBody();
+                            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+                            out.print(response);
+                            out.flush();
+                            exchange.close();
                         }
-
-                        Player currentPlayer = getPlayer(playerID);
-                        Player otherPlayer = matchToWatch.getOtherPlayer(currentPlayer);
-
-                        if (mapIDToWinners.containsKey(matchID)) {
-
-                            String winnerID = mapIDToWinners.get(matchID);
-                            response = "show_score\n" + winnerID + "\n" + playerID + "\n"
-                                    + matchToWatch.getScore(currentPlayer) + "\n"
-                                    + matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
-                                    + matchToWatch.getScore(otherPlayer) + "\n"
-                                    + matchToWatch.getChallengePoints(otherPlayer);
-
-                        }
-
-                        else {
-                            response = "play\nupdate\n" + playerID + "\n" + matchToWatch.getScore(currentPlayer) + "\n"
-                                    + matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
-                                    + matchToWatch.getScore(otherPlayer) + "\n"
-                                    + matchToWatch.getChallengePoints(otherPlayer) + "\n" + matchToWatch.toString();
-                        }
-
-                        // write the response to the output stream using UTF-8 character encoding
-                        OutputStream body = exchange.getResponseBody();
-                        PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
-                        out.print(response);
-                        out.flush();
-                        exchange.close();
+                    } catch (NullPointerException e) {
+                        Thread.currentThread().interrupt(); // watch board no longer should go through, since match
+                                                            // finished already
+                        return;
                     }
 
                 }
