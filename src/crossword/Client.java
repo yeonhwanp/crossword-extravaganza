@@ -172,6 +172,8 @@ public class Client {
             URL test = new URL("http://" + host + ":" + port + extension);
             System.out.println("OUT: " + test);
             BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+            
+            if (exit) {System.exit(0);}
 
             // Get the response into one big line then parse it
             String response = ClientManager.receiveResponse(responseBuffer);
@@ -181,8 +183,6 @@ public class Client {
             System.out.println("-----------------------");
             parseResponse(response, userInput);
             responseBuffer.close();
-            
-            if (exit) {System.exit(0);}
             
             repaint(); 
         } catch (IOException e) {
