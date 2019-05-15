@@ -259,7 +259,7 @@ public class Client {
      *          -  INT an integer representing how many valid puzzles there are
      *          -  ... IDs of valid puzzles, each separated by a newline
      *          -  INT an integer representing how many available matches there are
-     *          -  ... IDs of available matches
+     *          -  ... IDs of available matches \n descriptions associated with each ID
      */
     public synchronized String getMatches() {
         return canvas.getListOfMatches();
@@ -279,7 +279,7 @@ public class Client {
      *      - Description must not contain newlines
      *  - EXIT -> 
      *      - If the client is in a choose wait or play state: /exit/state/player_ID/match_ID
-     *      - Else: /exit/state
+     *      - Else (Except START): /exit/state
      *  - TRY id word -> /try/player_ID/match_ID/id/word
      *  - CHALLENGE id word -> /challenge/player_ID/match_ID/id/word
      */
