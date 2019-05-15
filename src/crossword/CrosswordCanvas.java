@@ -49,7 +49,7 @@ class CrosswordCanvas extends JComponent {
     private static final int CONTROLLED_INDEX = 4;
     private static final int CONFIRMED_INDEX = 5;
     private static final int USER_INDEX = 6;
-    private static final int GENERAL_X_BUFFER = 250;
+    private static final int GENERAL_X_BUFFER = 300;
     private static final int SELF_Y_BUFFER = 150;
     private static final int OTHER_Y_BUFFER = 200;
     private static final int END_INST_SPACE = 5;
@@ -346,11 +346,17 @@ class CrosswordCanvas extends JComponent {
         case PLAY:
             this.state = ClientState.PLAY;
             switch (input) {
-            case "validtry":
+            case "success":
                 playStatus = "Inserted guess.";
                 break;
-            case "invalidtry":
-                playStatus = "Invalid TRY command.";
+            case "inconsistent_current":
+                playStatus = "Guess was inconsistent with the current board.";
+                break;
+            case "incorrect_length":
+                playStatus = "Guess was not of the correct length.";
+                break;
+            case "wrong_id":
+                playStatus = "ID was not valid.";
                 break;
             case "wonch":
                 //won challenge!
