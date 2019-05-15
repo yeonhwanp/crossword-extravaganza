@@ -29,20 +29,31 @@ class CrosswordCanvas extends JComponent {
     
     /*
      * Abstraction Function
-     * AF(playerID, matchID, userInput, sendString, canvas) = a canvas represented by a state and the currentBoard if the 
-     *                                                        state is PLAY and a list of matches currentPuzzleMathces if the
-     *                                                        state is CHOOSE. The request is in line with the latest
-     *                                                        text that the user has entered into the text field.
+     * AF(state, request, currentBoard, currentPuzzleMathces, endString) = a GUI representing a CrosswordExtravaganza
+     *                                                                     user interface in the gamestate given by state.
+     *                                                                     If the player is in the PLAY state, then they
+     *                                                                     are playing on a board referened by currentBoard
+     *                                                                     and if they are in the CHOOSE state, then they view
+     *                                                                     the list of matches referened by currentPuzzleMatches.
+     *                                                                     Finally, if they are in the SHOW_SCORE state, then
+     *                                                                     they hold the details to the results of the game in
+     *                                                                     endString.                                                           
+     *                                                                     
      * 
      * Rep Invariant:
-     *  currentBoard only contains ?, #, and letters.
+     *  currentBoard only contains ?, #, alphanumerics, and newlines.
+     *  in currentPuzzleMatches, integers precede the lines of matches.
+     *      For the first set of numbers lines = int.
+     *      For the second set of numbers lines = int*2.
+     *  TODO endstring and request?
+     *  
      * 
      * Safety from Rep Exposure:
      *  All variables are private
      *  None of the methods take in or return mutable objects
      *  
      * Thread safety argument:
-     *  Threadsafe because client is threadsafe.
+     *  Threadsafe because Client is threadsafe and each crowssword canvas is unique to one Client.
      * 
      */
 
@@ -215,6 +226,7 @@ class CrosswordCanvas extends JComponent {
         ++line;
     }
     
+    // Centered bolded text
     private void printlnCenterBold(String s, Graphics g) {
         g.setFont(boldFont);
         FontMetrics fm = g.getFontMetrics();
@@ -231,6 +243,7 @@ class CrosswordCanvas extends JComponent {
         ++line;
     }
     
+    // Centered regular text
     private void printlnCenter(String s, Graphics g) {
         g.setFont(textFont);
         FontMetrics fm = g.getFontMetrics();
@@ -253,42 +266,42 @@ class CrosswordCanvas extends JComponent {
     
     /**
      * Sets the state of the canvas as well as the parameters for the state.
-     * @param state the string representing the state that the match should be in
-     * @param input another string representing the parameters for the match.
+     * @param state the state of the game the canvas should currently be representing
+     * @param input another string representing the parameters for the given state
      */
-    public void setRequest(String state, String input) {
+    public void setRequest(ClientState state, String input) {
         switch (state) {
-        case "start":
+        case START:
             this.state = ClientState.START;
             break;
-        case "choose":
+        case CHOOSE:
             this.state = ClientState.CHOOSE;
             break;
-        case "wait":
+        case WAIT:
             this.state = ClientState.WAIT;
             break;
-        case "play":
+        case PLAY:
             this.state = ClientState.PLAY;
             break;
-        case "show_score":
+        case SHOW_SCORE:
             this.state = ClientState.SHOW_SCORE;
             break;
         default:
-            throw new RuntimeException("uh oh");
+            throw new RuntimeException("Should never be here");
         }
         request = input;
     }
     
     /**
-     * Sets what the canvas should look like
-     * @param input the inputed string
+     * Sets the board string of the canvas 
+     * @param input the string representation of a board to update the canvas with
      */
     public void setBoard(String input) {
         currentBoard = input;
     }
     
     /**
-     * Sets the available puzzles to the string provided
+     * Sets the available puzzles to the string provided TODO bad spec?
      * @param puzzleMatchString the string of available puzzles and matches
      */
     public void setList(String puzzleMatchString) {
@@ -296,22 +309,22 @@ class CrosswordCanvas extends JComponent {
     }
     
     /**
-     * Sets the score to the last updated
-     * @param scoreString the string holding the score information
+     * Updates the endgame score
+     * @param scoreString the string holding the score information of both players
      */
     public void setScore(String scoreString) {
         endString = scoreString;
     }
     
     /**
-     * @return The state of the client gameside
+     * @return The state of the CrosswordCanvas game
      */
     public ClientState getState() {
         return state;
     }
     
     /**
-     * @return a text representation of the client gameboard along with necessary information
+     * @return a text representation of the client gameboard along with the necessary information TODO william
      */
     public String getCurrentBoard() {
         return currentBoard;
@@ -325,7 +338,7 @@ class CrosswordCanvas extends JComponent {
     }
     
     /**
-     * @return To be used for testing
+     * @return the parameters of the state
      */
     public String getRequestState() {
         return request;
@@ -340,8 +353,6 @@ class CrosswordCanvas extends JComponent {
      * We added some state just to allow you to see when the class gets repainted,
      * although in general you wouldn't want to be mutating state inside the paint
      * method.
-     * 
-     * TODO different UI updates for different game states
      */
     @Override
     public void paint(Graphics g) {
@@ -387,6 +398,7 @@ class CrosswordCanvas extends JComponent {
         }
     }
     
+    // Method to help print necessary information at the start state
     private void printStartInstructions(Graphics g) {
         printlnCenterBig("Welcome to Crossword Extravaganza!", g);
         ++line;
@@ -398,6 +410,7 @@ class CrosswordCanvas extends JComponent {
         printlnCenterBig("player_ID should only be composed of alphanumerics.", g);
     }
     
+    // Method to help print necessary information at the choose state
     private void printChooseInstructions(Graphics g) {
         printlnCenterBold("Valid Commands:", g);
         ++line;
@@ -409,10 +422,7 @@ class CrosswordCanvas extends JComponent {
         line -= 2;
     }
     
-    private void printWaitInsturctions(Graphics g) {
-        
-    }
-    
+    // Method to print scores when the game is over
     private void printScores(Graphics g) {
         String[] lines = endString.split("\\n");
         int lineCounter = 1;
@@ -437,6 +447,7 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
     }
     
+    // Method to print the list of valid and available matches
     private void printMatchList(Graphics g) {
         String[] lines = currentPuzzleMatches.split("\\n");
         int lineCounter = 0;
@@ -465,6 +476,7 @@ class CrosswordCanvas extends JComponent {
         }
     }
     
+    // Method to help print the board
     private void printBoard(Graphics g) {
         
         // First, split input string according to newlines

@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.stream.IntStream;
 
@@ -20,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 /**
@@ -37,12 +39,13 @@ public class Client {
     private static final int TEXTBOX_FONT_SIZE = 20;
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
+    private static final int CHOOSE_INPUT_LENGTH = 3;
     private final String host;
     private final int port;
     private String playerID = "";
     private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
-    
+
     // A simple alias to this object
     private final Client thisLock = this;
 
@@ -75,6 +78,8 @@ public class Client {
      *      
      *      receiveWait() is not entirely synchronized, but the parts that are unsynchronized are
      *      done so to prevent deadlock and do not rely on the accuracy of the internal reps of Client.
+     *      Once we do call on the methods that do touch the reps, we make sure to check the initial condition
+     *      that was required before running the rest of the method.
      *      
      *  Static methods do not touch any part of the rep and all variables inside of them are confined
      *      within that method.
@@ -148,7 +153,7 @@ public class Client {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setVisible(true);
     }
-    
+
     /**
      * Wrapper method to call other methods in response to a command submission
      * from the user.
@@ -158,11 +163,9 @@ public class Client {
     private void handleCommand(String userInput) {
         try {
             String extension = parseUserInput(userInput);
-
             // Send GET request
             URL test = new URL("http://" + host + ":" + port + extension);
             System.out.println("OUT: " + test);
-
             BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
 
             // Get the response into one big line then parse it
@@ -173,11 +176,12 @@ public class Client {
             System.out.println("-----------------------");
             parseResponse(response, userInput);
             responseBuffer.close();
-
-            repaint();
-
+            repaint(); 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            canvas.setRequest(getState(), "try again");
+            repaint();
         }
     }
 
@@ -274,10 +278,10 @@ public class Client {
             sendString = sendExit(commandInfo);
             break;
         case "START":
-            sendString = sendStart(commandInfo, userInput);
+            sendString = sendStart(commandInfo);
             break;
         default:
-            throw new RuntimeException("User input error. Should never reach here.");
+            throw new IllegalArgumentException();
         }
 
         return sendString;
@@ -312,7 +316,7 @@ public class Client {
         default:
             //TODO
             System.out.println(splitResponse[0]); //Piazza says that if they enter incorrect command, project spec
-                                // is unspecified. However, they said we should still give the user a human-readable message.
+            // is unspecified. However, they said we should still give the user a human-readable message.
             throw new RuntimeException("Should never reach here");
         }
     }
@@ -321,11 +325,17 @@ public class Client {
      * Refreshes the GUI
      */
     public synchronized void repaint() {
-        canvas.repaint();
+        try {
+            SwingUtilities.invokeAndWait(() -> {canvas.repaint();}); // TODO is this ok?
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     // ========= PUBLIC METHODS ========= //
-    
+
     // NOTE: commas within RECEIVES or SEND comments indicate a newline
 
     /**
@@ -338,7 +348,7 @@ public class Client {
      */
     private synchronized void receiveStart(String[] response) {
         String startState = response[0];
-        canvas.setRequest("start", startState);
+        canvas.setRequest(ClientState.START, startState);
     }
 
     /**
@@ -356,7 +366,7 @@ public class Client {
 
         // Set the state of the canvas
         String chooseState = response[lineCount];
-        canvas.setRequest("choose", chooseState);
+        canvas.setRequest(ClientState.CHOOSE, chooseState);
         lineCount++;
 
         // Set the player ID
@@ -402,17 +412,17 @@ public class Client {
      */
     private void receiveWait(String lastInput) throws IOException {
         synchronized (thisLock) {
-            canvas.setRequest("wait", "");
+            canvas.setRequest(ClientState.WAIT, "");
             matchID = lastInput.split(" ")[1];
             this.repaint(); 
         }
-        
+
         URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getUserID() + "/" + getMatchID());
         BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
         // Get the response into one big line then parse it
         String joinedResponse = ClientManager.receiveResponse(joinedBuffer);
 
-        
+
         // Make sure that you didn't change the state
         synchronized (thisLock) {
             if (getState() == ClientState.WAIT) {
@@ -442,7 +452,7 @@ public class Client {
 
         // Set the state of the canvas
         String chooseState = response[lineCount];
-        canvas.setRequest("play", chooseState);
+        canvas.setRequest(ClientState.PLAY, chooseState);
         lineCount++;
 
         if (chooseState.equals("new")) {
@@ -467,11 +477,11 @@ public class Client {
 
         // Set the state of the canvas
         String winner = response[lineCount];
-        canvas.setRequest("show_score", winner);
+        canvas.setRequest(ClientState.SHOW_SCORE, winner);
         lineCount++;
 
         String endString = "";
-        
+
         for (int i = 0; i < 6; i++) {
             endString += response[lineCount] + "\n";
             lineCount++;
@@ -485,16 +495,17 @@ public class Client {
      * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
      * The client must be on the START state (as defined in the project handout) to run this method.
      * @param inputStrings the input from the player
-     * @param lastInput the last input from the player
      * @return a string with the format of: /start/player_ID 
      */
-    private synchronized String sendStart(String[] inputStrings, String lastInput) {  
+    private synchronized String sendStart(String[] inputStrings) {  
         String sendString = "";
-        if (canvas.getState() == ClientState.START && !lastInput.equals("")) {
+        if (canvas.getState() == ClientState.START 
+                && inputStrings.length == 1
+                && inputStrings[0].matches("^[a-zA-Z0-9]+$") ) {
             sendString = "/start/" + inputStrings[0];
         }
         else {
-            throw new RuntimeException("Wrong start format.");
+            throw new IllegalArgumentException();
         }
         return sendString;
     }
@@ -509,15 +520,19 @@ public class Client {
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 3) {
+        if (canvas.getState() == ClientState.CHOOSE 
+                && inputStrings.length == CHOOSE_INPUT_LENGTH 
+                && inputStrings[0].matches("^[a-zA-Z0-9]+$") 
+                && inputStrings[1].matches("^[a-zA-Z0-9]+$") 
+                && inputStrings[2].matches("[^\n\r]*")) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
-            throw new RuntimeException("Wrong new format.");
+            throw new IllegalArgumentException();
         }
         return sendString;
     }
-    
+
     /**
      * A method that takes in a valid PLAY command in the form of: PLAY match_ID 
      * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
@@ -528,15 +543,17 @@ public class Client {
      */
     private synchronized String sendPlay(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == ClientState.CHOOSE && inputStrings.length == 1) {
+        if (canvas.getState() == ClientState.CHOOSE 
+                && inputStrings.length == 1
+                && inputStrings[0].matches("^[a-zA-Z0-9]+$")) {
             sendString = "/play/" + playerID + "/" + inputStrings[0];
         }
         else {
-            throw new RuntimeException("Wrong play format.");
+            throw new IllegalArgumentException();
         }
         return sendString;
     }
-    
+
     /**
      * A method that takes in a valid EXIT command in the form of: EXIT
      * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
@@ -550,7 +567,7 @@ public class Client {
      */
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
-        if (inputStrings.length == 0) {
+        if (inputStrings.length == 0 && inputStrings[0].equals("EXIT")) {
             if (canvas.getState() == ClientState.WAIT || canvas.getState() == ClientState.PLAY) {
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID + "/" + matchID;
             }
@@ -559,7 +576,7 @@ public class Client {
             }
         }
         else {
-            throw new RuntimeException("Wrong exit format");
+            throw new IllegalArgumentException();
         }
 
         return sendString;
@@ -576,11 +593,14 @@ public class Client {
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
         System.out.println(canvas.getState() + " STATE");
-        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 2) {
+        if (canvas.getState() == ClientState.PLAY 
+                && inputStrings.length == 2
+                && inputStrings[0].matches("^\\d+$") // TODO is this integers only
+                && inputStrings[1].matches("/^[A-Za-z]+$/")) { 
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
-            throw new RuntimeException("Wrong try format.");
+            throw new IllegalArgumentException();
         }
         return sendString;
     }
@@ -595,11 +615,14 @@ public class Client {
      */
     private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
-        if (canvas.getState() == ClientState.PLAY && inputStrings.length == 2) {
+        if (canvas.getState() == ClientState.PLAY 
+                && inputStrings.length == 2
+                && inputStrings[0].matches("^\\d+$") // TODO is this integers only
+                && inputStrings[1].matches("/^[A-Za-z]+$/")) { 
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
-            throw new RuntimeException("Wrong challenge format.");
+            throw new IllegalArgumentException();
         }
         return sendString;
     }
@@ -622,8 +645,6 @@ public class Client {
         }
         return boardString;
     }
-
-    //TODO: some method to tell the user that they've inputed something invalid
 
     /**
      * Returns the subarray starting at some index start to the end of the array.

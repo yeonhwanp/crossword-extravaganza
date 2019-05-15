@@ -8,6 +8,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -15,15 +16,39 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
+import javax.swing.SwingUtilities;
+
 import crossword.Client.ClientState;
 
 public class ClientManager {
 
     /*
-     * Abstraction Function: TODO
-     * Rep Invariant: TODO
-     * Safety from Rep Exposure: TODO
-     * Thread safety argument: TODO
+     * Abstraction Function
+     * AF() = A program to manage connections between a CrosswordExtravaganaza client and server.                                                                                                                         
+     * 
+     * Rep Invariant:
+     *  true
+     * 
+     * Safety from Rep Exposure:
+     *  No variables
+     *  
+     * Thread safety argument:
+     *  Client is threadsafe and each ClientManager handles only one instance of Client in connecToServer()
+     *  connectToServer is only ever run once and even if it were run multiple times, each instance of
+     *  the variables are confined to each method call
+     *  GUI updates are wrapped in a SwingUtilities.invokeLater()
+     *  There are two threads which rely on the state of the same client at any given moment and we
+     *      acknowledge that interleaving is possible up to the lines that are synchronized. However,
+     *      his is ok for two reasons:
+     *          1. The method calls after the if statements are run independently of methods in the client referenced
+     *             and all new variables/methods are confined  
+     *          2. The part that is synchronized checks for the initial condition again before running the rest of the 
+     *             code to make sure that the condition holds true while running the rest of the code.
+     *             
+     *             TODO this is pretty bad lol
+     *  receiveResponse() is not synchronized but all referenced variables are confined to the method call. TOOD correct?
+     *  Only public method is the main() method which is only ever run once per lifecycle. TODO correct?
+     * 
      */
 
     /*
@@ -105,14 +130,14 @@ public class ClientManager {
                             if (client.getState() == ClientState.CHOOSE) {
                                 client.parseResponse(response, "");
                                 responseBuffer.close();
-                                client.repaint();  
+                                client.repaint();
                             }
                         }
 
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                } 
             }
         }).start();
 
@@ -129,7 +154,7 @@ public class ClientManager {
                             if (client.getState() == ClientState.PLAY) {
                                 client.parseResponse(response, "");
                                 responseBuffer.close();
-                                client.repaint();  
+                                client.repaint();
                             }
                         }
                     }
