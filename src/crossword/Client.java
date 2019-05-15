@@ -384,7 +384,7 @@ public class Client {
      * Refreshes the GUI
      */
     public synchronized void repaint() {
-        canvas.repaint();
+        SwingUtilities.invokeLater(() -> {canvas.repaint();});
         checkRep();
     }
 
