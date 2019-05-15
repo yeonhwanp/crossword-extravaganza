@@ -665,7 +665,7 @@ public class Client {
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$")
-                && inputStrings[1].matches("^[A-Za-z]+$")) { 
+                && inputStrings[1].matches("^[A-Za-z-]+$")) { 
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
@@ -689,7 +689,7 @@ public class Client {
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$") 
-                && inputStrings[1].matches("^[A-Za-z]+$")) { 
+                && inputStrings[1].matches("^[A-Za-z-]+$")) { 
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
