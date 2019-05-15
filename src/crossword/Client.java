@@ -52,7 +52,7 @@ public class Client {
     /*
      * Abstraction Function
      * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
-     *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnza 
+     *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnaza 
      *                                             server at the url http://host:port with a unique identifying playerID 
      *                                             and a matchID if currently in session. 
      * 
