@@ -595,11 +595,12 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
-                && inputStrings[0].matches("^\\d+$") // TODO is this integers only
-                && inputStrings[1].matches("/^[A-Za-z]+$/")) { 
+                && inputStrings[0].matches("\\d+") // TODO is this integers only
+                && inputStrings[1].matches("^[A-Za-z]+$")) { 
             sendString = "/try/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
+            System.out.println(String.valueOf(inputStrings.length) + inputStrings[1].matches("^[A-Za-z]+$"));
             throw new IllegalArgumentException();
         }
         return sendString;
@@ -618,7 +619,7 @@ public class Client {
         if (canvas.getState() == ClientState.PLAY 
                 && inputStrings.length == 2
                 && inputStrings[0].matches("^\\d+$") // TODO is this integers only
-                && inputStrings[1].matches("/^[A-Za-z]+$/")) { 
+                && inputStrings[1].matches("^[A-Za-z]+$")) { 
             sendString = "/challenge/" + playerID + "/" +  matchID + "/" + inputStrings[0] + "/" + inputStrings[1];
         }
         else {
