@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import crossword.Cell.Exist;
-
 /**
  * Word of a crossword puzzle, that can be guessed or challenged
  *

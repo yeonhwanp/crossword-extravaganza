@@ -5,9 +5,7 @@ package crossword;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
