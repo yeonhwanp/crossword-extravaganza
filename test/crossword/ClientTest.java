@@ -530,8 +530,12 @@ public class ClientTest {
      *      - NEW 
      *      - PLAY 
      *      - EXIT:
-     *          - From WAIT, PLAY, CHOOSE, SEND_SCORE
-     *      - TRY:
+     *          - From WAIT (manual), PLAY, CHOOSE, SEND_SCORE
+     *          - For wait, the user can test it by first opening up the client, 
+     *                      entering START testID, then entering NEW matchid somepuzzle.puzzle "desc",
+     *                      and when the user enters the waiting state, the user should enter EXIT and
+     *                      be redirected back to the CHOOSE state.
+     *      - TRY
      *      - CHALLENGE  
      */
     
@@ -565,6 +569,153 @@ public class ClientTest {
         
         String testString = testClient.parseUserInput("NEW testID thisIsgreat.puzzle \"hello\"");
         assertEquals("/choose/player25/testID/thisIsgreat.puzzle/hello", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: PLAY
+    @Test
+    public void testParseUserPLAY() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String testString = testClient.parseUserInput("PLAY testID");
+        assertEquals("/play/player25/testID", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: EXIT when in CHOOSE
+    @Test
+    public void testParseUserExitChoose() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String testString = testClient.parseUserInput("EXIT");
+        assertEquals("/exit/choose/player25", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: EXIT when in PLAY
+    @Test
+    public void testParseUserExitPlay() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY something";
+        testClient.parseUserInput(userInput2);
+        
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        String testString = testClient.parseUserInput("EXIT");
+        assertEquals("/exit/play/player25/something", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: TRY
+    @Test
+    public void testParseUserTry() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY something";
+        testClient.parseUserInput(userInput2);
+        
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        String testString = testClient.parseUserInput("TRY 1 DOO");
+        assertEquals("/try/player25/something/1/DOO", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: CHALLENGE
+    @Test
+    public void testParseUserChallenge() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY something";
+        testClient.parseUserInput(userInput2);
+        
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        String testString = testClient.parseUserInput("CHALLENGE 1 DOO");
+        assertEquals("/challenge/player25/something/1/DOO", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: EXIT when in SEND_SCORE
+    @Test
+    public void testParseUserExitShowScore() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String userInput2 = "PLAY something";
+        testClient.parseUserInput(userInput2);
+        
+        String serverResponse2 = "play\nnew\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        testClient.parseResponse(serverResponse2, userInput2);
+        
+        testClient.parseUserInput("EXIT");
+        String serverResponse3 = "show_score\nwilly\nwilly\n3\n0\nchris\n0\n0";
+        testClient.parseResponse(serverResponse3, "EXIT");
+        String testString2 = testClient.parseUserInput("EXIT");
+        assertEquals("/exit/show_score/player25", testString2);
     }
     
     

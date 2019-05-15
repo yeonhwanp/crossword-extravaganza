@@ -6,15 +6,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-
-import javax.swing.SwingUtilities;
 
 import crossword.Client.ClientState;
 
@@ -37,7 +34,7 @@ public class ClientManager {
      *  Client is threadsafe and each ClientManager handles only one instance of Client in connecToServer()
      *  connectToServer is only ever run once and even if it were run multiple times, each instance of
      *  the variables are confined to each method call
-     *  GUI updates that may possibly mutate the rep of the GUI are wrapped in a SwingUtilities.invokeLater()
+     *  Swing GUI updates are wrapped in a SwingUtilities.invokeLater()
      *  There are two threads which rely on the state of the same client at any given moment and we
      *      acknowledge that interleaving is possible up to the lines that are synchronized. However,
      *      this is ok for two reasons:
@@ -65,8 +62,7 @@ public class ClientManager {
      */
     public static void main(String[] args) throws UnknownHostException, IOException {
         // Create a new client object and have it connect
-        ClientManager thisClient = new ClientManager();
-        thisClient.connectToServer(args);
+        connectToServer(args);
     }
 
     /**
@@ -75,7 +71,7 @@ public class ClientManager {
      * @throws UnknownHostException if the server/socket is unknown host.
      * @throws IOException if we cannot connect with URL, or by socket.
      */
-    private void connectToServer(String[] args) throws UnknownHostException, IOException {
+    private static void connectToServer(String[] args) throws UnknownHostException, IOException {
 
         // ========= PARSING LAUNCH ARGUMENTS ========= //
         final Queue<String> arguments = new LinkedList<>(List.of(args));
@@ -183,6 +179,7 @@ public class ClientManager {
 
     /**
      * Constructs the response into one big string, properly formatted with newlines kept, as read through response
+     * @param response the bufferedReader that needs to be read from
      * @return the constructed response in a string form, with newlines kept
      * @throws IOException if the response line cannot be read
      */

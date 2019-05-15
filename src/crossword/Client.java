@@ -36,6 +36,7 @@ public class Client {
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
     private static final int CHOOSE_INPUT_LENGTH = 3;
+    private static final int END_PLAYER_LINES = 6;
     private final String host;
     private final int port;
     private boolean exit = false;
@@ -73,25 +74,18 @@ public class Client {
      *  host and port are private, final, and immutable
      *  All accesses to playerID, matchID, and canvas happen within Client methods
      *      which are all guarded by Client's lock except for handleCommand and parseResponse.
-     *      However, these two methods do not access the client's internal mutable reps except
-     *      for the canvas -- any method that mutates the rep of canvas is encapsulated in an SwingUtilities.invokeLater() 
-     *      method such that updates to the gui are threadsafe (this is also true in ClientManager).
+     *      However, this is ok because all of the variables in handleCommand and parseReponse are confined
+     *      and they do not access any internal reps. The methods they call on do access the rep. However, this is
+     *      ok because they themselves are synchronized so only one thread can touch the reps at  a time.
      *      
-     *      handleWait() is not synchronized and there are parts that are not encapsulated in SwingUtilities.invokeLater(). 
-     *      Again, this is to prevent deadlock from a blocking ReadingBuffer. However, this is again ok because 
-     *      the only method that looks at a rep is to the canvas, and only to the state that is saved within the canvas. 
-     *      This state is only ever mutated by Client and never mutated by any other threads that would possibly mutate it.
-     *      While CilentManager also looks at the state of the client, this is ok for two reasons.
-     *          1. It is not crucial that the result of client.getState() is correct because it is rechecked
-     *             within a synchronized block.
-     *          2. It is crucial that the state is accurate when the user enters an input (because it must always be sent)
-     *             but the only methods that rely on the correct states are the sending methods and the states are never
-     *             ever mutated by any other threads or processes.
+     *      receiveWait() is a method used by parseResponse which is not synchronized. However, this is ok because it is
+     *      synchronized in the places that it needs to be (where it touches the internal rep of Client). It releases the lock
+     *      so that when it is reading input from a BufferedReader, it does not result in holding onto the lock for an indefinite
+     *      amount of time. When it does need to touch the reps again after reading from the ResponseBuffer, however, it synchronizes
+     *      back onto Client and checks that the state at which it was called in is still satisfied.
      *      
-     *      receiveWait() is also not entirely synchronized, but the parts that are unsynchronized are
-     *      done so to prevent deadlock and do not rely on the accuracy of the internal reps of Client.
-     *      Once we do call on the methods that do touch the reps, we make sure to check the initial condition
-     *      that was required before running the rest of the method.
+     *      getSubArray() and parseBoard() are not synchronized but they are static and as such do not touch the rep, and all variables
+     *      are confined to the caller.
      *      
      *  Static methods do not touch any part of the rep and all variables inside of them are confined
      *      within that method.
@@ -276,7 +270,7 @@ public class Client {
      *  - START player_ID -> /start/playerID
      *  - PLAY match_ID -> /play/player_ID/match_ID
      *  - NEW match_ID puzzle_ID "Description" -> /choose/playerID/matchID/Description
-     *      - Description must not contain newlines
+     *      - Description must be alphanumeric
      *  - EXIT -> 
      *      - If the client is in a choose wait or play state: /exit/state/player_ID/match_ID
      *      - Else (Except START): /exit/state
@@ -323,7 +317,7 @@ public class Client {
 
     /**
      * Parses the response from the server and updates the canvas/client accordingly
-     * @param response a valid response from the server as defined by @link TODO
+     * @param response a valid response from the server as defined by @link[receiveStart(), receiveChoose(), receiveWait(), receivePlay(), receiveEnd()]
      * @param lastInput the player's last input
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */
@@ -334,34 +328,24 @@ public class Client {
 
         switch (splitResponse[0]) {
         case "start":
-//            SwingUtilities.invokeLater(() -> {
             receiveStart(rest);
             repaint();
-//            });
             break;
         case "choose":
-//            SwingUtilities.invokeLater(() ->  {
             receiveChoose(rest, lastInput);
             repaint();
-//            });
             break;
         case "wait":
             receiveWait(lastInput);
-//            SwingUtilities.invokeLater(() -> {
                 repaint();
-//            });
             break;
         case "play":
-//            SwingUtilities.invokeLater(() -> {
             receivePlay(rest, lastInput);
             repaint();
-//            });
             break;
         case "show_score":
-//            SwingUtilities.invokeLater(() -> {
             receiveEnd(rest);
             repaint();
-//            });
             break;
         default:
             throw new RuntimeException("Should never reach here");
@@ -533,7 +517,7 @@ public class Client {
 
         String endString = "";
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < END_PLAYER_LINES; i++) {
             endString += response[lineCount] + "\n";
             lineCount++;
         }
