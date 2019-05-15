@@ -65,9 +65,9 @@ public class Client {
      * 
      * Safety from Rep Exposure:
      *  host and port are private, final, and immutable
-     *  playerID and matchID are private and immutable
-     *  canvas is a mutable type but is never returned to the client or taken in as a parameter, so it is safe from rep exposure
-     *  all public methods take in and return immutable types, so it's safe to directly alias them
+     *  playerID, exit, matchID are private
+     *  canvas is a mutable type but is never returned to the client or taken in as a parameter from a method, so it is safe from rep exposure
+     *  all public methods take in and return immutable types, so it's safe to directly alias them. Hence, this is SRE
      *  
      * Thread safety argument:
      *  host and port are private, final, and immutable
