@@ -259,12 +259,13 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(1, 2, "hint", 1, "ca", "ACROSS");
-        addCells(firstWord);
         Player player = new Player("hey");
         tester.addWord(firstWord);
-        firstWord.setOwner(player);
+        
         firstWord.addInvolvedCell(tester);
         firstWord.addInvolvedCell(new Cell(1,3,Exist.PRESENT));
+        firstWord.setOwner(player);
+
         firstWord.tryInsertNewWord(player, "ca");
         
         assertEquals('c', tester.getCurrentValue());
@@ -282,17 +283,22 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(1, 2, "hint", 1, "aw", "ACROSS");
-        addCells(firstWord);
         Word secondWord = new Word(0, 2, "hint", 1, "ca", "DOWN");
-        addCells(secondWord);
         Player player = new Player("hey");
         
         tester.addWord(firstWord);
+        firstWord.addInvolvedCell(tester);
+        firstWord.addInvolvedCell(new Cell(1,3,Exist.PRESENT));
         firstWord.setOwner(player);
+        
+
         firstWord.tryInsertNewWord(player, "aw");
         
         tester.addWord(secondWord);
+        secondWord.addInvolvedCell(new Cell(0,2,Exist.PRESENT));
+        secondWord.addInvolvedCell(tester);
         secondWord.setOwner(player);
+
         secondWord.tryInsertNewWord(player, "da");
         
         assertEquals('a', tester.getCurrentValue());
@@ -379,11 +385,16 @@ public class CellTest {
     @Test
     public void testCanChangeValueNo() {
         
-        Cell tester = new Cell(1,2,Exist.PRESENT);
+        Cell tester = new Cell(3,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
-        addCells(firstWord);
+        
+        firstWord.addInvolvedCell(tester);
+        firstWord.addInvolvedCell(new Cell(3, 3, Exist.PRESENT));
+        firstWord.addInvolvedCell(new Cell(3, 4, Exist.PRESENT));
+        
         firstWord.setOwner(player);
+        firstWord.tryInsertNewWord(player, "cat");
         firstWord.setConfirmed();
         tester.addWord(firstWord);
         
