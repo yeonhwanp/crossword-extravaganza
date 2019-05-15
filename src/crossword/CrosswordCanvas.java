@@ -54,6 +54,8 @@ class CrosswordCanvas extends JComponent {
     private static final int OTHER_Y_BUFFER = 200;
     private static final int END_INST_SPACE = 5;
     private static final int PLAYER_LINES = 3;
+    private static final int MATCH_LIST_SPACING = 6;
+    private static final int GEN_LIST_SPACING = 10;
 
     private ClientState state;
     private String request;
@@ -130,6 +132,8 @@ class CrosswordCanvas extends JComponent {
      * Generally big font
      */
     private final Font bigFont = new Font("Arial", Font.PLAIN, 32); 
+    
+    private final Font instructionFont = new Font("Arial", Font.PLAIN, 12);
 
     /**
      * Draw a cell at position (row, col) in a crossword.
@@ -281,6 +285,23 @@ class CrosswordCanvas extends JComponent {
     // Centered regular text
     private void printlnCenter(String s, Graphics g) {
         g.setFont(textFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        int centerX = (CENTER_X_BUFFER - fm.stringWidth(s)) / 2;
+        int placeY = CENTER_Y_BUFFER + originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    // Centered instruction text
+    private void printlnCenterInst(String s, Graphics g) {
+        g.setFont(instructionFont);
         FontMetrics fm = g.getFontMetrics();
         // Before changing the color it is a good idea to record what the old color
         // was.
@@ -460,7 +481,7 @@ class CrosswordCanvas extends JComponent {
             
             g.setColor(Color.RED);
             g.setFont(boldFont);
-            g.drawString("Available commands", (PLAY_Y_AVAIL - fm.stringWidth("Available commands")), originY + PLAY_X_AVAIL + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString("Available commands", (PLAY_X_AVAIL - fm.stringWidth("Available commands")), originY + PLAY_Y_AVAIL + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
             g.setFont(textFont);
             g.drawString("TRY id word", (PLAY_X_CMD_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
             g.drawString("CHALLENGE id word", (PLAY_X_CMD_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + PLAY_LINE_SPACING + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
@@ -491,11 +512,11 @@ class CrosswordCanvas extends JComponent {
     private void printChooseInstructions(Graphics g) {
         printlnCenterBold("Valid Commands:", g);
         ++line;
-        printlnCenter("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
+        printlnCenterInst("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
         ++line;
-        printlnCenter("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be a unique alphanumeric identifier, Puzzle_ID Should be obtained from the available puzzles, and description must be encapsulated around quotes and contain no newlines.", g);
+        printlnCenterInst("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be unique and alphanumeric, Puzzle_ID should be from available puzzles, and description must be encapsulated around quotes and contain no newlines.", g);
         ++line;
-        printlnCenter("EXIT", g);
+        printlnCenterInst("EXIT", g);
         line -= 2;
     }
 
@@ -506,21 +527,26 @@ class CrosswordCanvas extends JComponent {
 
         Color oldColor = g.getColor();
         FontMetrics fm = g.getFontMetrics();
-
-        printlnCenterBold("The game is over! Winner: " + request, g);
-
-        ++line;
-        // Print out my score
-        g.setColor(new Color(COLOR_CONST, 0, 0));
-        g.setFont(textFont);
-        line += 2;
         
-        ++line;
-        g.drawString("Your total score: " + lines[lineCounter], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
-        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+ID_INDEX], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
-        ++line;
-        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
-        g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+ID_INDEX+1], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        if (request.equals("tie score")) {
+            printlnCenterBold("The game is over! You have both tied.", g);
+        }
+        else {
+            printlnCenterBold("The game is over! Winner: " + request, g);
+
+            ++line;
+            // Print out my score
+            g.setColor(new Color(COLOR_CONST, 0, 0));
+            g.setFont(textFont);
+            line += 2;
+            
+            ++line;
+            g.drawString("Your total score: " + lines[lineCounter], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+ID_INDEX], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            ++line;
+            g.drawString("Your challenge points: " + lines[lineCounter+1], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+ID_INDEX+1], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        }
         
         line += END_INST_SPACE;
         printlnCenterBold("Type EXIT to end your client...", g);
@@ -536,7 +562,7 @@ class CrosswordCanvas extends JComponent {
 
         // Printing valid puzzles
         printlnCenterBold("Valid Puzzles To Choose From:", g);
-        line += 6;
+        line += MATCH_LIST_SPACING;
         int validPuzzleCount = Integer.valueOf(lines[lineCounter]);
         lineCounter++;
         for (int i = 0; i < validPuzzleCount; i++) {
@@ -544,11 +570,12 @@ class CrosswordCanvas extends JComponent {
             printlnCenter(listCounter + ". " + lines[lineCounter], g);
             lineCounter++;
         }
-        line -= 5;
+        line -= MATCH_LIST_SPACING;
         
         // Printing valid Matches
         printlnCenterBold("Valid Matches To Connect To:", g);
-        line += 10; // To space out the title and the list
+        line += validPuzzleCount + MATCH_LIST_SPACING; // To space out the title and the list
+//        line += PLAYER_LINES;
         int validMatchCount = Integer.valueOf(lines[lineCounter]);
         lineCounter++;
         for (int i = 0; i < validMatchCount; i++) {
@@ -598,7 +625,7 @@ class CrosswordCanvas extends JComponent {
                 }
                 else if (Character.isLetter(thisChar)) {
                     drawCell(i, j, g);
-                    letterInCell(Character.toString(thisChar), i, j, g);
+                    letterInCell(Character.toString(thisChar).toLowerCase(), i, j, g);
                 }
             }
             lineCounter++;

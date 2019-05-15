@@ -552,7 +552,7 @@ public class Match {
             return players.get(1).getID();
         }
         else {
-            return "TIE";
+            return "tie score";
         }
         
     }

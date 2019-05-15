@@ -5,15 +5,11 @@ package crossword;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-// TODO: check for invalid command inputs
-// TODO: Reset matchID if exit or join different game etc.
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.stream.IntStream;
 
