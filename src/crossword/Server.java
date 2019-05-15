@@ -73,14 +73,15 @@ public class Server {
      *  where these matches only have one player and are waiting for another. The server also has a map mapIDToMatch
      *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
      *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
-     *  Any matches where a player has forfeited has its map ID in mapIDToWinner, where values are the player who didn't forfeit
+     *  Any matches that has finished/terminated has its map ID in mapIDToWinner, where values are the players who are the most recent
+     *      winners of that match
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
      *  a value of twoPlayerMatches (again as a player of that match), but not both.
      * Every player should not have multiple locations (there cannot be duplicate players)
      * Every key in mapIDToDescription should exist in mapIDToMatch, and vice versa.
-     * Every key in twoPlayerMatches should not be in mapIDToDescription
+     * There should be no shared keys between mapIDToMatch, twoPlayerMatches, or mapIDToWinners
      * 
      * Safety from rep exposure:
      *  All fields, except validPuzzleNames, are private and final.
@@ -96,12 +97,16 @@ public class Server {
      *          It is not mutated, taken in as a parameter, or returned in any other method.
      *      twoPlayerMatches is mutated in playMatch and exit, but this is expected client behavior, so it is not rep exposure.
      *          It is not mutated, taken in as a parameter, or returned in any other method.
-     *          //TODO finish the two fields i added
+     *      mapIDToWinners is mutated in numerous methods, but this is expected client behavior, so it is not rep exposure.
      *        
      * Thread safety argument:
      *  Every method that is non-static is locked by the rep folderPath. Therefore, all accesses to our rep are guarded by
      *  the lock on folderPath, which is an instance variable. This means that only one thread can access/change our rep
      *  at a time. This is essentially the same as monitor pattern, except we do not want to give access to this.
+     *  
+     *  In some methods (exit, tryInsert, challenge, and watchBoard), we also lock on the match users are playing on
+     *  There is no case for deadlock, as the locks are always obtained in the order ot server, then match itself.
+     *  Now, any change to the current match is atomic, so we will not have thread safe issues here.
      *  All of our static methods are threadsafe because:
      *    The static methods only used local variables that are confined, so there is no behavior that is not threadsafe
      *  
@@ -297,8 +302,9 @@ public class Server {
         assert server != null;
         assert folderPath != null;
         assert validPuzzleNames != null;
-        
-        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or twoPlayerMatches)
+
+        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or
+                                           // twoPlayerMatches)
             int playerCount = 0;
             for (String matchID : mapIDToMatch.keySet()) {
                 Match oneMatch = mapIDToMatch.get(matchID);
@@ -314,20 +320,16 @@ public class Server {
             }
             assert playerCount == 1;
         }
-        
+
         assert mapIDToMatch.keySet().equals(mapIDToDescription.keySet());
-        
+
         for (String matchID : twoPlayerMatches.keySet()) {
             assert !mapIDToMatch.keySet().contains(matchID);
         }
-        
+
         assert mapIDToWinners != null;
-        
-        
+
     }
-
-
-
 
     public static enum PuzzleGrammar {
         FILE, NAME, DESCRIPTION, ENTRY, WORDNAME, CLUE, DIRECTION, ROW, COL, STRING, STRINGIDENT, INT, SPACES, WHITESPACE, NEWLINES, COMMENT, COMMENTORWHITESPACE;
@@ -378,7 +380,6 @@ public class Server {
 
         // make an AST from the parse tree
         final Match match = makeBoard(parseTree);
-        // System.out.println("AST " + expression);
         
         return match;
     }
@@ -419,16 +420,12 @@ public class Server {
           
             allWords.add(currentWord);
         }
-        
+
         Match currentMatch = new Match(name, description, allWords);
-        
+
         return currentMatch;
     }
-    
-    
-    
-    
-    
+
     /**
      * @return the port on which this server is listening for connections
      */
@@ -471,19 +468,14 @@ public class Server {
         final String response;
         exchange.sendResponseHeaders(VALID, 0);
 
-        String result = "start\n"
-                + "new game";
+        response = "start\nnew game";
         
-        response = result;
-
-
         // write the response to the output stream using UTF-8 character encoding
         OutputStream body = exchange.getResponseBody();
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         out.print(response);
         out.flush();
 
-        // if you do not close the exchange, the response will not be sent!
         exchange.close();
         
     }
@@ -532,10 +524,7 @@ public class Server {
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             out.print(response);
             out.flush();
-            
-//            System.out.println("sent back choose, (new or try again), allMatches - client should now see all the available matches to choose");
 
-            // if you do not close the exchange, the response will not be sent!
             exchange.close();
 
         }
@@ -581,6 +570,10 @@ public class Server {
             
             if (isUniqueMatchID(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
                 
+                if (mapIDToWinners.containsKey(matchID)) { //client started a new match with a matchID equal to the matchID of a match
+                                                        //that used to exist, but is now being replaced                    
+                    mapIDToWinners.remove(matchID);
+                }
                 
                 Player existingPlayer = getPlayer(playerID);
                 
@@ -597,12 +590,9 @@ public class Server {
                 out.print(waitResponse);
                 out.flush();
                 exchange.close();
-//                System.out.println("sent back wait, so server is waiting until another player joins match");
-                
+      
                 folderPath.notifyAll();
-                
-                
-                
+                     
             }
             else {
                 
@@ -627,8 +617,8 @@ public class Server {
      *          STATE: play
      *          - SEND: STATE, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws IOException if response headers cannot be sent
+     * @throws InterruptedException if we close incorrectly while waiting
      */
     private void waitForJoin(HttpExchange exchange) throws IOException, InterruptedException {
         
@@ -649,15 +639,13 @@ public class Server {
             
             Match matchToPlay = mapIDToMatch.get(matchID);
             Player player = getPlayer(playerID);
-            
-            
+
             
             while(matchToPlay.getNumberPlayers() < 2) {
                 folderPath.wait();
             }
             
             Player otherPlayer = matchToPlay.getOtherPlayer(player);
-//            Player otherPlayer = getPlayer(otherPlayerID);
 
             exchange.sendResponseHeaders(VALID, 0);
             OutputStream body = exchange.getResponseBody();
@@ -673,15 +661,12 @@ public class Server {
             playResponse = playResult;
             out.print(playResponse);
             out.flush();
-            
+
             exchange.close();
-            
-//            System.out.println("sent back play, new, match, so the client should now see the match to play");
-            
+
         }
-        
+
     }
-    
     
     /**
      * RECEIVE: A play request in the form: "play playerID matchID"
@@ -740,8 +725,7 @@ public class Server {
                 final String validResponse = validTemporary;
                 out.print(validResponse);
                 out.flush();
-//                System.out.println("sent back play, new , match, so client should now see the match that they just joined");
-                
+ 
                 folderPath.notifyAll();
     
             }
@@ -750,8 +734,7 @@ public class Server {
                 final String invalidResponse = getChooseResponse("try again");
                 out.print(invalidResponse);
                 out.flush();
-//                System.out.println("sent back choose, try again, allmatches. client should choose a valid match to start/play this time");
-//                System.out.println("client should now see available matches to choose from");
+
             }
      
             exchange.close();
@@ -825,7 +808,6 @@ public class Server {
                 
                 Player quittingPlayer = getPlayer(playerID);
                 
-                String finishedResponse = "show_score\n";
                 Match currentMatch = twoPlayerMatches.get(matchID);
                 
                 synchronized (currentMatch) {
@@ -837,13 +819,12 @@ public class Server {
                     mapIDToWinners.put(matchID, winnerID);
                     
                     currentMatch.notifyAll();
-                    
-                    finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
-                            currentMatch.getChallengePoints(quittingPlayer) + "\n" + winnerID + "\n" + currentMatch.getScore(winner) + "\n" +
-                            currentMatch.getChallengePoints(winner);
-                    final String finished = finishedResponse;
 
-    
+                    final String finished = "show_score\n" + winnerID + "\n" + playerID + "\n"
+                            + currentMatch.getScore(quittingPlayer) + "\n"
+                            + currentMatch.getChallengePoints(quittingPlayer) + "\n" + winnerID + "\n"
+                            + currentMatch.getScore(winner) + "\n" + currentMatch.getChallengePoints(winner);
+
                     out.print(finished);
                     out.flush();
                     exchange.close();
@@ -906,47 +887,40 @@ public class Server {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
                             
-                            String finishedResponse = "show_score\n";
                             String winnerID = currentMatch.calculateWinner();
                             
                             twoPlayerMatches.remove(matchID);
                             mapIDToWinners.put(matchID, winnerID);
 
-                            currentMatch.notifyAll();
-       
+                            currentMatch.notifyAll();       
                             
-                            finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer)
+                            final String finished = "show_score\n" + winnerID + "\n" + playerID + "\n" + currentMatch.getScore(currentPlayer)
                                     + "\n" + currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID()
                                     + "\n" + currentMatch.getScore(otherPlayer) + "\n"
                                     + currentMatch.getChallengePoints(otherPlayer);
                             
-                            final String finished = finishedResponse;
-    
                             out.print(finished);
                             out.flush();
                             exchange.close();
-//                            System.out.println("sent showScore, score (includes match toString). client made a finishing move, so client should see winner");
-    
+   
                         } else {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
                             
                             String validTryStr = (validTry)? "validtry" : "invalidtry";
     
-                            String ongoingResponse = "play\n" + validTryStr + "\n" + playerID + "\n"
+                            final String ongoing = "play\n" + validTryStr + "\n" + playerID + "\n"
                                     + currentMatch.getScore(currentPlayer) + "\n"
                                     + currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
                                     + currentMatch.getScore(otherPlayer) + "\n"
                                     + currentMatch.getChallengePoints(otherPlayer) + "\n" + currentMatch.toString();
 
-                            final String ongoing = ongoingResponse;
     
                             out.print(ongoing);
                             out.flush();
                             exchange.close();
                             
-//                            System.out.println("sent play, true/false, match. client made a valid/invalid move, so choose another move");
-    
+  
                         }
     
                     }
@@ -1030,8 +1004,7 @@ public class Server {
                             out.print(finished);
                             out.flush();
                             exchange.close();
-//                            System.out.println("sent show_score, score, match. client made a valid challenge that finished the game, should now see score.");
-    
+ 
                         } else {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
@@ -1052,8 +1025,7 @@ public class Server {
                             out.print(ongoing);
                             out.flush();
                             exchange.close();
-//                            System.out.println("sent play, true/false, match. client made a valid or invalid challenge, and should now see board again. ");
-    
+
                         }
     
                     }
@@ -1095,14 +1067,11 @@ public class Server {
             out.print(response);
 
             out.flush();
-            // System.out.println("sent over updated available matches (it just changed)");
             exchange.close();
 
         }
         
     }
-    
-    
     
     
     /**
@@ -1184,10 +1153,6 @@ public class Server {
                         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
                         out.print(response);
                         out.flush();
-                        // System.out.println("sent over updated board (it just changed by someone
-                        // making a move), or sent over automatic winner");
-
-                        // if you do not close the exchange, the response will not be sent!
                         exchange.close();
                     }
 
