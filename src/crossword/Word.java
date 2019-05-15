@@ -13,11 +13,12 @@ import crossword.Cell.Exist;
 public class Word {
     
     // Abstraction function:
-    //    AF(startRow, startCol, id, hint, correctValue, direction, confirmed, owner) =
-    //      A word with the value correctValue with an "id" referenced by id that's a part of the crossword puzzle 
-    //      that starts at the cell [startRow x startCol] with an orientation direction with a "hint" referenced by hint.
+    //    AF(involvedCells, startRow, startCol, id, hint, correctValue, direction, confirmed, owner) =
+    //      A word with the correct value correctValue with an "id" referenced by id that's a part of the crossword puzzle 
+    //      that starts at the cell [startRow x startCol] with an orientation given by direction with a "hint" referenced by hint.
     //      confirmed and owner refer to if this word has been confirmed by either a challenge or a completed game with
-    //      owner referencing the player who is "guessing" this word.
+    //      owner referencing the player who is "guessing" this word. The particular cells on the match board that this word is part of
+    //      is stored within involvedCells, so [involvedCells.get(0), involvedCells.get(1), ...] forms the word on the board
     //      
     // Representation invariant:
     //    startRow >= 0 && startCol >= 0
@@ -32,10 +33,11 @@ public class Word {
     // Safety from rep exposure:
     //    startRow, startCol, id, hint, correctValue, and direction are all private and final
     //    confirmed and owner are private and are only changed using methods of the class
-    //    All methods take in and return immutable types
+    //    All methods take in and return immutable types, so it's safe to directly alias them and does not threaten SRE
     //   
     // Thread safety argument:
-    //   This class is not threadsafe, but it's OK because only Match accesses Word methods, and Match is threadsafe.
+    //   This class is not threadsafe, but it's OK because only Match accesses Word methods, and Match is threadsafe. This ensures that at most 
+    //   one thread is looking at a Word at a time.
     
     public enum Direction {ACROSS, DOWN}
     public enum ChallengeResult {INVALID, INCORRECT, CORRECT}
