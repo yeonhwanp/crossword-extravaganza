@@ -181,8 +181,6 @@ public class Word {
      * @return the smallest row index
      */
     public int getRowLowerBound() {
-        checkRep();
-
         return startRow;
     }
     
@@ -191,7 +189,6 @@ public class Word {
      * @return the largest row index
      */
     public int getRowUpperBound() {
-        checkRep();
         if (this.isVertical()) {
             return startRow + this.getLength() - 1;
         }
@@ -205,7 +202,6 @@ public class Word {
      * @return the smallest column index
      */
     public int getColumnLowerBound() {
-        checkRep();
         return startCol;
     }
     
@@ -214,7 +210,6 @@ public class Word {
      * @return the largest column index
      */
     public int getColumnUpperBound() {
-        checkRep();
         if (this.isHorizontal()) {
             return startCol + this.getLength() - 1;
         }
