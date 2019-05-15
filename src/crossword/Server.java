@@ -34,19 +34,6 @@ import edu.mit.eecs.parserlib.ParseTree;
 import edu.mit.eecs.parserlib.Parser;
 import edu.mit.eecs.parserlib.UnableToParseException;
 
-/*
- * TODO NOTES:
- * - Multiple matches
- * - Seeing all matches that work, seeing all the matches that can be connected to
- * - Receive input from the client based on the state of the match
- *      - Implement CHOOSE: PLAY, NEW, EXIT
- *      - Implement PLAY: TRY, CHALLENGE, EXIT
- * - TODO Go to OH and ask about changing the file midway
- * - handle player ID's
- * TODO define restrictions on "Description"
- */
-
-
 
 /*
  * Concurrency design:
@@ -71,6 +58,9 @@ public class Server {
     private final Map<String, Match> twoPlayerMatches;
     private final Map<String, String> mapIDToWinners;
     
+    
+    private static final int THIRD_INDEX = 3;
+    private static final int FOURTH_INDEX = 4;
     
     
     /*
@@ -432,7 +422,7 @@ public class Server {
         
         //initiate Board constructor here - putting in name of puzzle, and description of puzzle
         
-        for (int i = 3; i < children.size(); i++) {
+        for (int i = THIRD_INDEX; i < children.size(); i++) {
             
             //for every entry, use all of the printed information below to create a Word object
             //put this Word object into the set of words that the board holds on to
@@ -443,8 +433,8 @@ public class Server {
             String wordname = entryTree.children().get(0).text();
             String hint = entryTree.children().get(1).text();
             String direction = entryTree.children().get(2).text();
-            int row = Integer.valueOf(entryTree.children().get(3).text());
-            int col = Integer.valueOf(entryTree.children().get(4).text());
+            int row = Integer.valueOf(entryTree.children().get(THIRD_INDEX).text());
+            int col = Integer.valueOf(entryTree.children().get(FOURTH_INDEX).text());
             
             WordTuple currentWord = new WordTuple(row, col, hint, wordname, direction);
           
@@ -609,7 +599,7 @@ public class Server {
             String playerID = names[0];
             String matchID = names[1];
             String puzzleID = names[2];
-            String description = names[3];
+            String description = names[THIRD_INDEX];
             
             if (isUniqueMatchID(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
                 
@@ -891,11 +881,11 @@ public class Server {
      *     - MATCH_ID must exist in currently playing matches
      *     - PLAYER_ID must be one of the players in the match
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, validtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF INVALID (game logic):
-     *     - SEND: play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, invalidtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
@@ -918,7 +908,7 @@ public class Server {
             String playerID = ids[0];
             String matchID = ids[1];
             String wordID = ids[2];
-            String word = ids[3];
+            String word = ids[THIRD_INDEX];
 
             if (twoPlayerMatches.containsKey(matchID)) {
                 Match currentMatch = twoPlayerMatches.get(matchID);
@@ -961,8 +951,10 @@ public class Server {
                         } else {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+                            
+                            String validTryStr = (validTry)? "validtry" : "invalidtry";
     
-                            String ongoingResponse = "play\n" + String.valueOf(validTry) + "\n" + playerID + "\n"
+                            String ongoingResponse = "play\n" + validTryStr + "\n" + playerID + "\n"
                                     + currentMatch.getScore(currentPlayer) + "\n"
                                     + currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
                                     + currentMatch.getScore(otherPlayer) + "\n"
@@ -993,11 +985,14 @@ public class Server {
      *     - matchID must exist
      *     - playerID must be one of the players in the match
      * IF VALID CHALLENGE -> Ongoing (game logic):
-     *     - SEND: play, true, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     if challenge correct:
+     *     - SEND: play, wonch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     if challenge incorrect:
+     *     - SEND: play, lostch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_CHALLENGE -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: play, false, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, falsech, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be properly sent
      */
@@ -1021,7 +1016,7 @@ public class Server {
             String playerID = ids[0];
             String matchID = ids[1];
             String wordID = ids[2];
-            String word = ids[3];
+            String word = ids[THIRD_INDEX];
 
             if (twoPlayerMatches.containsKey(matchID)) {
                 Match currentMatch = twoPlayerMatches.get(matchID);

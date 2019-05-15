@@ -38,6 +38,7 @@ public class Word {
     //   This class is not threadsafe, but it's OK because only Match accesses Word methods, and Match is threadsafe.
     
     public enum Direction {ACROSS, DOWN}
+    public enum ChallengeResult {INVALID, INCORRECT, CORRECT}
 
     private final List<Cell> involvedCells;
     private final int startRow;
@@ -105,6 +106,8 @@ public class Word {
      * @return the ID of the word
      */
     public int getID() {
+        checkRep();
+        
         return id;
     }
     
@@ -113,6 +116,8 @@ public class Word {
      * @return the correct value
      */
     public String getCorrectValue() {
+        checkRep();
+
         return correctValue;
     }
     
@@ -122,6 +127,8 @@ public class Word {
      * @return the correct character
      */
     public char getCorrectCharAt(int i) {
+        checkRep();
+
         return correctValue.charAt(i);
     }
     
@@ -130,6 +137,8 @@ public class Word {
      * @return whether or not the word is down
      */
     public boolean isVertical() {
+        checkRep();
+
         return direction == Direction.DOWN;
     }
     
@@ -138,6 +147,8 @@ public class Word {
      * @return whether or not the word is across
      */
     public boolean isHorizontal() {
+        checkRep();
+
         return direction == Direction.ACROSS;
     }
     
@@ -146,6 +157,8 @@ public class Word {
      * @return the direction of the word
      */
     public Direction getDirection() {
+        checkRep();
+
         return direction;
     }
     
@@ -154,6 +167,8 @@ public class Word {
      * @return the hint
      */
     public String getHint() {
+        checkRep();
+
         return hint;
     }
     
@@ -162,6 +177,8 @@ public class Word {
      * @return the smallest row index
      */
     public int getRowLowerBound() {
+        checkRep();
+
         return startRow;
     }
     
@@ -170,6 +187,7 @@ public class Word {
      * @return the largest row index
      */
     public int getRowUpperBound() {
+        checkRep();
         if (this.isVertical()) {
             return startRow + this.getLength() - 1;
         }
@@ -183,6 +201,7 @@ public class Word {
      * @return the smallest column index
      */
     public int getColumnLowerBound() {
+        checkRep();
         return startCol;
     }
     
@@ -191,6 +210,7 @@ public class Word {
      * @return the largest column index
      */
     public int getColumnUpperBound() {
+        checkRep();
         if (this.isHorizontal()) {
             return startCol + this.getLength() - 1;
         }
@@ -204,6 +224,7 @@ public class Word {
      * @return the length of the correct word
      */
     public int getLength() {
+        checkRep();
         return correctValue.length();
     }
     
@@ -212,6 +233,7 @@ public class Word {
      * @return whether or not the word has been confirmed
      */
     public boolean isConfirmed() {
+        checkRep();
         return confirmed;
     }
     
@@ -221,6 +243,7 @@ public class Word {
      */
     public void setOwner(Player newOwner) {
         owner = Optional.of(newOwner);
+        checkRep();
     }
     
     /**
@@ -228,6 +251,7 @@ public class Word {
      * @return true iff the word has an owner
      */
     public boolean hasOwner() {
+        checkRep();
         return owner.isPresent();
     }
     
@@ -236,6 +260,7 @@ public class Word {
      */
     public void clearOwner() {
         owner = Optional.empty();
+        checkRep();
     }
     
     /**
@@ -244,6 +269,7 @@ public class Word {
      * @return the owner of the word
      */
     public Player getOwner() {
+        checkRep();
         if(!hasOwner()) {
             throw new RuntimeException("Tried calling get owner on a word that isn't owned!");
         }
@@ -255,6 +281,7 @@ public class Word {
      */
     public void setConfirmed() {
         confirmed = true;
+        checkRep();
     }
     
 //    public void addInvolvedCells(Match currentMatch) {
@@ -280,6 +307,7 @@ public class Word {
      */
     public void addInvolvedCell(Cell cell) {
         involvedCells.add(cell);
+        checkRep();
     }
     
     /**
@@ -293,6 +321,7 @@ public class Word {
             wordValue += cell.getCurrentValue();
         }
         
+        checkRep();
         return wordValue;
     }
     
@@ -303,6 +332,8 @@ public class Word {
      * @return if the insert is valid or not
      */
     public boolean checkConsistentInsert(Player player, String tryWord) {
+        checkRep();
+        
         if(this.isConfirmed() || (this.hasOwner() && !player.equals(this.getOwner()))) { // check if it's already confirmed or has a different owner
             return false;
         }
@@ -330,6 +361,8 @@ public class Word {
      * cleared if it has an owner. Then, it will set the word to have no owner.
      */
     public void clearThisInsertedWord() {
+        checkRep();
+        
         if(!hasOwner()) {
             return;
         }
@@ -361,6 +394,7 @@ public class Word {
         }
         
         setOwner(player);
+        checkRep();
     }
     
     /**
@@ -370,11 +404,13 @@ public class Word {
      * @return true iff the word was inserted (and was consistent, so it returns false iff it was inconsistent)
      */
     public boolean tryInsertNewWord(Player player, String tryWord) {
+        checkRep();
         if(!checkConsistentInsert(player, tryWord)) {
             return false;
         }
         
         byPassInsert(player, tryWord);
+        checkRep();
         return true;
     }
     
@@ -385,6 +421,8 @@ public class Word {
      * @return true iff it is a consistent challenge
      */
     public boolean checkConsistentChallenge(Player player, String challengeWord) {
+        checkRep();
+        
         if(!this.hasOwner() || player.equals(this.getOwner())) {
             return false;
         }
@@ -406,11 +444,14 @@ public class Word {
      * @param player must be a player within currentMatch
      * @param challengeWord the new challenge word
      * @param currentMatch the current match that this word and player are on
-     * @return true iff the challenge was accepted (if it was consistent)
+     * @return the result of the challenge in terms of ChallengeResult (INVALID if it wasn't consistent according to the rules, INCORRECT if the challenge was
+     * incorrect, and CORRECT if the challenge is correct)
      */
-    public boolean tryChallenge(Player player, String challengeWord, Match currentMatch) {
-        if(!checkConsistentChallenge(player, challengeWord)) {
-            return false;
+    public ChallengeResult tryChallenge(Player player, String challengeWord, Match currentMatch) {
+        checkRep();
+        
+        if(!checkConsistentChallenge(player, challengeWord)) { // the challenge was inconsistent, so it was invalid
+            return ChallengeResult.INVALID;
         }
         
         final String currentValue = this.getCurrentValue();
@@ -420,24 +461,26 @@ public class Word {
             currentMatch.incrementScore(this.getOwner());
             currentMatch.decreaseChallenge(player);
             this.setConfirmed();
+            return ChallengeResult.INCORRECT; // the challenging player got it incorrect
         }
-        else if(correct.equals(challengeWord)) {
+        else if(correct.equals(challengeWord)) { // the challenging player got it correct
             byPassInsert(player, challengeWord);
             currentMatch.incrementScore(player);
             currentMatch.incrementChallengeByTwo(player);
             this.setConfirmed();
+            return ChallengeResult.CORRECT;
         }
-        else {
+        else { // both players got it incorrect
             this.clearThisInsertedWord();
             currentMatch.decreaseChallenge(player);
+            return ChallengeResult.INCORRECT;
         }
-        
-        return true;
     }
     
     
     @Override
     public String toString() {
+        checkRep();
         return this.id + ". " + this.correctValue + " at (" + this.startRow + "," + this.startCol + "), in the " + this.direction.name()
                 + " direction, with the hint: " + this.hint;
     }
