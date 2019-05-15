@@ -574,8 +574,9 @@ public class Client {
         String sendString = "";
         if (canvas.getState() == ClientState.CHOOSE 
                 && inputStrings.length == CHOOSE_INPUT_LENGTH 
-                && inputStrings[0].matches("^[a-zA-Z0-9]+$") 
-                && inputStrings[1].matches("^[a-zA-Z0-9.]+$")) { // TODO match the quotes
+                && inputStrings[0].matches("^[a-zA-Z0-9]+$")
+                && inputStrings[1].matches("^[a-zA-Z0-9.]+$")
+                && inputStrings[2].matches("\"[a-zA-Z0-9]+\"")) {
             sendString = "/choose/" + playerID + "/" + inputStrings[0] + "/" + inputStrings[1] + "/" + inputStrings[2].replaceAll("\"", "");
         }
         else {
