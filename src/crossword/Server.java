@@ -898,12 +898,14 @@ public class Server {
      * PRECONDITION:
      *     - MATCH_ID must exist in currently playing matches
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - type of try varies, call it typeOfTry - it is a TryResult
-     *     - SEND: play, typeOfTry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, success, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF INVALID (game logic):
-     *     - SEND: play, invalidtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *   based on why the insert was rejected, send one of the following:
+     *     - SEND: play, incorrect_length, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, wrong_id, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, inconsistent_current, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
