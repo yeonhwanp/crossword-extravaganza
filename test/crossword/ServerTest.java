@@ -48,7 +48,6 @@ public class ServerTest {
      *  valid challenge: ongoing, finished board
      *  invalid challenge (game logic)
      * 
-     * Test showScore()
      * 
      * Test watchMatches()
      * 
