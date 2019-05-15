@@ -78,7 +78,6 @@ public class Match {
             Word newWord = new Word(wordTuple.getRow(), wordTuple.getCol(), wordTuple.getHint(), counter,
                     wordTuple.getWord(), wordTuple.getDirection());
             this.words.add(newWord);
-            this.idToWordMap.put(newWord.getID(), newWord);
             counter++;
         }
                 
@@ -117,6 +116,8 @@ public class Match {
                     this.gameBoard[i][j].addWord(word);
                 }
             }
+            
+            this.idToWordMap.put(word.getID(), word);
         }
         
         players = new ArrayList<>();

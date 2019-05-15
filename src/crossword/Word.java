@@ -87,7 +87,7 @@ public class Word {
         System.out.println(correctValue.length());
         assert involvedCells.size() == correctValue.length();
         if(this.confirmed) {
-            assert this.hasOwner();
+            assert this.owner.isPresent();
         }
         
         for(int i = 0; i < involvedCells.size()-1; i++) {
@@ -288,22 +288,22 @@ public class Word {
         checkRep();
     }
     
-    public void addInvolvedCells(Match currentMatch) {
-        final int rowLower = this.getRowLowerBound();
-        final int rowHigher = this.getRowUpperBound();
-        final int colLower = this.getColumnLowerBound();
-        final int colHigher = this.getColumnUpperBound();
-        
-        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
-            for(int j = colLower; j <= colHigher; j++) {
-                if(this.gameBoard[i][j].isAbsent()) {
-                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
-                }
-//                word.addInvolvedCell(this.gameBoard[i][j]);
-                this.gameBoard[i][j].addWord(word);
-            }
-        }
-    }
+//    public void addInvolvedCells(Match currentMatch) {
+//        final int rowLower = this.getRowLowerBound();
+//        final int rowHigher = this.getRowUpperBound();
+//        final int colLower = this.getColumnLowerBound();
+//        final int colHigher = this.getColumnUpperBound();
+//        
+//        for(int i = rowLower; i <= rowHigher; i++) { // NOTE: this order of iteration is CRUCIAL to maintaining the rep invariant 
+//            for(int j = colLower; j <= colHigher; j++) {
+//                if(this.gameBoard[i][j].isAbsent()) {
+//                    this.gameBoard[i][j] = new Cell(i, j, Exist.PRESENT); // be careful, we don't want to override any cells that already exist
+//                }
+////                word.addInvolvedCell(this.gameBoard[i][j]);
+//                this.gameBoard[i][j].addWord(word);
+//            }
+//        }
+//    }
     
     /**
      * Add a cell that corresponds to this given word.
