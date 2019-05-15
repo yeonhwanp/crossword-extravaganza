@@ -182,8 +182,12 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            canvas.setRequest(getState(), "try again");
-            repaint();
+            synchronized(thisLock) {
+                SwingUtilities.invokeLater(() -> {
+                    canvas.setRequest(getState(), "try again");
+                    repaint();
+                });
+            }
         }
     }
 
@@ -257,14 +261,12 @@ public class Client {
      *  - CHALLENGE id word -> /challenge/player_ID/match_ID/id/word
      */
     public synchronized String parseUserInput(String userInput) {
-
         String[] inputStrings = userInput.split(" "); 
         String[] commandInfo = getSubarray(inputStrings, 1);
         String sendString = "";
         
         if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
             sendString = "/restart/";
-            return sendString;
         }
 
         // Using the appropriate methods to send the request.
@@ -290,15 +292,12 @@ public class Client {
         default:
             throw new IllegalArgumentException();
         }
-        
-        System.out.println("ajksdlf");
-
         return sendString;
     }
 
     /**
      * Parses the response from the server and updates the canvas/client accordingly
-     * @param response a valid reponse from the server as defined by @link TODO
+     * @param response a valid response from the server as defined by @link TODO
      * @param lastInput the player's last input
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */

@@ -114,8 +114,15 @@ public class ClientManager {
         BufferedReader socketIn = new BufferedReader(new InputStreamReader(loadRequest.openStream(), UTF_8));
         String initialRequest = receiveResponse(socketIn);
 
-        client.parseResponse(initialRequest, ""); // TODO check this line "" is ok?
+        SwingUtilities.invokeLater(() -> {
+        try {
+            client.parseResponse(initialRequest, "");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } 
         client.launchGameWindow();
+        });
+        
         socketIn.close();
 
         // watch match list
