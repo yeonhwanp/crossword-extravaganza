@@ -320,35 +320,39 @@ public class Server {
      * Check for valid server rep
      */
     private void checkRep() {
-        assert server != null;
-        assert folderPath != null;
-        assert validPuzzleNames != null;
 
-        for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or
-                                           // twoPlayerMatches)
-            int playerCount = 0;
-            for (String matchID : mapIDToMatch.keySet()) {
-                Match oneMatch = mapIDToMatch.get(matchID);
-                if (oneMatch.containsPlayer(player)) {
-                    playerCount++;
+        synchronized (folderPath) {
+
+            assert server != null;
+            assert folderPath != null;
+            assert validPuzzleNames != null;
+
+            for (Player player : allPlayers) { // assert each player has only one location (either mapIDToMatch or
+                                               // twoPlayerMatches)
+                int playerCount = 0;
+                for (String matchID : mapIDToMatch.keySet()) {
+                    Match oneMatch = mapIDToMatch.get(matchID);
+                    if (oneMatch.containsPlayer(player)) {
+                        playerCount++;
+                    }
                 }
+                for (String matchID : twoPlayerMatches.keySet()) {
+                    Match oneMatch = twoPlayerMatches.get(matchID);
+                    if (oneMatch.containsPlayer(player)) {
+                        playerCount++;
+                    }
+                }
+                assert playerCount == 1;
             }
+
+            assert mapIDToMatch.keySet().equals(mapIDToDescription.keySet());
+
             for (String matchID : twoPlayerMatches.keySet()) {
-                Match oneMatch = twoPlayerMatches.get(matchID);
-                if (oneMatch.containsPlayer(player)) {
-                    playerCount++;
-                }
+                assert !mapIDToMatch.keySet().contains(matchID);
             }
-            assert playerCount == 1;
+
+            assert mapIDToWinners != null;
         }
-
-        assert mapIDToMatch.keySet().equals(mapIDToDescription.keySet());
-
-        for (String matchID : twoPlayerMatches.keySet()) {
-            assert !mapIDToMatch.keySet().contains(matchID);
-        }
-
-        assert mapIDToWinners != null;
 
     }
 
