@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import crossword.Word.ChallengeResult;
+
 
 public class MatchTest {
 
@@ -851,7 +853,7 @@ public class MatchTest {
         currentMatch.tryInsert(yo, 1, "cry");
         
         
-        assertTrue(currentMatch.challenge(dude, 2, "mab"));
+        assertEquals(ChallengeResult.CORRECT, currentMatch.challenge(dude, 2, "mab"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -881,7 +883,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "dad");
         
-        assertTrue(currentMatch.challenge(dude, 2, "mab"));
+        assertEquals(ChallengeResult.CORRECT, currentMatch.challenge(dude, 2, "mab"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -910,7 +912,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "mab");
         
-        assertTrue(currentMatch.challenge(dude, 2, "bro"));
+        assertEquals(ChallengeResult.INCORRECT, currentMatch.challenge(dude, 2, "bro"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -940,7 +942,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "hia");
         
-        assertTrue(currentMatch.challenge(dude, 2, "bro"));
+        assertEquals(ChallengeResult.INCORRECT, currentMatch.challenge(dude, 2, "bro"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -971,7 +973,7 @@ public class MatchTest {
         currentMatch.tryInsert(yo, 1, "aia");
         currentMatch.tryInsert(yo, 2, "hia");
         
-        assertTrue(currentMatch.challenge(dude, 1, "bro"));
+        assertEquals(ChallengeResult.INCORRECT, currentMatch.challenge(dude, 1, "bro"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -1001,7 +1003,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "aia");
         
-        assertTrue(!currentMatch.challenge(yo, 2, "bro"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(yo, 2, "bro"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -1032,7 +1034,7 @@ public class MatchTest {
         currentMatch.tryInsert(yo, 2, "mab");
         currentMatch.challenge(dude, 2, "bro");
         
-        assertTrue(!currentMatch.challenge(dude, 2, "iii"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(dude, 2, "iii"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -1063,7 +1065,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "mab");
         
-        assertTrue(!currentMatch.challenge(dude, 2, "mab"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(dude, 2, "mab"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -1092,7 +1094,7 @@ public class MatchTest {
         
         currentMatch.tryInsert(yo, 2, "mab");
         
-        assertTrue(!currentMatch.challenge(dude, 2, "a"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(dude, 2, "a"));
         
         String expected = "3x3\n" + 
                 "#?#\n" + 
@@ -1121,7 +1123,7 @@ public class MatchTest {
         Player yo = new Player("yo");
         currentMatch.addPlayer(yo);
         
-        assertTrue(!currentMatch.challenge(yo, 3, "a"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(yo, 3, "a"));
         
         String expected = "3x11\n" + 
                 "##########?\n" + 
@@ -1147,7 +1149,7 @@ public class MatchTest {
         Player yo = new Player("yo");
         currentMatch.addPlayer(yo);
         
-        assertTrue(!currentMatch.challenge(yo, 1, "cat"));
+        assertEquals(ChallengeResult.INVALID, currentMatch.challenge(yo, 1, "cat"));
         
         String expected = "3x11\n" + 
                 "##########?\n" + 
