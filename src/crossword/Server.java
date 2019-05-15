@@ -291,6 +291,17 @@ public class Server {
             }
         });
         watchMatchRequest.getFilters().addAll(filters);
+        
+        // handle requests for paths that start with /restart/
+        HttpContext restartRequest = server.createContext("/restart/", new HttpHandler() {
+
+            public void handle(HttpExchange exchange) throws IOException {
+
+                restart(exchange);   
+
+            }
+        });
+        restartRequest.getFilters().addAll(filters);
 
         checkRep();
     }
@@ -495,8 +506,6 @@ public class Server {
         
         synchronized (folderPath) {
 
- 
-            
             // if you want to know the requested path:
             final String path = exchange.getRequestURI().getPath();
 
@@ -529,6 +538,37 @@ public class Server {
 
         }
     }
+    
+    
+    
+    /**
+     * RECEIVE: a restart request from the players in the form of: "restart"
+     *   - SEND: choose, "update", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     * @param exchange exchange to communicate with client
+     * @throws IOException if headers cannot be sent
+     */
+    private void restart(HttpExchange exchange) throws IOException {
+        
+        synchronized (folderPath) {
+
+            final String response;
+            exchange.sendResponseHeaders(VALID, 0);
+
+            response = getChooseResponse("update");
+
+            // write the response to the output stream using UTF-8 character encoding
+            OutputStream body = exchange.getResponseBody();
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
+            out.print(response);
+            out.flush();
+
+            exchange.close();
+
+        }
+    }
+    
+    
+    
     
     /**
      * RECIEVE: A new match request in the form of: "choose player_ID match_ID puzzle_ID "Description"
@@ -1040,7 +1080,7 @@ public class Server {
 
     /**
      * RECEIVES: request to watch for other matches to be added or removed in the form of: watchMatches
-     * SENDS: STATE, "new", allMatches
+     * SENDS: STATE, "update", allMatches
      * 
      * Wait and watch until other matches are added and removed from the list of playable matches (with one player already)
      * Communicate this information (live update) to the client
@@ -1055,13 +1095,13 @@ public class Server {
             final String response;
             exchange.sendResponseHeaders(VALID, 0);
 
-            String availableMatches = getChooseResponse("new");
+            String availableMatches = getChooseResponse("update");
 
-            while (availableMatches.equals(getChooseResponse("new"))) {
+            while (availableMatches.equals(getChooseResponse("update"))) {
                 folderPath.wait();
             }
 
-            response = getChooseResponse("new");
+            response = getChooseResponse("update");
 
             // write the response to the output stream using UTF-8 character encoding
             OutputStream body = exchange.getResponseBody();
