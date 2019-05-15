@@ -472,7 +472,7 @@ class CrosswordCanvas extends JComponent {
     }
 
     /**
-     * Sets the available puzzles to the string provided TODO bad spec?
+     * Stores the a string with the IDs of all valid puzzles and matches available
      * @param puzzleMatchString the string of available puzzles and matches
      */
     public void setList(String puzzleMatchString) {
@@ -497,7 +497,27 @@ class CrosswordCanvas extends JComponent {
     }
 
     /**
-     * @return a text representation of the client gameboard along with the necessary information TODO william
+     * @return a human readable string in the following format:
+     * 
+     * First lines before these: 
+     *  - myPlayerID
+     *  - Score 
+     *  - ChallengePoints
+     *  - OtherID
+     *  - Score
+     *  - ChallengePoints
+     * first line: dimensions (rxc)
+     * next r lines: the board with "#" representing cells that don't exist, "?" for empty cells, and characters for cells currently filled in
+     * next line: how many pairs of lines follow (n)
+     * next 2*n lines: starting location (row column), direction (ACROSS/DOWN), word ID, has owner, is confirmed (then owner ID if has owner)
+     * 
+     * example:
+     * 2x3
+     * #?#
+     * #ab
+     * 2
+     * 1 0 DOWN 1 false false
+     * 1 1 ACROSS 2 true false iAmOwner
      */
     public String getCurrentBoard() {
         return currentBoard;
