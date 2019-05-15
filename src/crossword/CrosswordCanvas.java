@@ -24,6 +24,36 @@ import crossword.Client.ClientState;
  * @author asolar
  */
 class CrosswordCanvas extends JComponent {
+    
+    private static final int LETTER_X_DELTA_DIV = 6;
+    private static final int LETTER_Y_DELTA_DIV = 10; 
+    private static final int ID_X_DELTA_DIV = 8;
+    private static final int ID_Y_DELTA_DIV = 15;
+    private static final int PRINTLN_X_BUFFER = 400;
+    private static final int PRINTFN_X_BUFFER = 500;
+    private static final int PRINTFN_COLOR = 200;
+    private static final int COLOR_CONST = 100;
+    private static final int ASCENT_NUMER = 6;
+    private static final int ASCENT_DENOM = 5;
+    private static final int CENTER_X_BUFFER = 1200;
+    private static final int CENTER_Y_BUFFER = 30;
+    private static final int START_TRY_SPACING = 10;
+    private static final int PLAY_X_DIV = 20;
+    private static final int PLAY_X_CMD_BUFFER = 800;
+    private static final int PLAY_Y_CMD_BUFFER = 350;
+    private static final int PLAY_LINE_SPACING = 20;
+    private static final int PLAY_Y_AVAIL = 300;
+    private static final int PLAY_X_AVAIL = 600;
+    private static final int PSTATUS_Y_BUFFER = 150;
+    private static final int ID_INDEX = 3;
+    private static final int CONTROLLED_INDEX = 4;
+    private static final int CONFIRMED_INDEX = 5;
+    private static final int USER_INDEX = 6;
+    private static final int GENERAL_X_BUFFER = 250;
+    private static final int SELF_Y_BUFFER = 150;
+    private static final int OTHER_Y_BUFFER = 200;
+    private static final int END_INST_SPACE = 5;
+    private static final int PLAYER_LINES = 3;
 
     private ClientState state;
     private String request;
@@ -127,8 +157,8 @@ class CrosswordCanvas extends JComponent {
     private void letterInCell(String letter, int row, int col, Graphics g) {
         g.setFont(mainFont);
         FontMetrics fm = g.getFontMetrics();
-        g.drawString(letter, originX + col * delta + delta / 6,
-                originY + row * delta + fm.getAscent() + delta / 10);
+        g.drawString(letter, originX + col * delta + delta / LETTER_X_DELTA_DIV,
+                originY + row * delta + fm.getAscent() + delta / LETTER_Y_DELTA_DIV);
     }
 
     /**
@@ -140,8 +170,8 @@ class CrosswordCanvas extends JComponent {
      */
     private void verticalId(String id, int row, int col, Graphics g) {
         g.setFont(indexFont);
-        g.drawString(id, originX + col * delta + delta / 8,
-                originY + row * delta - delta / 15);
+        g.drawString(id, originX + col * delta + delta / ID_X_DELTA_DIV,
+                originY + row * delta - delta / ID_Y_DELTA_DIV);
     }
 
     /**
@@ -155,8 +185,8 @@ class CrosswordCanvas extends JComponent {
         g.setFont(indexFont);
         FontMetrics fm = g.getFontMetrics();
         int maxwidth = fm.charWidth('0') * id.length();
-        g.drawString(id, originX + col * delta - maxwidth - delta / 8,
-                originY + row * delta + fm.getAscent() + delta / 15);
+        g.drawString(id, originX + col * delta - maxwidth - delta / ID_X_DELTA_DIV,
+                originY + row * delta + fm.getAscent() + delta / ID_Y_DELTA_DIV);
     }
 
     // The three methods that follow are meant to show you one approach to writing
@@ -184,8 +214,8 @@ class CrosswordCanvas extends JComponent {
         // Before changing the color it is a good idea to record what the old color
         // was.
         Color oldColor = g.getColor();
-        g.setColor(new Color(100, 0, 0));
-        g.drawString(s, originX + 400, originY + line * fm.getAscent() * 6 / 5);
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        g.drawString(s, originX + PRINTLN_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
@@ -197,8 +227,8 @@ class CrosswordCanvas extends JComponent {
 
         g.setFont(textFont);
         FontMetrics fm = g.getFontMetrics();
-        int lineHeight = fm.getAscent() * 6 / 5;
-        int xpos = originX + 500;
+        int lineHeight = fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
+        int xpos = originX + PRINTFN_X_BUFFER;
         int ypos = originY + line * lineHeight;
 
         // Before changing the color it is a good idea to record what the old color
@@ -207,7 +237,7 @@ class CrosswordCanvas extends JComponent {
 
         g.setColor(new Color(0, 0, 0));
         g.fillRect(xpos, ypos - fm.getAscent(), fm.stringWidth(s), lineHeight);
-        g.setColor(new Color(200, 200, 0));
+        g.setColor(new Color(PRINTFN_COLOR, PRINTFN_COLOR, 0));
         g.drawString(s, xpos, ypos);
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
@@ -221,9 +251,9 @@ class CrosswordCanvas extends JComponent {
         // Before changing the color it is a good idea to record what the old color
         // was.
         Color oldColor = g.getColor();
-        g.setColor(new Color(100, 0, 0));
-        int centerX = (1200 - fm.stringWidth(s)) / 2;
-        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        int centerX = (CENTER_X_BUFFER - fm.stringWidth(s)) / 2;
+        int placeY = CENTER_Y_BUFFER + originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
         // Set the font
         g.drawString(s, centerX, placeY);
         // After writing the text you can return to the previous color.
@@ -238,9 +268,9 @@ class CrosswordCanvas extends JComponent {
         // Before changing the color it is a good idea to record what the old color
         // was.
         Color oldColor = g.getColor();
-        g.setColor(new Color(100, 0, 0));
-        int centerX = (1200 - fm.stringWidth(s)) / 2;
-        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        int centerX = (CENTER_X_BUFFER - fm.stringWidth(s)) / 2;
+        int placeY = CENTER_Y_BUFFER + originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
         // Set the font
         g.drawString(s, centerX, placeY);
         // After writing the text you can return to the previous color.
@@ -255,9 +285,9 @@ class CrosswordCanvas extends JComponent {
         // Before changing the color it is a good idea to record what the old color
         // was.
         Color oldColor = g.getColor();
-        g.setColor(new Color(100, 0, 0));
-        int centerX = (1200 - fm.stringWidth(s)) / 2;
-        int placeY = 30 + originY + line * fm.getAscent() * 6 / 5;
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        int centerX = (CENTER_X_BUFFER - fm.stringWidth(s)) / 2;
+        int placeY = CENTER_Y_BUFFER + originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
         // Set the font
         g.drawString(s, centerX, placeY);
         // After writing the text you can return to the previous color.
@@ -373,7 +403,7 @@ class CrosswordCanvas extends JComponent {
             else if (request.equals("try again")) {     
                 printStartInstructions(g);
 
-                line += 10;
+                line += START_TRY_SPACING;
                 printlnCenterBold("That was an invalid request or the ID already exists.", g);
                 printlnCenterBold("Try again!", g);
             }
@@ -426,9 +456,17 @@ class CrosswordCanvas extends JComponent {
             default:
                 break;
             }
+            g.drawString(playStatus, (CENTER_X_BUFFER - fm.stringWidth(playStatus)) / PLAY_X_DIV, originY + PSTATUS_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
             
-            System.out.println("PLAYSTATUS" + playStatus + "|" + request);
-            g.drawString(playStatus, (1200 - fm.stringWidth(playStatus)) / 20, originY + 150 + line * fm.getAscent() * 6 / 5);
+            g.setColor(Color.RED);
+            g.setFont(boldFont);
+            g.drawString("Available commands", (PLAY_Y_AVAIL - fm.stringWidth("Available commands")), originY + PLAY_X_AVAIL + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.setFont(textFont);
+            g.drawString("TRY id word", (PLAY_X_CMD_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString("CHALLENGE id word", (PLAY_X_CMD_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + PLAY_LINE_SPACING + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString("EXIT", (PLAY_X_CMD_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + PLAY_LINE_SPACING + PLAY_LINE_SPACING + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString("id: The id of the word that you're trying to guess", (CENTER_X_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+            g.drawString("word: Your guess", (CENTER_X_BUFFER - fm.stringWidth(playStatus)) / 2, originY + PLAY_Y_CMD_BUFFER + PLAY_LINE_SPACING + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
             
             g.setColor(oldColor);
         }
@@ -473,15 +511,20 @@ class CrosswordCanvas extends JComponent {
 
         ++line;
         // Print out my score
-        g.setColor(new Color(100, 0, 0));
+        g.setColor(new Color(COLOR_CONST, 0, 0));
         g.setFont(textFont);
-
-        line += 3;
-        g.drawString("Your total score: " + lines[lineCounter], originX + 250, originY + line * fm.getAscent() * 6 / 5);
-        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+3], originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        line += 2;
+        
         ++line;
-        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + 250, originY + line * fm.getAscent() * 6 / 5);
-        g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+4], originX + 500, originY + line * fm.getAscent() * 6 / 5);
+        g.drawString("Your total score: " + lines[lineCounter], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString(lines[lineCounter+2] + "'s total score: " + lines[lineCounter+ID_INDEX], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        ++line;
+        g.drawString("Your challenge points: " + lines[lineCounter+1], originX + GENERAL_X_BUFFER, originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString(lines[lineCounter+2] + "'s challenge points: " + lines[lineCounter+ID_INDEX+1], originX + (GENERAL_X_BUFFER*2), originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        
+        line += END_INST_SPACE;
+        printlnCenterBold("Type EXIT to end your client...", g);
+        printlnCenterBold("Type NEW MATCH to view a list of available matches!", g);
 
         g.setColor(oldColor);
     }
@@ -501,8 +544,8 @@ class CrosswordCanvas extends JComponent {
             printlnCenter(listCounter + ". " + lines[lineCounter], g);
             lineCounter++;
         }
-
         line -= 5;
+        
         // Printing valid Matches
         printlnCenterBold("Valid Matches To Connect To:", g);
         line += 10; // To space out the title and the list
@@ -533,7 +576,7 @@ class CrosswordCanvas extends JComponent {
         String myName = lines[0];
         String myScore = lines[1];
         String myChallengePoints = lines[2];
-        lineCounter += 3;
+        lineCounter += PLAYER_LINES;
 
         // Get second player
         ownedMap.put(lines[lineCounter], new HashSet<String>());
@@ -541,7 +584,7 @@ class CrosswordCanvas extends JComponent {
         String theirName = lines[lineCounter];
         String theirScore = lines[lineCounter+1];
         String theirChallengePoints = lines[lineCounter+2];
-        lineCounter += 3;
+        lineCounter += PLAYER_LINES;
         // First line after is going to give us dimensions so split according to x
         String[] dimensions = lines[lineCounter].split("x");
         lineCounter++;
@@ -575,23 +618,27 @@ class CrosswordCanvas extends JComponent {
 
                     // Create the IDs
                     if (split[2].equals("ACROSS")) {
-                        horizontalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
+                        horizontalId(split[ID_INDEX], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
                     else if (split[2].equals("DOWN")) {
-                        verticalId(split[3], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
+                        verticalId(split[ID_INDEX], Integer.valueOf(split[0]), Integer.valueOf(split[1]), g);
                     }
 
                     // Add the ID to the list of descriptions
-                    wordString += "ID: " + split[3];
+                    wordString += "ID: " + split[ID_INDEX];
 
                     // Add to the list of controlled words
-                    if (split[4].equals("true") && split[5].equals("false")) {
-                        ownedMap.get(split[6]).add(split[3]);
+                    if (split[CONTROLLED_INDEX].equals("true") && split[CONFIRMED_INDEX].equals("false")) {
+                        ownedMap.get(split[USER_INDEX]).add(split[ID_INDEX]);
+                        g.setColor(Color.WHITE);
                     }
 
                     // Add to the list of confirmed words
-                    else if (split[4].equals("true") && split[5].equals("true")) {
-                        confirmedMap.get(split[6]).add(split[3]);
+                    else if (split[CONTROLLED_INDEX].equals("true") && split[CONFIRMED_INDEX].equals("true")) {
+                        confirmedMap.get(split[USER_INDEX]).add(split[ID_INDEX]);
+                        
+                        // FILL COLOR
+                        
                     }
                 }
                 else if (j == 1) {
@@ -627,24 +674,24 @@ class CrosswordCanvas extends JComponent {
 
         Color oldColor = g.getColor();
         FontMetrics fm = g.getFontMetrics();
-        g.setColor(new Color(100, 0, 0));
+        g.setColor(new Color(COLOR_CONST, 0, 0));
         g.setFont(textFont);
+        line += 2;
 
         // Showing score/challenge
-        line += 3;
-        g.drawString("Your total score: " + myScore, originX + 250, originY + 150 + line * fm.getAscent() * 6 / 5);
-        g.drawString(theirName + "'s total score: " + theirScore, originX + 500, originY + 150 + line * fm.getAscent() * 6 / 5);
         ++line;
-        g.drawString("Your challenge points: " + myChallengePoints, originX + 250, originY + 150 + line * fm.getAscent() * 6 / 5);
-        g.drawString(theirName + "'s challenge points: " + theirChallengePoints, originX + 500, originY + 150 + line * fm.getAscent() * 6 / 5);
+        g.drawString("Your total score: " + myScore, originX + GENERAL_X_BUFFER, originY + SELF_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString(theirName + "'s total score: " + theirScore, originX + (GENERAL_X_BUFFER*2), originY + SELF_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        ++line;
+        g.drawString("Your challenge points: " + myChallengePoints, originX + GENERAL_X_BUFFER, originY + SELF_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString(theirName + "'s challenge points: " + theirChallengePoints, originX + (GENERAL_X_BUFFER*2), originY + SELF_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
 
         // Showing owned/confirmed words
-        g.drawString("Words you control: " + myOwnedIDs, originX + 250, originY + 200 + line * fm.getAscent() * 6 / 5);
-        g.drawString("Words " + theirName + " controls: " + theirOwnedIDs, originX + 500, originY + 200 + line * fm.getAscent() * 6 / 5);
+        g.drawString("Words you control: " + myOwnedIDs, originX + GENERAL_X_BUFFER, originY + OTHER_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString("Words " + theirName + " controls: " + theirOwnedIDs, originX + (GENERAL_X_BUFFER*2), originY + OTHER_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
         ++line;
-        g.drawString("Words you confirmed: " + myConfirmedIDs, originX + 250, originY + 200 + line * fm.getAscent() * 6 / 5);
-        g.drawString("Words " + theirName + " confirmed: " + theirConfirmedIDs, originX + 500, originY + 200 + line * fm.getAscent() * 6 / 5);
-
+        g.drawString("Words you confirmed: " + myConfirmedIDs, originX + GENERAL_X_BUFFER, originY + OTHER_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
+        g.drawString("Words " + theirName + " confirmed: " + theirConfirmedIDs, originX + (GENERAL_X_BUFFER*2), originY + OTHER_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
 
         g.setColor(oldColor);
 
