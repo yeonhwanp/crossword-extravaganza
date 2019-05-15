@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import crossword.Cell.Exist;
 import crossword.Word.Direction;
+import crossword.Word.TryResult;
 
 /**
  * Tests for mutable word object
@@ -395,7 +396,7 @@ public class WordTest {
         Word firstWord = makeCatWord();
         Player player = new Player("hey");
         
-        assertTrue(firstWord.checkConsistentInsert(player, "bbb"));
+        assertEquals(TryResult.SUCCESS, firstWord.checkConsistentInsert(player, "bbb"));
         
     }
     
@@ -409,7 +410,7 @@ public class WordTest {
         
         firstWord.tryInsertNewWord(player, "cat");
         firstWord.setConfirmed();
-        assertTrue(!firstWord.checkConsistentInsert(player, "bbb"));
+        assertEquals(TryResult.INCONSISTENT_CURRENT, firstWord.checkConsistentInsert(player, "bbb"));
         
     }
     
@@ -421,7 +422,7 @@ public class WordTest {
         Word firstWord = makeCatWord();
         Player player = new Player("hey");
         
-        assertTrue(!firstWord.checkConsistentInsert(player, "c"));
+        assertEquals(TryResult.INCORRECT_LENGTH, firstWord.checkConsistentInsert(player, "c"));
         
     }
     
@@ -459,7 +460,7 @@ public class WordTest {
         Word firstWord = makeCatWord();
         Player player = new Player("hey");
         
-        assertTrue(firstWord.tryInsertNewWord(player, "bbb"));
+        assertEquals(TryResult.SUCCESS, firstWord.tryInsertNewWord(player, "bbb"));
         assertEquals("bbb", firstWord.getCurrentValue());
         
     }
@@ -474,7 +475,7 @@ public class WordTest {
         
         firstWord.tryInsertNewWord(player, "cat");
         firstWord.setConfirmed();
-        assertTrue(!firstWord.tryInsertNewWord(player, "bbb"));
+        assertEquals(TryResult.INCONSISTENT_CURRENT, firstWord.tryInsertNewWord(player, "bbb"));
         assertEquals("cat", firstWord.getCurrentValue());
         
     }
@@ -487,7 +488,7 @@ public class WordTest {
         Word firstWord = makeCatWord();
         Player player = new Player("hey");
         
-        assertTrue(!firstWord.tryInsertNewWord(player, "c"));
+        assertEquals(TryResult.INCORRECT_LENGTH, firstWord.tryInsertNewWord(player, "c"));
         
     }
     
