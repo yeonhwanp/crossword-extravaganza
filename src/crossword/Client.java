@@ -267,7 +267,7 @@ public class Client {
         String sendString = "";
         
         if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
-            sendString = "/restart/" + playerID;
+            sendString = "/restart/";
             return sendString;
         }
 
