@@ -90,7 +90,7 @@ class CrosswordCanvas extends JComponent {
      *  if state == CientState.WAIT:
      *      request == ""
      *  if state == ClientState.PLAY:
-     *      request == new, update, validtry, invalidtry, wonch, lostch, invalidch
+     *      request == new, update, wrong_id, incorrect_length, inconsistent_current, success, wonch, lostch, invalidch
      *      
      *  if request == success: playstatus = "Inserted guess."
      *  if request == inconsistent_current: playstatus = "Guess was inconsistent with the current board."
@@ -112,8 +112,35 @@ class CrosswordCanvas extends JComponent {
 
     private void checkRep() {
         if (!currentPuzzleMatches.equals("")) {
-            int line = 0;
-            for (int i )
+            String[] lines = currentPuzzleMatches.split(" ");
+            int amountValid = Integer.valueOf(lines[0]);
+            for (int i=1; i < amountValid + 1; i++) {
+                assert lines[i] != null;
+            }
+            int amountMatches = Integer.valueOf(lines[amountValid + 1]);
+            int lineIndex = amountValid + 2;
+            for (int i=1; i < amountMatches + 1; i++) {
+                assert lines[lineIndex] != null;
+                lineIndex++;
+            }
+        }
+        if (state == ClientState.START) {
+            assert request.equals("new game") || request.equals("try again");
+        }
+        if (state == ClientState.CHOOSE) {
+            assert request.equals("new") || request.equals("try again") || request.equals("update");
+        }
+        if (state == ClientState.WAIT) {
+            assert request.equals("");
+        }
+        if (state == ClientState.PLAY) {
+            assert request.equals("new") || request.equals("update") || request.equals("wrong_id") || request.equals("incorrect_length")
+                    || request.equals("inconsistent_current") || request.equals("success") || request.equals("wonch") || request.equals("lostch")
+                    || request.equals("invalidch");
+        }
+        
+        if (request.equals("success")) {
+            
         }
     }
 
@@ -481,6 +508,7 @@ class CrosswordCanvas extends JComponent {
             }
         }
         else if (state == ClientState.CHOOSE) {
+            System.out.println(currentPuzzleMatches);
             if (request.equals("new") || request.equals("update")) {
                 printChooseInstructions(g);
                 printMatchList(g);
@@ -685,15 +713,11 @@ class CrosswordCanvas extends JComponent {
                     // Add to the list of controlled words
                     if (split[CONTROLLED_INDEX].equals("true") && split[CONFIRMED_INDEX].equals("false")) {
                         ownedMap.get(split[USER_INDEX]).add(split[ID_INDEX]);
-                        g.setColor(Color.WHITE);
                     }
 
                     // Add to the list of confirmed words
                     else if (split[CONTROLLED_INDEX].equals("true") && split[CONFIRMED_INDEX].equals("true")) {
                         confirmedMap.get(split[USER_INDEX]).add(split[ID_INDEX]);
-                        
-                        // FILL COLOR
-                        
                     }
                 }
                 else if (j == 1) {
