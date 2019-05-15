@@ -38,9 +38,7 @@ public class ClientTest {
 
     
     /*
-     * Testing Strategy
-     * 
-     * parseResponse:
+     * Testing Strategy for Client.parseResponse():
      *  - receiveChoose:
      *    a. new game - 0, 1, >1 files in server responses
      *    b. try again - 0, 1, >1 matches in server responses
@@ -58,14 +56,19 @@ public class ClientTest {
      *      - wonch
      *      - lostch
      *      - invalidch
-     *  - receiveEnd:
-     *    
-     * 
+     *  - receiveEnd
+     *  
+     *  Testing Strategy for getUserID(): Same, try to change (w/out using new)
+     *  Testing Strategy for getMatchID(): Same, try to change (w/out using new)
+     *  Testing Strategy for getState(): START, CHOOSE, WAIT, PLAY, SHOW_SCORE
+     *  Testing Strategy for getBoardText(): same board, different board
+     *  Testing Strategy for getMatches(): same matchlist, different matchlist
      */
     
-    
     /*
-     * receiveChoose: new game with 0 files
+     * receiveChoose(): new game with 0 files
+     * getState(): START
+     * getUserID(): Same
      */
     @Test
     public void testReceiveStart0() throws IOException, InterruptedException {
@@ -79,6 +82,8 @@ public class ClientTest {
         String userInput = "START Player1";
         testClient.parseUserInput(userInput);
         
+        assertEquals(ClientState.START, testClient.getState());
+        
         String serverResponse = "choose\nnew\n0\n0";
         testClient.parseResponse(serverResponse, userInput);
         assertEquals("Player1", testClient.getUserID(), "Expected correct id");
@@ -88,6 +93,7 @@ public class ClientTest {
     
     /*
      * receiveChoose: new game with 1 file
+     * getState(): CHOOSE
      */
     @Test
     public void testReceiveStart1() throws IOException {
@@ -101,6 +107,7 @@ public class ClientTest {
         
         String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
         testClient.parseResponse(serverResponse, userInput);
+        assertEquals(ClientState.CHOOSE, testClient.getState());
     }
     
     /*
@@ -152,6 +159,7 @@ public class ClientTest {
     
     /*
      * receiveChoose: try again - 1 match
+     * getMatchID(): Try to change
      */
     @Test
     public void testReceiveChooseTryAgain1() throws IOException {
@@ -178,6 +186,7 @@ public class ClientTest {
     
     /*
      * receiveChoose: try again - >1 match
+     * getMatches()
      */
     @Test
     public void testReceiveChooseTryAgainG1() throws IOException {
@@ -204,6 +213,8 @@ public class ClientTest {
     
     /*
      * receivePlay: new
+     * getBoardText(): same
+     * getState(): PLAY
      */
     @Test
     public void testReceivePlayNew() throws IOException {
@@ -226,10 +237,12 @@ public class ClientTest {
         
         assertEquals("player23", testClient.getUserID(), "Expected correct id");
         assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        assertEquals(ClientState.PLAY, testClient.getState());
     }
     
     /*
      * receivePlay: update
+     * getBoardText(): Different
      */
     @Test
     public void testReceivePlayUpdate() throws IOException {
@@ -253,10 +266,10 @@ public class ClientTest {
         assertEquals("player23", testClient.getUserID(), "Expected correct id");
         assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
         
-        String serverResponse3 = "play\nupdate\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue";
+        String serverResponse3 = "play\nupdate\nwilly\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS true false chris\nmyclue";
         testClient.parseResponse(serverResponse3, userInput2);
         
-        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS true false chris\nmyclue", testClient.getBoardText(), "Expected correct matches");
     }
     
     /*
@@ -478,6 +491,7 @@ public class ClientTest {
     
     /*
      * receiveEnd
+     * getState(): SHOW_SCORE
      */
     @Test
     public void testReceivePlayRecieveEnd() throws IOException {
@@ -505,8 +519,53 @@ public class ClientTest {
         testClient.parseResponse(serverResponse3, userInput2);
         
         assertEquals("willy\n0\n0\nchris\n0\n0\n1x4\n????\n1\n0 0 ACROSS false false\nmyclue", testClient.getBoardText(), "Expected correct matches");
+        
+        assertEquals(ClientState.SHOW_SCORE, testClient.getState());
     }
     
+    /*
+     * Testing Strategy for Client.parseUserInput():
+     *  Possible raw Inputs:
+     *      - START: 
+     *      - NEW 
+     *      - PLAY 
+     *      - EXIT:
+     *          - From WAIT, PLAY, CHOOSE, SEND_SCORE
+     *      - TRY:
+     *      - CHALLENGE  
+     */
+    
+    // Covers Client.parseUserInput(): Raw input: START
+    @Test
+    public void testParseUserStart() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        testClient.parseResponse(receiveInit, "");
+        String testString = testClient.parseUserInput("START test");
+        assertEquals("/start/test", testString);
+    }
+    
+    // Covers Client.parseUserInput(): Raw input: NEW
+    @Test
+    public void testParseUserNEW() throws IOException {
+        
+        // Always need this
+        final Client testClient = new Client(HOST, PORT);
+        String receiveInit = "start\nnew game";
+        
+        testClient.parseResponse(receiveInit, "");
+        
+        String userInput = "START player25";
+        testClient.parseUserInput(userInput);
+        
+        String serverResponse = "choose\nnew\n1\nthisIsgreat.puzzle\n1\nCURRENT\nlmao\n";
+        testClient.parseResponse(serverResponse, userInput);
+        
+        String testString = testClient.parseUserInput("NEW testID thisIsgreat.puzzle \"hello\"");
+        assertEquals("/choose/player25/testID/thisIsgreat.puzzle/hello", testString);
+    }
     
     
     
