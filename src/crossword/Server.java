@@ -325,32 +325,6 @@ public class Server {
         
         
     }
-    
-    /**
-     * Given a file, make a match object that contains match information given in puzzle, according to the grammar in the project handout
-     * @param puzzle file pathname leading to the puzzle to parse
-     * @return match object that contains match information given in puzzle
-     * @throws IOException if we cannot read the file passed in
-     * @throws UnableToParseException if we cannot parse the string of the puzzle
-     */
-    private static Match loadMatch(File puzzle) throws IOException, UnableToParseException {
-        BufferedReader reader = new BufferedReader(new FileReader(puzzle));
-        
-        System.out.println(puzzle.getName());
-        
-        String fullPuzzle = "";
-        String line = reader.readLine();
-        while (line != null) {
-            fullPuzzle += line;
-            line = reader.readLine();
-        }
-        reader.close();
-        Match parsedMatch = parse(fullPuzzle);
-        
-        
-        return parsedMatch;
-    }
-
 
 
 
@@ -389,13 +363,14 @@ public class Server {
     /**
      * Parse a string into an expression.
      * 
-     * @param string string to parse
-     * @return Expression parsed from the string
-     * @throws UnableToParseException if the string doesn't match the Expression grammar
+     * @param puzzle file to parse
+     * @return Expression parsed from the file
+     * @throws UnableToParseException if unable to parse the puzzle correctly
+     * @throws IOException if we cannot open the puzzle correctly
      */
-    private static Match parse(final String string) throws UnableToParseException {
+    private static Match parse(final File puzzle) throws UnableToParseException, IOException {
         // parse the example into a parse tree
-        final ParseTree<PuzzleGrammar> parseTree = parser.parse(string);
+        final ParseTree<PuzzleGrammar> parseTree = parser.parse(puzzle);
 
         // display the parse tree in various ways, for debugging only
 //         System.out.println("parse tree " + parseTree);
@@ -507,7 +482,6 @@ public class Server {
         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
         out.print(response);
         out.flush();
-//        System.out.println("sent back start, new game - client should now choose playerID");
 
         // if you do not close the exchange, the response will not be sent!
         exchange.close();
@@ -611,7 +585,7 @@ public class Server {
                 Player existingPlayer = getPlayer(playerID);
                 
                 File puzzleFile = new File(folderPath + "/" +  puzzleID);
-                Match puzzle = loadMatch(puzzleFile);
+                Match puzzle = parse(puzzleFile);
                 puzzle.addPlayer(existingPlayer);
                 
                 mapIDToDescription.put(matchID, description);
@@ -787,7 +761,7 @@ public class Server {
     }
 
     /**
-     * RECEIVE: An exist request in the form "exit gameState (playerID matchID)", where playerID and matchID only are in the request if state
+     * RECEIVE: An exist request in the form "exit gameState playerID (matchID)", where matchID only is in the request if state
      * is wait or play
      *   IF gameState == choose:
      *      - Close connection
@@ -797,13 +771,13 @@ public class Server {
      *   ELSE IF gameState == play:
      *      - Terminate game
      *      - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
-     *   ELSE IF gameState == showScore:
+     *   ELSE IF gameState == show_score:
      *      - Close connection
      * @param exchange exchange to communicate with client
      * @throws if headers cannot be sent
      */
     private void exit(HttpExchange exchange) throws IOException {
-        
+
         synchronized (folderPath) {
 
             // if you want to know the requested path:
@@ -815,14 +789,21 @@ public class Server {
             final String stateAndID = path.substring(base.length());
 
             String[] states = stateAndID.split("/");
+
             String gameState = states[0];
+            String playerID = states[1];
 
             exchange.sendResponseHeaders(VALID, 0);
             OutputStream body = exchange.getResponseBody();
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
 
-            if (gameState.equals("choose")) {
+            if (gameState.equals("choose") || gameState.equals("show_score")) {
+
+                Player playerToRemove = getPlayer(playerID);
+                allPlayers.remove(playerToRemove);
+                
                 exchange.close();
+                
             } else if (gameState.equals("wait")) {
 
                 String matchID = states[2];
@@ -834,13 +815,12 @@ public class Server {
                 out.print(response);
                 out.flush();
                 exchange.close();
-//                System.out.println("sent choose, new, allmatches. client should now see list of matches to choose from.");
-                
+
                 folderPath.notifyAll();
 
             } else if (gameState.equals("play")) {
 
-                String playerID = states[1];
+                
                 String matchID = states[2];
                 
                 Player quittingPlayer = getPlayer(playerID);
@@ -857,8 +837,6 @@ public class Server {
                     mapIDToWinners.put(matchID, winnerID);
                     
                     currentMatch.notifyAll();
-    
-
                     
                     finishedResponse += winnerID + "\n" + playerID + "\n" + currentMatch.getScore(quittingPlayer) + "\n" +
                             currentMatch.getChallengePoints(quittingPlayer) + "\n" + winnerID + "\n" + currentMatch.getScore(winner) + "\n" +
@@ -869,12 +847,9 @@ public class Server {
                     out.print(finished);
                     out.flush();
                     exchange.close();
-//                    System.out.println("sent showScore, score (includes match toString). so client should see the winner's playerID of the match");  
-                
+     
                 }
 
-            } else if (gameState.equals("showScore")) {
-                exchange.close();
             }
         }
     }
@@ -1145,7 +1120,7 @@ public class Server {
     private void watchBoard(HttpExchange exchange) throws IOException, InterruptedException {
         
         synchronized (folderPath) {
-            
+
             // if you want to know the requested path:
             final String path = exchange.getRequestURI().getPath();
 
@@ -1156,41 +1131,38 @@ public class Server {
             String[] ids = playerAndMatch.split("/");
             final String playerID = ids[0];
             final String matchID = ids[1];
-            
+
             Match matchToWatch = twoPlayerMatches.get(matchID);
-            
-            
+
             new Thread(new Runnable() {
+
                 public void run() {
 
                     synchronized (matchToWatch) {
-                        
-                        
+
                         final String response;
                         try {
                             exchange.sendResponseHeaders(VALID, 0);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        
+
                         String currentMatchState = matchToWatch.toString();
-            
-                        while (currentMatchState.equals(matchToWatch.toString()) && !mapIDToWinners.containsKey(matchID)) {
+
+                        while (currentMatchState.equals(matchToWatch.toString())
+                                && !mapIDToWinners.containsKey(matchID)) {
                             try {
                                 matchToWatch.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
-                        
+
                         Player currentPlayer = getPlayer(playerID);
                         Player otherPlayer = matchToWatch.getOtherPlayer(currentPlayer);
-                        
-                        if (mapIDToWinners.containsKey(matchID)) {
-                            
-                            
 
-                            
+                        if (mapIDToWinners.containsKey(matchID)) {
+
                             String winnerID = mapIDToWinners.get(matchID);
                             response = "show_score\n" + winnerID + "\n" + playerID + "\n"
                                     + matchToWatch.getScore(currentPlayer) + "\n"
@@ -1199,36 +1171,36 @@ public class Server {
                                     + matchToWatch.getChallengePoints(otherPlayer);
 
                         }
-                        
-                        
+
                         else {
                             response = "play\nupdate\n" + playerID + "\n" + matchToWatch.getScore(currentPlayer) + "\n"
                                     + matchToWatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
                                     + matchToWatch.getScore(otherPlayer) + "\n"
                                     + matchToWatch.getChallengePoints(otherPlayer) + "\n" + matchToWatch.toString();
                         }
-            
+
                         // write the response to the output stream using UTF-8 character encoding
                         OutputStream body = exchange.getResponseBody();
                         PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
                         out.print(response);
                         out.flush();
-//                        System.out.println("sent over updated board (it just changed by someone making a move), or sent over automatic winner");
-            
+                        // System.out.println("sent over updated board (it just changed by someone
+                        // making a move), or sent over automatic winner");
+
                         // if you do not close the exchange, the response will not be sent!
                         exchange.close();
                     }
-                    
-                    
+
                 }
             }).start();
 
         }
     }
-    
 
     /**
-     * Determines if the passed in player already is an existing player (unique or not)
+     * Determines if the passed in player already is an existing player (unique or
+     * not)
+     * 
      * @param player player to check uniqueness
      * @return if the passed in player already is an existing player
      */
@@ -1311,7 +1283,7 @@ public class Server {
       File folder = new File(folderPath);
       Set<String> puzzles = new HashSet<>();
       for (File puzzle : folder.listFiles()) {
-          Match match = loadMatch(puzzle);
+          Match match = parse(puzzle);
           //need to check if this match is valid
           if (match.checkConsistency()) {
               puzzles.add(puzzle.getName());
