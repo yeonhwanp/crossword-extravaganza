@@ -83,9 +83,9 @@ public class Word {
         assert this.startRow >= 0 && this.startCol >= 0;
         assert this.id >= 1;
         assert this.direction != null;
-//        assert involvedCells.size() == correctValue.length();
+        assert involvedCells.size() == correctValue.length();
         if(this.confirmed) {
-            assert this.hasOwner();
+            assert this.owner.isPresent();
         }
         
         for(int i = 0; i < involvedCells.size()-1; i++) {
