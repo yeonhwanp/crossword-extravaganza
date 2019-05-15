@@ -67,14 +67,16 @@ public class Server {
     /*
      * Abstraction Function:
      * AF(server, folderPath, validPuzzleNames, allPlayers, mapIDToDescription, mapIDToMatch, twoPlayerMatches, mapIDToWinners) =
-     *  Server that is played on server, using path folderPath to the folder to read puzzles from. Puzzles that are valid
-     *  puzzles (according to project handout) have IDs in validPuzzleNames. All the players that are playing on this server
-     *  have their identifiers stored in allPlayers. The server contains a map mapIDToDescription mapping match ID's to the match description,
-     *  where these matches only have one player and are waiting for another. The server also has a map mapIDToMatch
-     *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
-     *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
+     *  Server that is hosted on server, using path folderPath as the folder to read puzzles from. Puzzles that are valid
+     *  puzzles (according to project handout) have IDs in validPuzzleNames. All the players that are currently playing are
+     *  stored in allPlayers. The server contains a map mapIDToDescription mapping match ID's to the match description,
+     *  where these matches only have one player and are waiting for another. In other words, mapIDToDescription.get(s) is the description
+     *  of the match with ID s. The server also has a map mapIDToMatch that maps match IDs to actual matches 
+     *  (these matches also have only one player). In other words, mapIDToMatch.get(s) is the Match object for match with ID s. 
+     *  Any matches with two players that are currently being played are in twoPlayerMatches, which maps the match ID to the Match object itself.
      *  Any matches that has finished/terminated has its map ID in mapIDToWinner, where values are the players who are the most recent
-     *      winners of that match
+     *      winners of that match, so mapIDToWinner.get(s) is the ID of the player that won the match with ID s. By most recent winner,
+     *      this means the winner of the most recent time the matchID was used for a match (matchIDs can be recycled after termination).
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or

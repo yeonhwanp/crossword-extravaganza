@@ -9,6 +9,7 @@ import java.util.Set;
 
 import crossword.Cell.Exist;
 import crossword.Word.ChallengeResult;
+import crossword.Word.TryResult;
 
 /**
  * Ongoing match of Crossword Extravaganza to be played by two players.
@@ -283,12 +284,14 @@ public class Match {
      * @param player the player attempting the insert
      * @param wordID the ID of the word being attempted
      * @param tryWord the guessed word
-     * @return true iff the insert succeeded, false if the consistency check failed
+     * @return INCORRECT_LENGTH if the try failed because of incorrect length, INCONSISTENT_CURRENT if it was inconsistent with
+     * what was on the board (already confirmed, or owned by other player), SUCCESS if it is consistent (and it was inserted onto the board),
+     * WRONG_ID if the word ID did not exist within the match
      */
-    public synchronized boolean tryInsert(Player player, int wordID, String tryWord) {
+    public synchronized TryResult tryInsert(Player player, int wordID, String tryWord) {
         tryWord = tryWord.toLowerCase();
         
-        if(!idToWordMap.containsKey(wordID)) return false;
+        if(!idToWordMap.containsKey(wordID)) return TryResult.WRONG_ID;
         
         final Word word = idToWordMap.get(wordID);
         
