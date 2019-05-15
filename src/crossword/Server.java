@@ -88,7 +88,7 @@ public class Server {
      * 
      * Safety from rep exposure:
      *  All fields, except validPuzzleNames, are private and final.
-     *      server is mutated in the Server constructor (parameter as well), start(), and stop(), but this is part of the expected behavior, so no rep exposure
+     *      server is mutated in start(), and stop(), but this is part of the expected behavior, so no unsafe rep exposure
      *      validPuzzleNames is mutated only in our constructor, but this is okay because it is part of the expected behavior.
      *          validPuzzleNames is never returned or taken in as an argument to any method, so we do not keep references of it
      *      folderPath is also immutable, so we have no rep exposure here, even when it is taken in as a parameter to other methods,
@@ -899,7 +899,7 @@ public class Server {
      * PRECONDITION:
      *     - MATCH_ID must exist in currently playing matches
      * IF VALID REQUEST -> Ongoing (game logic):
-     *     - type of try varies, call it typeOfTry (valid try)
+     *     - type of try varies, call it typeOfTry - it is a TryResult
      *     - SEND: play, typeOfTry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
