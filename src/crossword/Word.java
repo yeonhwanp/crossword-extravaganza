@@ -99,7 +99,7 @@ public class Word {
             }
         }
         
-        if(this.isConfirmed()) {
+        if(this.confirmed) {
             assert correctValue.equals(this.getCurrentValue());
         }
                 
