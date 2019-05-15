@@ -568,7 +568,7 @@ public class Client {
      * @param lastInput the last input from the player
      * @return a string with the format of: 
      *  - /exit/state/player_ID/match_ID (if there is an active game or is waiting for another player to join)
-     *  - /exit/state (if the player is currently viewing the list of games to play or at the end screen)
+     *  - /exit/state/player_ID (if the player is currently viewing the list of games to play or at the end screen)
      */
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
