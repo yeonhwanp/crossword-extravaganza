@@ -330,11 +330,11 @@ public class Client {
 
     /**
      * Parses a valid start response from the server and updates the GUI accordingly.
-     * @param response the response from the server split along newlines.
+     * @param response the substring of the response from the server after "start" split along newlines.
      * 
      * RECEIVES: 
-     *  - start, "new game" 
-     *  - start, "try again"
+     *  - "start", "new game" 
+     *  - "start", "try again"
      */
     private synchronized void receiveStart(String[] response) {
         String startState = response[0];
@@ -343,12 +343,12 @@ public class Client {
 
     /**
      * Receives a valid choose response from the server and updates the GUI accordingly.
-     * @param response the response from the server split along newlines.
+     * @param response the substring of the response from the server after "choose" split along newlines.
      * @param lastInput the last input of the player.
      * 
      * RECEIVES: 
-     *  - choose, "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
-     *  - choose, "try again", allMatches
+     *  - "choose", "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     *  - "choose", "try again", allMatches
      */
     private synchronized void receiveChoose(String[] response, String lastInput) {
 
@@ -398,7 +398,7 @@ public class Client {
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      * 
      * RECEIVES:
-     *  - wait
+     *  - "wait"
      */
     private void receiveWait(String lastInput) throws IOException {
         synchronized (thisLock) {
@@ -424,16 +424,16 @@ public class Client {
 
     /**
      * Receives a valid update to the board and updates the GUI accordingly.
-     * @param response the response from the server split along newlines.
+     * @param response the substring of the response from the server after "play" split along newlines.
      * @param lastInput the last input of the player.
      * 
      * RECEIVES:
-     *  - play, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
-     *  - play, validtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
-     *  - play, invalidtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
-     *  - play, wonch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
-     *  - play, lostch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
-     *  - play, invalidch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - "play", "new", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - "play", "validtry", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
+     *  - "play", "invalidtry", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
+     *  - "play", "wonch", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
+     *  - "play", "lostch", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - "play", "invalidch", playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *  
      *  Should only receive true/false when challenge. New should only be sent on initial CHOOSE/PLAY request. Otherwise, always update.
      */
@@ -458,9 +458,9 @@ public class Client {
 
     /**
      * Receives a valid show_score repsonse from the server and updates the GUI accordingly.
-     * @param response the last input of the player.
+     * @param response the substring of the response from the server after "show_score" split along newlines.
      * 
-     * RECEIVES: show_score, winner, myPlayer, score, challengePts, otherPlayer, score2, challengePts2
+     * RECEIVES: "show_score", winner, myPlayer, score, challengePts, otherPlayer, score2, challengePts2
      */
     private synchronized void receiveEnd(String[] response) {
         int lineCount = 0;
