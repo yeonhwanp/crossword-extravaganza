@@ -132,6 +132,8 @@ class CrosswordCanvas extends JComponent {
      * Generally big font
      */
     private final Font bigFont = new Font("Arial", Font.PLAIN, 32); 
+    
+    private final Font instructionFont = new Font("Arial", Font.PLAIN, 12);
 
     /**
      * Draw a cell at position (row, col) in a crossword.
@@ -283,6 +285,23 @@ class CrosswordCanvas extends JComponent {
     // Centered regular text
     private void printlnCenter(String s, Graphics g) {
         g.setFont(textFont);
+        FontMetrics fm = g.getFontMetrics();
+        // Before changing the color it is a good idea to record what the old color
+        // was.
+        Color oldColor = g.getColor();
+        g.setColor(new Color(COLOR_CONST, 0, 0));
+        int centerX = (CENTER_X_BUFFER - fm.stringWidth(s)) / 2;
+        int placeY = CENTER_Y_BUFFER + originY + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM;
+        // Set the font
+        g.drawString(s, centerX, placeY);
+        // After writing the text you can return to the previous color.
+        g.setColor(oldColor);
+        ++line;
+    }
+    
+    // Centered instruction text
+    private void printlnCenterInst(String s, Graphics g) {
+        g.setFont(instructionFont);
         FontMetrics fm = g.getFontMetrics();
         // Before changing the color it is a good idea to record what the old color
         // was.
@@ -493,11 +512,11 @@ class CrosswordCanvas extends JComponent {
     private void printChooseInstructions(Graphics g) {
         printlnCenterBold("Valid Commands:", g);
         ++line;
-        printlnCenter("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
+        printlnCenterInst("PLAY Match_ID: Match_ID Should be obtained from the valid puzzles to choose from.", g);
         ++line;
-        printlnCenter("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be a unique alphanumeric identifier, Puzzle_ID Should be obtained from the available puzzles, and description must be encapsulated around quotes and contain no newlines.", g);
+        printlnCenterInst("NEW Match_ID Puzzle_ID \"Description\": Match_ID should be unique and alphanumeric, Puzzle_ID should be from available puzzles, and description must be encapsulated around quotes and contain no newlines.", g);
         ++line;
-        printlnCenter("EXIT", g);
+        printlnCenterInst("EXIT", g);
         line -= 2;
     }
 
@@ -606,7 +625,7 @@ class CrosswordCanvas extends JComponent {
                 }
                 else if (Character.isLetter(thisChar)) {
                     drawCell(i, j, g);
-                    letterInCell(Character.toString(thisChar), i, j, g);
+                    letterInCell(Character.toString(thisChar).toLowerCase(), i, j, g);
                 }
             }
             lineCounter++;
