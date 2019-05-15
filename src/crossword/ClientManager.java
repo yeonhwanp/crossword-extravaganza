@@ -37,30 +37,18 @@ public class ClientManager {
      *  Client is threadsafe and each ClientManager handles only one instance of Client in connecToServer()
      *  connectToServer is only ever run once and even if it were run multiple times, each instance of
      *  the variables are confined to each method call
-     *  GUI updates are wrapped in a SwingUtilities.invokeLater()
+     *  GUI updates that may possibly mutate the rep of the GUI are wrapped in a SwingUtilities.invokeLater()
      *  There are two threads which rely on the state of the same client at any given moment and we
      *      acknowledge that interleaving is possible up to the lines that are synchronized. However,
-     *      his is ok for two reasons:
+     *      this is ok for two reasons:
      *          1. The method calls after the if statements are run independently of methods in the client referenced
      *             and all new variables/methods are confined  
      *          2. The part that is synchronized checks for the initial condition again before running the rest of the 
      *             code to make sure that the condition holds true while running the rest of the code.
      *             
-     *             TODO this is pretty bad lol
-     *  receiveResponse() is not synchronized but all referenced variables are confined to the method call. TOOD correct?
-     *  Only public method is the main() method which is only ever run once per lifecycle. TODO correct?
+     *  receiveResponse() is not synchronized but all referenced variables are confined to the method call. 
+     *  Only public method is the main() method which is only ever run once per lifecycle. 
      * 
-     */
-
-    /*
-     * Concurrency Design Comment:
-     *  We are currently using two threads. One thread to process input by the user (and in essence, the sending
-     *  and receiving of data associated with that request) and another thread to process active and live updates
-     *  to the client's GUI. 
-     * 
-     *  We know that this is threadsafe because the two threads are never accessing the same variables, and while the
-     *  canvas is the one thing shared by the two threads, it is ok because the methods that have access to the canvas are
-     *  locked to this object.
      */
 
     /**

@@ -83,8 +83,14 @@ class CrosswordCanvas extends JComponent {
      *  in currentPuzzleMatches, integers precede the lines of matches.
      *      For the first set of numbers lines = int.
      *      For the second set of numbers lines = int*2.
-     *  TODO endstring and request?
-     *  
+     *  if state == ClientState.START:
+     *      request == "new game" or "try again"
+     *  if state == ClientState.CHOOSE:
+     *      request == "new", "update", or "try again"
+     *  if state == CientState.WAIT:
+     *      request == ""
+     *  if state == ClientState.PLAY:
+     *      request == new, update, validtry, invalidtry, wonch, lostch, invalidch
      * 
      * Safety from Rep Exposure:
      *  All variables are private
@@ -339,6 +345,28 @@ class CrosswordCanvas extends JComponent {
             break;
         case PLAY:
             this.state = ClientState.PLAY;
+            switch (input) {
+            case "validtry":
+                playStatus = "Inserted guess.";
+                break;
+            case "invalidtry":
+                playStatus = "Invalid TRY command.";
+                break;
+            case "wonch":
+                //won challenge!
+                playStatus = "Successful Challenge!";
+                break;
+            case "lostch":
+                //lost challenge
+                playStatus = "You lost the challenge.";
+                break;
+            case "invalidch":
+                //invalid challenge
+                playStatus = "Invalid CHALLENGE command.";
+                break;
+            default:
+                break;
+            }
             break;
         case SHOW_SCORE:
             this.state = ClientState.SHOW_SCORE;
@@ -455,29 +483,6 @@ class CrosswordCanvas extends JComponent {
             FontMetrics fm = g.getFontMetrics();
             
             g.setColor(Color.BLUE);
-            
-            switch (request) {
-            case "validtry":
-                playStatus = "Inserted guess.";
-                break;
-            case "invalidtry":
-                playStatus = "Invalid TRY command.";
-                break;
-            case "wonch":
-                //won challenge!
-                playStatus = "Successful Challenge!";
-                break;
-            case "lostch":
-                //lost challenge
-                playStatus = "You lost the challenge.";
-                break;
-            case "invalidch":
-                //invalid challenge
-                playStatus = "Invalid CHALLENGE command.";
-                break;
-            default:
-                break;
-            }
             g.drawString(playStatus, (CENTER_X_BUFFER - fm.stringWidth(playStatus)) / PLAY_X_DIV, originY + PSTATUS_Y_BUFFER + line * fm.getAscent() * ASCENT_NUMER / ASCENT_DENOM);
             
             g.setColor(Color.RED);

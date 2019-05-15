@@ -45,6 +45,9 @@ public class Client {
 
     // A simple alias to this object for locking
     private final Client thisLock = this;
+    
+    // NOT ACTUALLY USED FOR THE REP, JUST FOR TESTING PURPOSES.
+    private boolean debugging = false;
 
     /*
      * Abstraction Function
@@ -71,10 +74,21 @@ public class Client {
      *  All accesses to playerID, matchID, and canvas happen within Client methods
      *      which are all guarded by Client's lock except for handleCommand and parseResponse.
      *      However, these two methods do not access the client's internal mutable reps except
-     *      for the canvas which is encapsulated in an SwingUtilities.invokeLater() method such
-     *      that updates to the gui are threadsafe.
+     *      for the canvas -- any method that mutates the rep of canvas is encapsulated in an SwingUtilities.invokeLater() 
+     *      method such that updates to the gui are threadsafe (this is also true in ClientManager).
      *      
-     *      receiveWait() is not entirely synchronized, but the parts that are unsynchronized are
+     *      handleWait() is not synchronized and there are parts that are not encapsulated in SwingUtilities.invokeLater(). 
+     *      Again, this is to prevent deadlock from a blocking ReadingBuffer. However, this is again ok because 
+     *      the only method that looks at a rep is to the canvas, and only to the state that is saved within the canvas. 
+     *      This state is only ever mutated by Client and never mutated by any other threads that would possibly mutate it.
+     *      While CilentManager also looks at the state of the client, this is ok for two reasons.
+     *          1. It is not crucial that the result of client.getState() is correct because it is rechecked
+     *             within a synchronized block.
+     *          2. It is crucial that the state is accurate when the user enters an input (because it must always be sent)
+     *             but the only methods that rely on the correct states are the sending methods and the states are never
+     *             ever mutated by any other threads or processes.
+     *      
+     *      receiveWait() is also not entirely synchronized, but the parts that are unsynchronized are
      *      done so to prevent deadlock and do not rely on the accuracy of the internal reps of Client.
      *      Once we do call on the methods that do touch the reps, we make sure to check the initial condition
      *      that was required before running the rest of the method.
@@ -130,9 +144,14 @@ public class Client {
             // thread.
             String textboxInput = textbox.getText();
             textbox.setText("");
-            new Thread(() -> {
-                handleCommand(textboxInput);
-             }).start();
+            if (textboxInput.equals("!")) {
+                debugging = !debugging;
+            }
+            else {
+                new Thread(() -> {
+                    handleCommand(textboxInput);
+                 }).start();
+            }
         });
 
         enterButton.setSize(ENTERBUTTON_SIZE, ENTERBUTTON_SIZE);
@@ -163,22 +182,30 @@ public class Client {
      */
     private void handleCommand(String userInput) {
         try {
+            // Formulate the URL
             String extension = parseUserInput(userInput);
-            // Send GET request
             URL test = new URL("http://" + host + ":" + port + extension);
-            System.out.println("OUT: " + test);
-            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-
-            // Get the response into one big line then parse it
-            String response = ClientManager.receiveResponse(responseBuffer);
-            System.out.println("RESPONSE");
-            System.out.println("-----------------------");
-            System.out.println(response);
-            System.out.println("-----------------------");
             
+            if (debugging) {System.out.println("OUT: " + test);}
+            
+            // Send GET request, formulate response into one string
+            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+            String response = ClientManager.receiveResponse(responseBuffer);
+            
+            if (debugging) {
+              System.out.println("RESPONSE");
+              System.out.println("-----------------------");
+              System.out.println(response);
+              System.out.println("-----------------------");
+            }
+
+            // Don't parse the repsonse if we've already exited
             if (exit) {System.exit(0);}
+            
+            // Otherwise, parse the message and close the buffer
             parseResponse(response, userInput);
             responseBuffer.close();
+            
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
@@ -267,6 +294,7 @@ public class Client {
         
         if (userInput.equals("NEW MATCH") && canvas.getState() == ClientState.SHOW_SCORE) {
             sendString = "/restart/";
+            return sendString;
         }
 
         // Using the appropriate methods to send the request.
@@ -292,6 +320,7 @@ public class Client {
         default:
             throw new IllegalArgumentException();
         }
+        
         return sendString;
     }
 
