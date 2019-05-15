@@ -47,13 +47,13 @@ public class Client {
     private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
 
-    // A simple alias to this object
+    // A simple alias to this object for locking
     private final Client thisLock = this;
 
     /*
      * Abstraction Function
-     * AF(host, port, playerID, matchID, canvas, exit) = A client interacting with the a CrosswordExtravagnaza client through
-     *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnza 
+     * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
+     *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnaza 
      *                                             server at the url http://host:port with a unique identifying playerID 
      *                                             and a matchID if currently in a game. exit represents whether the user
      *                                             has terminated the connection between the server or not.
