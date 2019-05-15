@@ -43,84 +43,69 @@ public class Client {
     private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
     
-    // For the lock 
+    // A simple alias to this object
     private final Client thisLock = this;
 
     /*
      * Abstraction Function
-     * AF(playerID, matchID, userInput, sendString, canvas) = client represented by the ID playerID
-     *                                                        that is playing on the game represented by matchID
-     *                                                        on the game GUI canvas that and has just
-     *                                                        inputed a string into the GUI represented by userInput
-     *                                                        and the current GET request by sendString.
+     * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
+     *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnza 
+     *                                             server at the url http://host:port with a unique identifying playerID 
+     *                                             and a matchID if currently in session. 
      * 
      * Rep Invariant:
-     *  playerID alphanumeric
-     *  matchID only contains alphanumeric
+     *  The host is alphanumeric
+     *  port >= 0
+     *  The chosen playerID is alphanumeric
+     *  The chosen matchID is only alphanumeric
      * 
      * Safety from Rep Exposure:
-     *  All variables except canvas are private and immutable
-     *  Methods take in mutable objects but do not copy them to the rep
-     *  Methods never return mutable objects or references to such mutable objects
+     *  host and port are private, final, and immutable
+     *  playerID and matchID are private and immutable
+     *  canvas is a mutable rep but is never returned to the client or taken in from the client
+     *  all public methods take in and return immutable types
      *  
      * Thread safety argument:
-     *  All of the variables within the class are ever only touched by one thread
-     *  playerID, matchID, userInput, sendString, validInput, are handled by thread one
-     *  canvas is touched by both threads but the methods that touch it are synchornized to an internal rep
-     *      such that two threads cannot get or modify the canvas at the same time.
-     * 
+     *  host and port are private, final, and immutable
+     *  All accesses to playerID, matchID, and canvas happen within Client methods
+     *      which are all guarded by Client's lock except for handleCommand and parseResponse.
+     *      However, these two methods do not access the client's internal mutable reps except
+     *      for the canvas which is encapsulated in an SwingUtilities.invokeLater() method such
+     *      that updates to the gui are threadsafe.
+     *      
+     *      receiveWait() is not entirely synchronized, but the parts that are unsynchronized are
+     *      done so to prevent deadlock and do not rely on the accuracy of the internal reps of Client.
+     *      
+     *  Static methods do not touch any part of the rep and all variables inside of them are confined
+     *      within that method.
      */
 
-    /**
-     * Check for proper client representation.
-     */
     private void checkRep() {
+        assert host.matches("^[a-zA-Z0-9]+$");
+        assert port >= 0;
+        if (!playerID.equals("")) {
+            assert playerID.matches("^[a-zA-Z0-9]+$");
+        }
+        if (!matchID.equals("")) {
+            assert matchID.matches("^[a-zA-Z0-9]+$");
+        }
     }
 
     /**
-     * Create a new Client object
-     * @param host the host we're connecting to
-     * @param port the port we're connecting to
+     * Constructor for the Client object.
+     * @param host the host that the client intends to connect to
+     * @param port a port number that the client intends to use when
+     *             connecting to the address as defined by host
      */
     public Client(String host, int port) { 
         this.host = host;
         this.port = port;
         checkRep();
     }
-   
-
-    // TESTING //
-
-    private void handleCommand(String userInput) {
-        try {
-            String extension = parseUserInput(userInput);
-
-            // OK BUT WE NEED TO DEAL WITH INVALID INPUTS AND SHOW SOMETHING LOL
-
-            // Send GET request
-            URL test = new URL("http://" + host + ":" + port + extension);
-            System.out.println("OUT: " + test);
-
-            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
-
-            // Get the response into one big line then parse it
-            String response = ClientManager.receiveResponse(responseBuffer);
-            System.out.println("RESPONSE");
-            System.out.println("-----------------------");
-            System.out.println(response);
-            System.out.println("-----------------------");
-            parseResponse(response, userInput);
-            responseBuffer.close();
-
-            repaint();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
-     * Display a window with a CrosswordCanvas, a text box to enter commands, and an Enter button.
+     * Launch a window for the user to interact with the Client with a textbox to type commands
+     * as well as an enter button to submit entries in the textbox.
      */
     public synchronized void launchGameWindow() {
 
@@ -163,6 +148,38 @@ public class Client {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setVisible(true);
     }
+    
+    /**
+     * Wrapper method to call other methods in response to a command submission
+     * from the user.
+     * 
+     * @param userInput an input from a user.
+     */
+    private void handleCommand(String userInput) {
+        try {
+            String extension = parseUserInput(userInput);
+
+            // Send GET request
+            URL test = new URL("http://" + host + ":" + port + extension);
+            System.out.println("OUT: " + test);
+
+            BufferedReader responseBuffer = new BufferedReader(new InputStreamReader(test.openStream(), UTF_8));
+
+            // Get the response into one big line then parse it
+            String response = ClientManager.receiveResponse(responseBuffer);
+            System.out.println("RESPONSE");
+            System.out.println("-----------------------");
+            System.out.println(response);
+            System.out.println("-----------------------");
+            parseResponse(response, userInput);
+            responseBuffer.close();
+
+            repaint();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     // ========= OBSERVER METHODS ========= // 
 
@@ -181,7 +198,8 @@ public class Client {
     }
 
     /**
-     * @return the state of the game (client side).
+     * @return the state of the game on the client side
+     *         as specified by the project handout.
      */
     public synchronized ClientState getState() {
         return canvas.getState();
@@ -195,14 +213,20 @@ public class Client {
     }
 
     /**
-     * @return the list of available matches.
+     * @return the list of valid puzzles to start and a list of available matches to connect to.
+     *         The format of the string should be as follows (dashes indicate newlines):
+     *          -  INT an integer representing how many valid puzzles there are
+     *          -  ... IDs of valid puzzles, each separated by a newline
+     *          -  INT an integer representing how many available matches there are
+     *          -  ... IDs of available matches
      */
     public synchronized String getMatches() {
         return canvas.getListOfMatches();
     }
 
     /**
-     * @return for testing
+     * @return a string representation of the substate that the current state is in.
+     *         To be used for testing.
      */
     public synchronized String getRequestState() {
         return canvas.getRequestState();
@@ -213,9 +237,18 @@ public class Client {
     // ========= PUBLIC METHODS ========= //
 
     /**
-     * Parses the user's raw input from the canvas and returns appropriate web protocol.
-     * @param userInput the user's raw input from the canvas textbox
-     * @return the proper extension for the GET request to send over to the server
+     * Parses the user's raw input from the canvas and returns appropriate web protocol extension.
+     * @param userInput a valid raw input from user 
+     * @return the proper extension for the GET request to send over to the server.
+     *  - START player_ID -> /start/playerID
+     *  - PLAY match_ID -> /play/player_ID/match_ID
+     *  - NEW match_ID puzzle_ID "Description" -> /choose/playerID/matchID/Description
+     *      - Description must not contain newlines
+     *  - EXIT -> 
+     *      - If the client is in a choose wait or play state: /exit/state/player_ID/match_ID
+     *      - Else: /exit/state
+     *  - TRY id word -> /try/player_ID/match_ID/id/word
+     *  - CHALLENGE id word -> /challenge/player_ID/match_ID/id/word
      */
     public synchronized String parseUserInput(String userInput) {
 
@@ -249,12 +282,11 @@ public class Client {
 
         return sendString;
     }
-    
-    // NOT SYNCHRONIZED because variables are confined + methods used are synchronized
+
     /**
      * Parses the response from the server and updates the canvas/client accordingly
-     * @param response the response form the server
-     * @param lastInput the player input
+     * @param response a valid reponse from the server as defined by @link TODO
+     * @param lastInput the player's last input
      * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
      */
     public void parseResponse(String response, String lastInput) throws IOException {
@@ -286,16 +318,19 @@ public class Client {
     }
 
     /**
-     * Refreshes the canvas
+     * Refreshes the GUI
      */
     public synchronized void repaint() {
         canvas.repaint();
     }
 
     // ========= PUBLIC METHODS ========= //
+    
+    // NOTE: commas within RECEIVES or SEND comments indicate a newline
 
     /**
-     * Receives a start response from the server and parses it into the canvas.
+     * Parses a valid start response from the server and updates the GUI accordingly.
+     * @param response the response from the server split along newlines.
      * 
      * RECEIVES: 
      *  - start, "new game" 
@@ -307,7 +342,9 @@ public class Client {
     }
 
     /**
-     * Receives a choose response from the server and parses it into the canvas.
+     * Receives a valid choose response from the server and updates the GUI accordingly.
+     * @param response the response from the server split along newlines.
+     * @param lastInput the last input of the player.
      * 
      * RECEIVES: 
      *  - choose, "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
@@ -356,9 +393,12 @@ public class Client {
     }
 
     /**
+     * Receives a valid wait response from the server and updates the GUI accordingly.
+     * @param lastInput the last input from the player
+     * @throws IOException if receiveWait cannot properly wait - parsed response is not correct, or closed incorrectly
+     * 
      * RECEIVES:
      *  - wait
-     * @throws IOException 
      */
     private void receiveWait(String lastInput) throws IOException {
         synchronized (thisLock) {
@@ -366,29 +406,34 @@ public class Client {
             matchID = lastInput.split(" ")[1];
             this.repaint(); 
         }
-
-        // Send back response (TODO potentially not threadsafe getUserID() and getMatchID())
+        
         URL waitResponse = new URL("http://" + host + ":" + port + "/waitforjoin/" + getUserID() + "/" + getMatchID());
         BufferedReader joinedBuffer = new BufferedReader(new InputStreamReader(waitResponse.openStream(), UTF_8));
         // Get the response into one big line then parse it
         String joinedResponse = ClientManager.receiveResponse(joinedBuffer);
 
         
-        // MAKE SURE YOU DIDNT CHANGE STATE
+        // Make sure that you didn't change the state
         synchronized (thisLock) {
-            this.parseResponse(joinedResponse, lastInput);
-            joinedBuffer.close(); 
+            if (getState() == ClientState.WAIT) {
+                this.parseResponse(joinedResponse, lastInput);
+                joinedBuffer.close(); 
+            }
         }
     }
 
     /**
+     * Receives a valid update to the board and updates the GUI accordingly.
+     * @param response the response from the server split along newlines.
+     * @param lastInput the last input of the player.
+     * 
      * RECEIVES:
      *  - play, new, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *  - play, validtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - play, invalidtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - play, wonch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board 
      *  - play, lostch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
-     *  - play, falsech, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *  - play, invalidch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      *  
      *  Should only receive true/false when challenge. New should only be sent on initial CHOOSE/PLAY request. Otherwise, always update.
      */
@@ -412,6 +457,9 @@ public class Client {
     }
 
     /**
+     * Receives a valid show_score repsonse from the server and updates the GUI accordingly.
+     * @param response the last input of the player.
+     * 
      * RECEIVES: show_score, winner, myPlayer, score, challengePts, otherPlayer, score2, challengePts2
      */
     private synchronized void receiveEnd(String[] response) {
@@ -433,7 +481,12 @@ public class Client {
     }
 
     /**
-     * SENDS: /start/playerID
+     * A method that takes in a valid START command in the form of: START player_ID
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on the START state (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: /start/player_ID 
      */
     private synchronized String sendStart(String[] inputStrings, String lastInput) {  
         String sendString = "";
@@ -447,7 +500,12 @@ public class Client {
     }
 
     /**
-     * SENDS: /choose/playerID/matchID/puzzleID/description
+     * A method that takes in a valid NEW command in the form of: NEW match_ID puzzle_ID "Description"
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on the CHOOSE state (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: /choose/player_ID/match_ID/puzzle_ID/description
      */
     private synchronized String sendChoose(String[] inputStrings) {
         String sendString = "";
@@ -459,9 +517,14 @@ public class Client {
         }
         return sendString;
     }
-
+    
     /**
-     * SENDS: /play/playerID/matchID
+     * A method that takes in a valid PLAY command in the form of: PLAY match_ID 
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on the PLAY state (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: /play/player_ID/match_ID
      */
     private synchronized String sendPlay(String[] inputStrings) {
         String sendString = "";
@@ -473,12 +536,17 @@ public class Client {
         }
         return sendString;
     }
-
+    
     /**
-     * if current client state is in the wait or play state:
-     *  SENDS: /exit/state/playerID/matchID
-     * else:
-     *  SENDS: /exit/state
+     * A method that takes in a valid EXIT command in the form of: EXIT
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on any of CHOOSE, WAIT PLAY, or SEND SCORE states 
+     * (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: 
+     *  - /exit/state/player_ID/match_ID (if there is an active game or is waiting for another player to join)
+     *  - /exit/state (if the player is currently viewing the list of games to play or at the end screen)
      */
     private synchronized String sendExit(String[] inputStrings) {
         String sendString = "";
@@ -486,7 +554,7 @@ public class Client {
             if (canvas.getState() == ClientState.WAIT || canvas.getState() == ClientState.PLAY) {
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase() + "/" + playerID + "/" + matchID;
             }
-            else {
+            else if (canvas.getState() == ClientState.CHOOSE || canvas.getState() == ClientState.SHOW_SCORE){
                 sendString = "/exit/" + canvas.getState().toString().toLowerCase();
             }
         }
@@ -498,7 +566,12 @@ public class Client {
     }
 
     /**
-     * SENDS: /try/playerID/matchID/wordID/word
+     * A method that takes in a valid TRY command in the form of: TRY id word
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on the PLAY state (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: /try/playerID/matchID/wordID/word
      */
     private synchronized String sendTry(String[] inputStrings) {
         String sendString = "";
@@ -513,7 +586,12 @@ public class Client {
     }
 
     /**
-     * SENDS: /challenge/playerID/matchID/wordID/word
+     * A method that takes in a valid CHALLENGE command in the form of: TRY id word
+     * and returns a string representing the extension to the URL to a CrosswordExtravaganza server.
+     * The client must be on the PLAY state (as defined in the project handout) to run this method.
+     * @param inputStrings the input from the player
+     * @param lastInput the last input from the player
+     * @return a string with the format of: /challenge/playerID/matchID/wordID/word
      */
     private synchronized String sendChallenge(String[] inputStrings) {
         String sendString = "";
@@ -528,8 +606,8 @@ public class Client {
 
     /**
      * Parses the board into a single string
-     * @param boardArray array containing each line of the board
-     * @return board as a single string
+     * @param boardArray an array containing each line of the board
+     * @return board as a single string, each newline separated by "\n"
      */
     private static String parseBoard(String[] boardArray) {
         String boardString = "";
