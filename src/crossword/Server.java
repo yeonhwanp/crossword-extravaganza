@@ -73,14 +73,15 @@ public class Server {
      *  where these matches only have one player and are waiting for another. The server also has a map mapIDToMatch
      *  that maps match IDs to actual matches (these matches also have only one player). Any matches with two players
      *  that are currently being played are in twoPlayerMatches, which maps the match ID to the match itself.
-     *  Any matches where a player has forfeited has its map ID in mapIDToWinner, where values are the player who didn't forfeit
+     *  Any matches that has finished/terminated has its map ID in mapIDToWinner, where values are the players who are the most recent
+     *      winners of that match
      * 
      * Rep Invariant:
      * Every player in allPlayers should exist in either a value of mapIDToMatch (as a player of that match), or
      *  a value of twoPlayerMatches (again as a player of that match), but not both.
      * Every player should not have multiple locations (there cannot be duplicate players)
      * Every key in mapIDToDescription should exist in mapIDToMatch, and vice versa.
-     * Every key in twoPlayerMatches should not be in mapIDToDescription
+     * There should be no shared keys between mapIDToMatch, twoPlayerMatches, or mapIDToWinners
      * 
      * Safety from rep exposure:
      *  All fields, except validPuzzleNames, are private and final.
@@ -96,12 +97,16 @@ public class Server {
      *          It is not mutated, taken in as a parameter, or returned in any other method.
      *      twoPlayerMatches is mutated in playMatch and exit, but this is expected client behavior, so it is not rep exposure.
      *          It is not mutated, taken in as a parameter, or returned in any other method.
-     *          //TODO finish the two fields i added
+     *      mapIDToWinners is mutated in numerous methods, but this is expected client behavior, so it is not rep exposure.
      *        
      * Thread safety argument:
      *  Every method that is non-static is locked by the rep folderPath. Therefore, all accesses to our rep are guarded by
      *  the lock on folderPath, which is an instance variable. This means that only one thread can access/change our rep
      *  at a time. This is essentially the same as monitor pattern, except we do not want to give access to this.
+     *  
+     *  In some methods (exit, tryInsert, challenge, and watchBoard), we also lock on the match users are playing on
+     *  There is no case for deadlock, as the locks are always obtained in the order ot server, then match itself.
+     *  Now, any change to the current match is atomic, so we will not have thread safe issues here.
      *  All of our static methods are threadsafe because:
      *    The static methods only used local variables that are confined, so there is no behavior that is not threadsafe
      *  
@@ -565,6 +570,10 @@ public class Server {
             
             if (isUniqueMatchID(matchID) && validPuzzleNames.contains(puzzleID)) { //start new match
                 
+                if (mapIDToWinners.containsKey(matchID)) { //client started a new match with a matchID equal to the matchID of a match
+                                                        //that used to exist, but is now being replaced                    
+                    mapIDToWinners.remove(matchID);
+                }
                 
                 Player existingPlayer = getPlayer(playerID);
                 
