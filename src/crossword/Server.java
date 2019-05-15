@@ -531,7 +531,7 @@ public class Server {
     }
     
     /**
-     * RECIEVE: A new match request in the form of: "new player_ID match_ID puzzle_ID "Description"
+     * RECIEVE: A new match request in the form of: "choose player_ID match_ID puzzle_ID "Description"
      *  PRECONDITION: matchID must be unique, puzzle_ID must exist, 
      *      - matchID must be unique
      *      - puzzle_ID must exist
@@ -697,12 +697,14 @@ public class Server {
             String[] playerAndMatchArray = playerAndMatch.split("/");
             String playerID = playerAndMatchArray[0];
             String matchID = playerAndMatchArray[1];
+           
             
             exchange.sendResponseHeaders(VALID, 0);
             OutputStream body = exchange.getResponseBody();
             PrintWriter out = new PrintWriter(new OutputStreamWriter(body, UTF_8), true);
             
             if (mapIDToMatch.containsKey(matchID)) { // valid precondition, so play an existing match
+
                 
                 Player secondPlayer = getPlayer(playerID); //second player to join the match
                 Match matchToPlay = mapIDToMatch.get(matchID);
@@ -1214,7 +1216,7 @@ public class Server {
      * @param playerStr player identifier to match player to
      * @return player that matches playerStr
      */
-    public Player getPlayer(String playerStr) {
+    private Player getPlayer(String playerStr) {
 
         synchronized (folderPath) {
             for (Player player : allPlayers) {

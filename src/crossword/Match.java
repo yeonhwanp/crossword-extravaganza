@@ -54,7 +54,6 @@ public class Match {
     private final Cell[][] gameBoard;
     private final int rows;
     private final int columns;
-//    private Map<String, Player> players;
     private final List<Player> players;
     private final Map<Player, Integer> scores;
     private final Map<Player, Integer> challengePts;
