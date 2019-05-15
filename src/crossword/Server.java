@@ -109,6 +109,11 @@ public class Server {
      *  Now, any change to the current match is atomic, so we will not have thread safe issues here.
      *  All of our static methods are threadsafe because:
      *    The static methods only used local variables that are confined, so there is no behavior that is not threadsafe
+     *  Private methods, though not synchronized, do not present thread safety issues because they are always called within
+     *      public, synchronized methods. So, in order to call a private method, we need to first obtain the lock on 
+     *      the rep of server anyway.
+     *      
+     *  
      *  
      */
     
