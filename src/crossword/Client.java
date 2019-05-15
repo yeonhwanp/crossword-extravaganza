@@ -40,9 +40,9 @@ public class Client {
     private static final int ENTERBUTTON_SIZE = 10;
     private static final int CANVAS_ADD = 50;
     private static final int CHOOSE_INPUT_LENGTH = 3;
-    private final boolean exit = false;
     private final String host;
     private final int port;
+    private boolean exit = false;
     private String playerID = "";
     private String matchID = "";
     private CrosswordCanvas canvas = new CrosswordCanvas();
@@ -52,10 +52,11 @@ public class Client {
 
     /*
      * Abstraction Function
-     * AF(host, port, playerID, matchID, canvas) = A client interacting with the a CrosswordExtravagnaza client through
+     * AF(host, port, playerID, matchID, canvas, exit) = A client interacting with the a CrosswordExtravagnaza client through
      *                                             a UI displayed by canvas and is connected to a CrosswordExtravagnza 
      *                                             server at the url http://host:port with a unique identifying playerID 
-     *                                             and a matchID if currently in session. 
+     *                                             and a matchID if currently in a game. exit represents whether the user
+     *                                             has terminated the connection between the server or not.
      * 
      * Rep Invariant:
      *  The host is alphanumeric
@@ -85,6 +86,9 @@ public class Client {
      *  Static methods do not touch any part of the rep and all variables inside of them are confined
      *      within that method.
      */
+    
+    //NOTE: on my 15 inch macbook pro (2016), the message for incorrect commands is pretty visible. However,
+    //      on a 13 inch macbook pro (2015 and prior) the message barely peeks out through the bottom.
 
     private void checkRep() {
         assert host.matches("^[a-zA-Z0-9]+$");
