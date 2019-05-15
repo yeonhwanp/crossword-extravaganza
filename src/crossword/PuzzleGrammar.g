@@ -16,5 +16,5 @@ StringIdent ::= '"' [^"\r\n\t\\]* '"';
 Int ::= [0-9]+;
 spaces ::= [ ]*;
 whitespace ::= [ \t\r\n]+;
-Comment::= "\/\/" [^\r\n]* "\n"?;
+Comment::= "\/\/" [^\r\n]* [\n\r]?;
 CommentOrWhitespace::=(Comment | whitespace);
