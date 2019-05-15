@@ -139,7 +139,6 @@ public class Word {
      * @return whether or not the word is down
      */
     public boolean isVertical() {
-        checkRep();
 
         return direction == Direction.DOWN;
     }
@@ -149,8 +148,7 @@ public class Word {
      * @return whether or not the word is across
      */
     public boolean isHorizontal() {
-        checkRep();
-
+        
         return direction == Direction.ACROSS;
     }
     
@@ -221,7 +219,6 @@ public class Word {
      * @return the length of the correct word
      */
     public int getLength() {
-        checkRep();
         return correctValue.length();
     }
     
