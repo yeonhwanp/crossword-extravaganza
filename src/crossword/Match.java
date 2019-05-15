@@ -19,11 +19,12 @@ public class Match {
     
     // Abstraction function:
     //    AF(matchName, matchDescription, words, idToWordMap, gameBoard, rows, columns, players, scores, challengePts, gameStarted) = 
-    //      A [rows x columns] crossword match with the name & description matchName/matchDescription respectively and a board with
-    //      contents specified by gameBoard and words -- players, scores, challengePts represent the players and their respective
-    //      points that they've accumulated throughout the game, so we have that:
-    //      (scores.get(i) is the number of correct words entered by player i, challengePts is # challenge points the player i has).
-    //      We also have that the game is started if and only if gameStarted is true.
+    //     A (rows x columns) crossword match with the name matchName and description matchDescription, and both players on the match are 
+    //     stored with players, where scores.get(i) gives the number of words confirmed under player i, challengePts.get(i) represents 
+    //     the number of challenge points that player i has, and gameStarted is whether or not the match has started (false if in waiting).
+    //     The Word objects that represents the words on the puzzle are stored within words, and idToWordMap maps the IDs of the words on the puzzle
+    //     to the corresponding Word objects in this Match. gameBoard[i][j] gives the Cell at index [i, j] on the Match board, and represents a cell
+    //     at index (i, j) within the crossword puzzle.
     
     // Rep invariant: 
     //    matchName cannot contain newlines, or tabs
@@ -39,14 +40,14 @@ public class Match {
     //
     // Safety from rep exposure:
     //    matchName, matchDescription, words, gameBoard, rows, columns are private and final
-    //    players, scores, challengePts, state are final
-    //    Match constructor takes in immutable types and 
-    //    Other public methods only take in and return immutable types
+    //    players, scores, challengePts, state are also private final
+    //    Match constructor takes in immutable types, so it's safe to directly alias them (it's SRE)
+    //    Other public methods only take in and return immutable types, so it's SRE because we don't expose our rep to potential unintended mutation
     //   
     // Thread safety argument:
     //   We use the monitor pattern and synchronize every method with a lock on this object, which ensures thread safety 
-    //   because only one thread can be in a given method at any given time, so we accesses to our rep happen within
-    //   Match's methods, which are all guarded by Match's lock.
+    //   because only one thread can be in a given method at any given time, so all accesses to our rep happen within
+    //   Match's methods, which are all guarded by this Match object's lock.
     
     
     private final String matchName;

@@ -3,8 +3,6 @@ package crossword;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 /**
  * Cell, or space of a board to represent a letter of a word.
  *
@@ -14,20 +12,24 @@ public class Cell {
     // Abstraction function:
     //    AF(row, col, value, correspondingWords, existState) =
     //      A cell on the crossword puzzle at the location [row x col] with the value given by value which corresponds
-    //      to one or two words contained in correspondingWords. ExistState defines whether or not this cell is part of
-    //      the crossword puzzle.
+    //      to one or two words contained in correspondingWords (meaning that this cell 
+    //      is part of all words in correspondingWords). ExistState defines whether or not this cell is part of
+    //      the crossword puzzle. (PRESENT = part of the puzzle, ABSENT = not part of the puzzle)
+    //      
     // Representation invariant:
     //    row >= 0 && col >= 0
     //    len(value) <= 1
+    //    correspondingWords is at most size 2
     //
     // Safety from rep exposure:
     //    Constructor takes in immutable types
     //    All methods take in and return immutable types except for addWord
     //    addWord takes in a mutable type but this is intended rep exposure because words need to be shared between cells
-    //        because each word occupies multiple cells
+    //        and the cells need direct aliases to the words that they are part of
     //   
     // Thread safety argument:
-    //   This class is not threadsafe, but it's OK because only Match accesses Cell methods, and Match is threadsafe.
+    //   This class is not threadsafe, but it's OK because only Match accesses Cell methods, and Match is threadsafe. This ensures that at most 
+    //   one thread is looking at a Cell at a time.
     
     public enum Exist {PRESENT, ABSENT}
 

@@ -7,7 +7,7 @@ package crossword;
  */
 public class WordTuple {
 
-    private final String word; //TODO check restrictions on these guys
+    private final String word;
     private final String hint;
     private final String direction;
     private final int startRow;
@@ -25,11 +25,11 @@ public class WordTuple {
      * 
      * Safety from rep exposure:
      *  all of our fields are private and final and immutable, therefore no rep exposure
-     *  none of our fields are saved in any of our methods
+     *  all methods take in and return only immutable types, so it is safe to directly alias and it is safe from rep exposure
      *  
      * Thread safety argument:
      *  We are using an immutable type, WordTuple. Since the fields are all private and final and immutable, there is no
-     *  way to have thread safety threatened.
+     *  way to have thread safety threatened. (We also don't do any beneficient mutation, so it is fully immutable)
      */
     
     /**
@@ -55,6 +55,8 @@ public class WordTuple {
     private void checkRep() {
         assert direction.equals("ACROSS") || direction.equals("DOWN");
         assert startRow >= 0 && startCol >= 0;
+        assert word != null;
+        assert hint != null;
     }
     
     /**
