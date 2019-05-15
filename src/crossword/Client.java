@@ -172,6 +172,7 @@ public class Client {
 
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setVisible(true);
+        checkRep();
     }
 
     /**
@@ -216,6 +217,7 @@ public class Client {
                 });
             }
         }
+        checkRep();
     }
 
     // ========= OBSERVER METHODS ========= // 
@@ -321,6 +323,7 @@ public class Client {
             throw new IllegalArgumentException();
         }
         
+        checkRep();
         return sendString;
     }
 
@@ -372,6 +375,7 @@ public class Client {
             // is unspecified. However, they said we should still give the user a human-readable message.
             throw new RuntimeException("Should never reach here");
         }
+        checkRep();
     }
 
     /**
@@ -379,13 +383,7 @@ public class Client {
      */
     public synchronized void repaint() {
         canvas.repaint();
-//        try {
-//            SwingUtilities.invokeAndWait(() -> {canvas.repaint();});
-//        } catch (InvocationTargetException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        checkRep();
     }
 
     // ========= PUBLIC METHODS ========= //
@@ -403,6 +401,7 @@ public class Client {
     private synchronized void receiveStart(String[] response) {
         String startState = response[0];
         canvas.setRequest(ClientState.START, startState);
+        checkRep();
     }
 
     /**
@@ -457,6 +456,7 @@ public class Client {
             lineCount++;
         }
         canvas.setList(puzzleMatchString);
+        checkRep();
     }
 
     /**
@@ -487,6 +487,7 @@ public class Client {
                 joinedBuffer.close(); 
             }
         }
+        checkRep();
     }
 
     /**
@@ -525,6 +526,7 @@ public class Client {
         canvas.setBoard(boardString);
 
         this.notifyAll();
+        checkRep();
     }
 
     /**
@@ -549,6 +551,7 @@ public class Client {
         }
         System.out.println(endString);
         canvas.setScore(endString);
+        checkRep();
     }
 
     /**
@@ -568,6 +571,7 @@ public class Client {
         else {
             throw new IllegalArgumentException();
         }
+        checkRep();
         return sendString;
     }
 
@@ -590,6 +594,7 @@ public class Client {
         else {
             throw new IllegalArgumentException();
         }
+        checkRep();
         return sendString;
     }
 
@@ -611,6 +616,7 @@ public class Client {
         else {
             throw new IllegalArgumentException();
         }
+        checkRep();
         return sendString;
     }
 
@@ -640,6 +646,7 @@ public class Client {
             throw new IllegalArgumentException();
         }
 
+        checkRep();
         return sendString;
     }
 
@@ -663,6 +670,7 @@ public class Client {
             System.out.println(String.valueOf(inputStrings.length) + inputStrings[1].matches("^[A-Za-z]+$"));
             throw new IllegalArgumentException();
         }
+        checkRep();
         return sendString;
     }
 
@@ -685,6 +693,7 @@ public class Client {
         else {
             throw new IllegalArgumentException();
         }
+        checkRep();
         return sendString;
     }
 

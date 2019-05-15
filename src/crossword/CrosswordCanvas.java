@@ -111,8 +111,8 @@ class CrosswordCanvas extends JComponent {
      */
 
     private void checkRep() {
-        if (!currentPuzzleMatches.equals("")) {
-            String[] lines = currentPuzzleMatches.split(" ");
+        if (currentPuzzleMatches != null) {
+            String[] lines = currentPuzzleMatches.split("\n");
             int amountValid = Integer.valueOf(lines[0]);
             for (int i=1; i < amountValid + 1; i++) {
                 assert lines[i] != null;
@@ -139,8 +139,33 @@ class CrosswordCanvas extends JComponent {
                     || request.equals("invalidch");
         }
         
-        if (request.equals("success")) {
-            
+        switch (request) {
+        case "success":
+            assert playStatus.equals("Inserted guess.");
+            break;
+        case "inconsistent_current":
+            assert playStatus.equals("Guess was inconsistent with the current board.");
+            break;
+        case "incorrect_length":
+            assert playStatus.equals("Guess was not of the correct length.");
+            break;
+        case "wrong_id":
+            assert playStatus.equals("ID was not valid.");
+            break;
+        case "wonch":
+            //won challenge!
+            assert playStatus.equals("Successful Challenge!");
+            break;
+        case "lostch":
+            //lost challenge
+            assert playStatus.equals("You lost the challenge.");
+            break;
+        case "invalidch":
+            //invalid challenge
+            assert playStatus.equals("Invalid CHALLENGE command.");
+            break;
+        default:
+            break;
         }
     }
 
@@ -199,6 +224,7 @@ class CrosswordCanvas extends JComponent {
         g.fillRect(originX + col * delta,
                 originY + row * delta, delta, delta);
         g.setColor(oldColor);
+        checkRep();
     }
 
     /**
@@ -213,6 +239,7 @@ class CrosswordCanvas extends JComponent {
         FontMetrics fm = g.getFontMetrics();
         g.drawString(letter, originX + col * delta + delta / LETTER_X_DELTA_DIV,
                 originY + row * delta + fm.getAscent() + delta / LETTER_Y_DELTA_DIV);
+        checkRep();
     }
 
     /**
@@ -226,6 +253,7 @@ class CrosswordCanvas extends JComponent {
         g.setFont(indexFont);
         g.drawString(id, originX + col * delta + delta / ID_X_DELTA_DIV,
                 originY + row * delta - delta / ID_Y_DELTA_DIV);
+        checkRep();
     }
 
     /**
@@ -241,6 +269,7 @@ class CrosswordCanvas extends JComponent {
         int maxwidth = fm.charWidth('0') * id.length();
         g.drawString(id, originX + col * delta - maxwidth - delta / ID_X_DELTA_DIV,
                 originY + row * delta + fm.getAscent() + delta / ID_Y_DELTA_DIV);
+        checkRep();
     }
 
     // The three methods that follow are meant to show you one approach to writing
@@ -273,6 +302,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
 
     // This code shows one approach for fancier formatting by changing the
@@ -296,6 +326,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
 
     // Centered text
@@ -313,6 +344,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
 
     // Centered bolded text
@@ -330,6 +362,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
 
     // Centered regular text
@@ -347,6 +380,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
     
     // Centered instruction text
@@ -364,6 +398,7 @@ class CrosswordCanvas extends JComponent {
         // After writing the text you can return to the previous color.
         g.setColor(oldColor);
         ++line;
+        checkRep();
     }
 
     private int x = 1;
@@ -424,6 +459,7 @@ class CrosswordCanvas extends JComponent {
             throw new RuntimeException("Should never be here");
         }
         request = input;
+        checkRep();
     }
 
     /**
@@ -432,6 +468,7 @@ class CrosswordCanvas extends JComponent {
      */
     public void setBoard(String input) {
         currentBoard = input;
+        checkRep();
     }
 
     /**
@@ -440,6 +477,7 @@ class CrosswordCanvas extends JComponent {
      */
     public void setList(String puzzleMatchString) {
         currentPuzzleMatches = puzzleMatchString;
+        checkRep();
     }
 
     /**
@@ -448,6 +486,7 @@ class CrosswordCanvas extends JComponent {
      */
     public void setScore(String scoreString) {
         endString = scoreString;
+        checkRep();
     }
 
     /**
@@ -550,6 +589,7 @@ class CrosswordCanvas extends JComponent {
         else if (state == ClientState.SHOW_SCORE) {
             printScores(g);
         }
+        checkRep();
     }
 
     // Method to help print necessary information at the start state
@@ -562,6 +602,7 @@ class CrosswordCanvas extends JComponent {
         ++line;
         printlnCenterBold("Please enter into the textbox: START player_ID", g);
         printlnCenterBig("player_ID should only be composed of alphanumerics.", g);
+        checkRep();
     }
 
     // Method to help print necessary information at the choose state
@@ -574,6 +615,7 @@ class CrosswordCanvas extends JComponent {
         ++line;
         printlnCenterInst("EXIT", g);
         line -= 2;
+        checkRep();
     }
 
     // Method to print scores when the game is over
@@ -609,6 +651,7 @@ class CrosswordCanvas extends JComponent {
         printlnCenterBold("Type NEW MATCH to view a list of available matches!", g);
 
         g.setColor(oldColor);
+        checkRep();
     }
 
     // Method to print the list of valid and available matches
@@ -639,6 +682,7 @@ class CrosswordCanvas extends JComponent {
             printlnCenter(listCounter + ". " + lines[lineCounter] + " \"" + lines[lineCounter+1] + "\"", g);
             lineCounter += 2;
         }
+        checkRep();
     }
 
     // Method to help print the board
@@ -775,6 +819,6 @@ class CrosswordCanvas extends JComponent {
         g.setColor(oldColor);
 
         // Print score + challenge points
-
+        checkRep();
     }
 }
