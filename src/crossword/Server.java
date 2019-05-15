@@ -903,7 +903,7 @@ public class Server {
      * IF VALID_REQUEST -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF INVALID (game logic):
-     *     - SEND: play, invalidtry, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, typeOfTry (invalid), playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      */
     private void tryPlay(HttpExchange exchange) throws IOException {
