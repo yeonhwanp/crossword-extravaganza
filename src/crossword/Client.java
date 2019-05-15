@@ -290,6 +290,8 @@ public class Client {
         default:
             throw new IllegalArgumentException();
         }
+        
+        System.out.println("ajksdlf");
 
         return sendString;
     }
