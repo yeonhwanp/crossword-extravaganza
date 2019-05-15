@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import crossword.Cell.Exist;
+import crossword.Word.Direction;
 
 
 /**
@@ -134,6 +135,7 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         firstWord.setOwner(player);
         assertTrue(tester.changeValue('h', player));
     }
@@ -146,6 +148,7 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         firstWord.setOwner(player);
         tester.addWord(firstWord);
         tester.changeValue('h', player);
@@ -159,7 +162,9 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         firstWord.setOwner(player);
+        firstWord.tryInsertNewWord(player, "cat");
         firstWord.setConfirmed();
         tester.addWord(firstWord);
         assertTrue(!tester.changeValue('h', player));
@@ -174,6 +179,7 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player player = new Player("hey");
         tester.addWord(firstWord);
         tester.changeValue('c', player);
@@ -191,6 +197,7 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         tester.addWord(firstWord);
         
         assertTrue(!tester.isOwned());
@@ -204,6 +211,7 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player player = new Player("hey");
         tester.addWord(firstWord);
         tester.changeValue('c', player);
@@ -221,6 +229,7 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player player = new Player("hey");
         tester.addWord(firstWord);
         firstWord.setOwner(player);
@@ -250,6 +259,7 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(1, 2, "hint", 1, "ca", "ACROSS");
+        addCells(firstWord);
         Player player = new Player("hey");
         tester.addWord(firstWord);
         firstWord.setOwner(player);
@@ -272,19 +282,17 @@ public class CellTest {
         
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Word firstWord = new Word(1, 2, "hint", 1, "aw", "ACROSS");
+        addCells(firstWord);
         Word secondWord = new Word(0, 2, "hint", 1, "ca", "DOWN");
+        addCells(secondWord);
         Player player = new Player("hey");
         
         tester.addWord(firstWord);
         firstWord.setOwner(player);
-        firstWord.addInvolvedCell(tester);
-        firstWord.addInvolvedCell(new Cell(1,3,Exist.PRESENT));
         firstWord.tryInsertNewWord(player, "aw");
         
         tester.addWord(secondWord);
         secondWord.setOwner(player);
-        secondWord.addInvolvedCell(new Cell(0,2,Exist.PRESENT));
-        secondWord.addInvolvedCell(tester);
         secondWord.tryInsertNewWord(player, "da");
         
         assertEquals('a', tester.getCurrentValue());
@@ -359,6 +367,7 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         firstWord.setOwner(player);
         tester.addWord(firstWord);
         
@@ -373,6 +382,7 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         Player player = new Player("hi");
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         firstWord.setOwner(player);
         firstWord.setConfirmed();
         tester.addWord(firstWord);
@@ -408,6 +418,39 @@ public class CellTest {
         Cell tester = new Cell(1,2,Exist.PRESENT);
         tester.changeValue('a', new Player("hi"));
         assertEquals("a", tester.toString());
+        
+    }
+    
+    
+    
+    /**
+     * Manually add cells to the word so it is a valid word. Emulates the functionality of Match constructor,
+     * which also adds cells to the word
+     * @param word word to add cells to
+     */
+    private static void addCells(Word word) {
+        
+        final int rowLower = word.getRowLowerBound();
+        final int rowHigher = word.getRowUpperBound();
+        final int colLower = word.getColumnLowerBound();
+        final int colHigher = word.getColumnUpperBound();
+        
+        if (word.getDirection() == Direction.ACROSS) {
+           
+            
+            for (int i = colLower; i <= colHigher; i++) {
+                Cell cellToAdd = new Cell(rowLower, i, Exist.PRESENT);
+                word.addInvolvedCell(cellToAdd);
+            }
+        }
+        else {
+            
+            for (int i = rowLower; i <= rowHigher; i++) {
+                Cell cellToAdd = new Cell(i, colLower, Exist.PRESENT);
+                word.addInvolvedCell(cellToAdd);
+            }
+        }
+        
         
     }
     

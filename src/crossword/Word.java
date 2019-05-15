@@ -83,6 +83,7 @@ public class Word {
         assert this.startRow >= 0 && this.startCol >= 0;
         assert this.id >= 1;
         assert this.direction != null;
+        
         assert involvedCells.size() == correctValue.length();
         if(this.confirmed) {
             assert this.owner.isPresent();
@@ -157,7 +158,6 @@ public class Word {
      * @return the direction of the word
      */
     public Direction getDirection() {
-        checkRep();
 
         return direction;
     }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import crossword.Cell.Exist;
+import crossword.Word.Direction;
 
 
 public class WordTest {
@@ -98,6 +99,7 @@ public class WordTest {
     @Test
     public void testGetCorrectValue() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals("cat", firstWord.getCorrectValue());
     }
     
@@ -105,6 +107,7 @@ public class WordTest {
     @Test
     public void testGetCorrectCharAt() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals("cat", firstWord.getCorrectValue());
     }
     
@@ -112,6 +115,7 @@ public class WordTest {
     @Test
     public void testIsVerticalInputVertical() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertTrue(firstWord.isVertical());
     }
     
@@ -119,6 +123,7 @@ public class WordTest {
     @Test
     public void testIsVerticalInputHorizontal() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertTrue(!firstWord.isVertical());
     }
     
@@ -126,6 +131,7 @@ public class WordTest {
     @Test
     public void testIsHorizontalInputVertical() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertTrue(!firstWord.isHorizontal());
     }
     
@@ -133,6 +139,7 @@ public class WordTest {
     @Test
     public void testIsHorizontalInputHorizontal() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertTrue(firstWord.isHorizontal());
     }
     
@@ -141,6 +148,7 @@ public class WordTest {
     @Test
     public void testGetRowLowerBoundAcross() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals(3, firstWord.getRowLowerBound());
     }
     
@@ -148,6 +156,7 @@ public class WordTest {
     @Test
     public void testGetRowLowerBoundDown() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertEquals(3, firstWord.getRowLowerBound());
     }
     
@@ -155,6 +164,7 @@ public class WordTest {
     @Test
     public void testGetRowUpperBoundAcross() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals(3, firstWord.getRowUpperBound());
     }
     
@@ -162,6 +172,7 @@ public class WordTest {
     @Test
     public void testGetRowUpperBoundDown() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertEquals(5, firstWord.getRowUpperBound());
     }
     
@@ -169,6 +180,7 @@ public class WordTest {
     @Test
     public void testGetColumnLowerBoundAcross() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals(2, firstWord.getColumnLowerBound());
     }
     
@@ -176,6 +188,7 @@ public class WordTest {
     @Test
     public void testGetColLowerBoundDown() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertEquals(2, firstWord.getColumnLowerBound());
     }
     
@@ -183,6 +196,7 @@ public class WordTest {
     @Test
     public void testGetColumnUpperBoundAcross() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals(4, firstWord.getColumnUpperBound());
     }
     
@@ -190,6 +204,7 @@ public class WordTest {
     @Test
     public void testGetColumnUpperBoundDown() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertEquals(2, firstWord.getColumnUpperBound());
     }
     
@@ -198,6 +213,7 @@ public class WordTest {
     @Test
     public void testGetLength() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertEquals(3, firstWord.getLength());
     }
     
@@ -206,6 +222,7 @@ public class WordTest {
     @Test
     public void testGetLengthEmpty() {
         Word firstWord = new Word(3, 2, "hint", 1, "", "DOWN");
+        addCells(firstWord);
         assertEquals(0, firstWord.getLength());
     }
     
@@ -213,6 +230,7 @@ public class WordTest {
     @Test
     public void testIsConfirmedDefault() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         assertTrue(!firstWord.isConfirmed());
     }
     
@@ -221,6 +239,11 @@ public class WordTest {
     @Test
     public void testIsConfirmedYes() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
+        
+        Player player = new Player("hi");
+        firstWord.setOwner(player);
+        firstWord.tryInsertNewWord(player, "cat");
         firstWord.setConfirmed();
         assertTrue(firstWord.isConfirmed());
     }
@@ -231,6 +254,7 @@ public class WordTest {
     @Test
     public void testToStringDown() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "DOWN");
+        addCells(firstWord);
         String expected = "1. cat at (3,2), in the DOWN direction, with the hint: hint";
         assertEquals(expected, firstWord.toString());
     }
@@ -239,6 +263,7 @@ public class WordTest {
     @Test
     public void testToStringAcross() {
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         String expected = "1. cat at (3,2), in the ACROSS direction, with the hint: hint";
         assertEquals(expected, firstWord.toString());
     }
@@ -248,6 +273,7 @@ public class WordTest {
     public void testGetOwnerDefault() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertThrows(RuntimeException.class, () -> { firstWord.getOwner(); });
     }
     
@@ -256,6 +282,7 @@ public class WordTest {
     public void testGetOwnerYes() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player yo = new Player("yo");
         firstWord.setOwner(yo);
         assertEquals(yo, firstWord.getOwner());
@@ -266,6 +293,7 @@ public class WordTest {
     public void testGetOwnerBefore() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player yo = new Player("yo");
         firstWord.setOwner(yo);
         firstWord.clearOwner();
@@ -277,6 +305,7 @@ public class WordTest {
     public void testSetOwnerNoneBefore() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player yo = new Player("a");
         firstWord.setOwner(yo);
         assertEquals(yo, firstWord.getOwner());
@@ -287,6 +316,8 @@ public class WordTest {
     public void testSetOwnerYesBefore() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
+        
         Player yo = new Player("a");
         Player a = new Player("bbb");
         firstWord.setOwner(yo);
@@ -299,6 +330,7 @@ public class WordTest {
     public void testHasOwnerNo() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         assertEquals(false, firstWord.hasOwner());
     }
     
@@ -307,6 +339,7 @@ public class WordTest {
     public void testHasOwnerYes() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player yo = new Player("a");
         firstWord.setOwner(yo);
         assertEquals(true, firstWord.hasOwner());
@@ -317,6 +350,7 @@ public class WordTest {
     public void testClearOwner() {
         
         Word firstWord = new Word(3, 2, "hint", 1, "cat", "ACROSS");
+        addCells(firstWord);
         Player yo = new Player("a");
         firstWord.setOwner(yo);
         firstWord.clearOwner();
@@ -329,7 +363,8 @@ public class WordTest {
     public void testGetCurrentValueNone() {
         
         Word firstWord = new Word(0, 1, "hint", 1, "cat", "ACROSS");
-        assertEquals("", firstWord.getCurrentValue());
+        addCells(firstWord);
+        assertEquals("???", firstWord.getCurrentValue());
         
     }
     
@@ -339,9 +374,7 @@ public class WordTest {
     public void testGetCurrentValueYes() {
         
         Word firstWord = new Word(0, 1, "hint", 1, "cat", "ACROSS");
-        firstWord.addInvolvedCell(new Cell(0, 1, Exist.PRESENT));
-        firstWord.addInvolvedCell(new Cell(0, 2, Exist.PRESENT));
-        firstWord.addInvolvedCell(new Cell(0, 3, Exist.PRESENT));
+        addCells(firstWord);
         assertEquals("???", firstWord.getCurrentValue());
         
     }
@@ -530,14 +563,43 @@ public class WordTest {
     
     
     /**
+     * Manually add cells to the word so it is a valid word. Emulates the functionality of Match constructor,
+     * which also adds cells to the word
+     * @param word word to add cells to
+     */
+    private static void addCells(Word word) {
+        
+        final int rowLower = word.getRowLowerBound();
+        final int rowHigher = word.getRowUpperBound();
+        final int colLower = word.getColumnLowerBound();
+        final int colHigher = word.getColumnUpperBound();
+        
+        if (word.getDirection() == Direction.ACROSS) {
+           
+            
+            for (int i = colLower; i <= colHigher; i++) {
+                Cell cellToAdd = new Cell(rowLower, i, Exist.PRESENT);
+                word.addInvolvedCell(cellToAdd);
+            }
+        }
+        else {
+            
+            for (int i = rowLower; i <= rowHigher; i++) {
+                Cell cellToAdd = new Cell(i, colLower, Exist.PRESENT);
+                word.addInvolvedCell(cellToAdd);
+            }
+        }
+        
+        
+    }
+    
+    /**
      * Method to make cat word, with attached cells
      * @return cat word with cells attached
      */
     private static Word makeCatWord() {
         Word firstWord = new Word(0, 0, "hint", 1, "cat", "ACROSS");
-        firstWord.addInvolvedCell(new Cell(0, 0, Exist.PRESENT));
-        firstWord.addInvolvedCell(new Cell(0, 1, Exist.PRESENT));
-        firstWord.addInvolvedCell(new Cell(0, 2, Exist.PRESENT));
+        addCells(firstWord);
         return firstWord;
     }
     
