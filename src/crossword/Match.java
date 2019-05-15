@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import crossword.Cell.Exist;
+import crossword.Word.ChallengeResult;
 
 /**
  * Ongoing match of Crossword Extravaganza to be played by two players.
@@ -196,6 +197,12 @@ public class Match {
         assert checkSetEquality(scores.keySet(), challengePts.keySet());
     }
     
+    /**
+     * Check if two sets have the exact same elements
+     * @param first the first set
+     * @param second the second set
+     * @return true iff the two sets contain the exact same elements, as determined by the .equals() method of the type E
+     */
     private synchronized <E> boolean checkSetEquality(Set<E> first, Set<E> second) {
         if(first.size() != second.size()) return false;
         
@@ -291,10 +298,11 @@ public class Match {
      * @param player the player doing the challenging
      * @param wordID the id of the word being challenged
      * @param challengeGuess the actual word used to challenge the other player's guesses
-     * @return true iff the challenge was accepted by the server, false if the consistency check failed
+     * @return the result of the challenge in terms of ChallengeResult (INVALID if it wasn't consistent according to the rules, INCORRECT if the challenge was
+     * incorrect, and CORRECT if the challenge is correct)
      */
-    public synchronized boolean challenge(Player player, int wordID, String challengeGuess) {
-        if(!idToWordMap.containsKey(wordID)) return false;
+    public synchronized ChallengeResult challenge(Player player, int wordID, String challengeGuess) {
+        if(!idToWordMap.containsKey(wordID)) return ChallengeResult.INVALID;
 
         final Word word = idToWordMap.get(wordID);
         

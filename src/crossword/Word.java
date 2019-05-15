@@ -38,6 +38,7 @@ public class Word {
     //   This class is not threadsafe, but it's OK because only Match accesses Word methods, and Match is threadsafe.
     
     public enum Direction {ACROSS, DOWN}
+    public enum ChallengeResult {INVALID, INCORRECT, CORRECT}
 
     private final List<Cell> involvedCells;
     private final int startRow;
@@ -406,11 +407,12 @@ public class Word {
      * @param player must be a player within currentMatch
      * @param challengeWord the new challenge word
      * @param currentMatch the current match that this word and player are on
-     * @return true iff the challenge was accepted (if it was consistent)
+     * @return the result of the challenge in terms of ChallengeResult (INVALID if it wasn't consistent according to the rules, INCORRECT if the challenge was
+     * incorrect, and CORRECT if the challenge is correct)
      */
-    public boolean tryChallenge(Player player, String challengeWord, Match currentMatch) {
-        if(!checkConsistentChallenge(player, challengeWord)) {
-            return false;
+    public ChallengeResult tryChallenge(Player player, String challengeWord, Match currentMatch) {
+        if(!checkConsistentChallenge(player, challengeWord)) { // the challenge was inconsistent, so it was invalid
+            return ChallengeResult.INVALID;
         }
         
         final String currentValue = this.getCurrentValue();
@@ -420,19 +422,20 @@ public class Word {
             currentMatch.incrementScore(this.getOwner());
             currentMatch.decreaseChallenge(player);
             this.setConfirmed();
+            return ChallengeResult.INCORRECT; // the challenging player got it incorrect
         }
-        else if(correct.equals(challengeWord)) {
+        else if(correct.equals(challengeWord)) { // the challenging player got it correct
             byPassInsert(player, challengeWord);
             currentMatch.incrementScore(player);
             currentMatch.incrementChallengeByTwo(player);
             this.setConfirmed();
+            return ChallengeResult.CORRECT;
         }
-        else {
+        else { // both players got it incorrect
             this.clearThisInsertedWord();
             currentMatch.decreaseChallenge(player);
+            return ChallengeResult.INCORRECT;
         }
-        
-        return true;
     }
     
     

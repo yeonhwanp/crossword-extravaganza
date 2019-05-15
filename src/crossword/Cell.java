@@ -56,7 +56,7 @@ public class Cell {
     }
     
     /**
-     * TODO fix this up
+     * Check cell's rep invariant
      */
     private void checkRep() {
         assert row >= 0;
@@ -69,6 +69,8 @@ public class Cell {
      * @return the row that this cell is located at on the gameboard
      */
     public int getRow() {
+        checkRep();
+        
         return row;
     }
     
@@ -76,6 +78,8 @@ public class Cell {
      * @return the column that this cell is located at on the gameboard
      */
     public int getCol() {
+        checkRep();
+        
         return col;
     }
     
@@ -83,6 +87,8 @@ public class Cell {
      * @return true if this cell is part of the gameboard, false otherwise
      */
     public boolean isPresent() {
+        checkRep();
+        
         return existState == Exist.PRESENT;
     }
     
@@ -90,6 +96,8 @@ public class Cell {
      * @return true if this cell is part of the gameboard, false otherwise
      */
     public boolean isAbsent() {
+        checkRep();
+        
         return existState == Exist.ABSENT;
     }
     
@@ -133,9 +141,12 @@ public class Cell {
     public boolean isOwned() {
         for(Word word : correspondingWords) {
             if(word.hasOwner()) {
+                checkRep();
                 return true;
             }
         }
+        
+        checkRep();
         return false;
     }
     
@@ -146,12 +157,15 @@ public class Cell {
         for(Word word : correspondingWords) {
             word.clearThisInsertedWord();
         }
+        
+        checkRep();
     }
     
     /**
      * @return the value hosted in this cell
      */
     public char getCurrentValue() {
+        checkRep();
         return value;
     }
     
@@ -159,6 +173,7 @@ public class Cell {
      * @return true if the cell doesn't contain value and is part of the gameboard, false otherwise
      */
     public boolean isBlank() {
+        checkRep();
         return isPresent() && getCurrentValue() == EMPTY_CELL;
     }
     
@@ -168,6 +183,7 @@ public class Cell {
      */ 
     public void addWord(Word word) {
         correspondingWords.add(word);
+        checkRep();
     }
     
     /**
@@ -179,15 +195,19 @@ public class Cell {
     public boolean canChangeValue(Player player) {
         for(Word word : correspondingWords) {
             if(word.isConfirmed() || (word.hasOwner() && !player.equals(word.getOwner()))) {
+                checkRep();
                 return false;
             }
         }
         
+        checkRep();
         return true;
     }
     
     @Override
     public String toString() {
+        checkRep();
+        
         if(isAbsent()) {
             return "#";
         }
