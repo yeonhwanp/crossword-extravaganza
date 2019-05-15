@@ -55,6 +55,8 @@ public class WordTuple {
     private void checkRep() {
         assert direction.equals("ACROSS") || direction.equals("DOWN");
         assert startRow >= 0 && startCol >= 0;
+        assert word != null;
+        assert hint != null;
     }
     
     /**
