@@ -27,6 +27,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import crossword.Word.ChallengeResult;
 import crossword.web.ExceptionsFilter;
 import crossword.web.HeadersFilter;
 import crossword.web.LogFilter;
@@ -334,6 +335,9 @@ public class Server {
      */
     private static Match loadMatch(File puzzle) throws IOException, UnableToParseException {
         BufferedReader reader = new BufferedReader(new FileReader(puzzle));
+        
+        System.out.println(puzzle.getName());
+        
         String fullPuzzle = "";
         String line = reader.readLine();
         while (line != null) {
@@ -992,7 +996,7 @@ public class Server {
      * IF VALID_CHALLENGE -> Finish (game logic):
      *     - SEND: show_score, winner, myPlayer, score, challengePoints, otherPlayer, score2, challengePoints2
      * IF FAILED_CHALLENGE (game logic):
-     *     - SEND: play, falsech, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
+     *     - SEND: play, invalidch, playerID, playerPoints, playerChallengePts, otherPlayerID, otherPlayerPts, otherPlayerChallengePts, board
      * @param exchange exchange to communicate with client
      * @throws IOException if headers cannot be properly sent
      */
@@ -1026,10 +1030,10 @@ public class Server {
                     Player currentPlayer = getPlayer(playerID);
                     if (currentMatch.containsPlayer(currentPlayer)) {
     
-                        boolean validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
+                        ChallengeResult validChallenge = currentMatch.challenge(currentPlayer, Integer.valueOf(wordID), word);
                         boolean matchFinished = currentMatch.isFinished();
     
-                        if (validChallenge && matchFinished) {
+                        if (validChallenge == ChallengeResult.CORRECT && matchFinished) {
                             
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
@@ -1056,8 +1060,13 @@ public class Server {
                         } else {
                             
                             Player otherPlayer = currentMatch.getOtherPlayer(currentPlayer);
+                            
+                            String typeOfChallenge;
+                            if (validChallenge == ChallengeResult.CORRECT) typeOfChallenge = "wonch";
+                            else if (validChallenge == ChallengeResult.INCORRECT) typeOfChallenge = "lostch";
+                            else typeOfChallenge = "invalidch";
 
-                            String ongoingResponse = "play\n" + String.valueOf(validChallenge) + "\n" + playerID + "\n"
+                            String ongoingResponse = "play\n" + typeOfChallenge + "\n" + playerID + "\n"
                                     + currentMatch.getScore(currentPlayer) + "\n"
                                     + currentMatch.getChallengePoints(currentPlayer) + "\n" + otherPlayer.getID() + "\n"
                                     + currentMatch.getScore(otherPlayer) + "\n"
