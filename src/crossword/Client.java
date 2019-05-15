@@ -386,6 +386,7 @@ public class Client {
      * 
      * RECEIVES: 
      *  - "choose", "new", allMatches (matches with one player to join, and puzzles with no players to start a new match)
+     *  - "choose", "update", allMatches
      *  - "choose", "try again", allMatches
      */
     private synchronized void receiveChoose(String[] response, String lastInput) {
@@ -398,7 +399,7 @@ public class Client {
         lineCount++;
 
         // Set the player ID
-        if (chooseState.equals("new") && playerID.equals("")) {
+        if (chooseState.equals("new")) {
             playerID = lastInput.split(" ")[1];
         }
 
