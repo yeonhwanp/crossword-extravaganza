@@ -87,7 +87,7 @@ public class Server {
      *  All fields, except validPuzzleNames, are private and final.
      *      server is mutated in the Server constructor (parameter as well), start(), and stop(), but this is part of the expected behavior, so no rep exposure
      *      validPuzzleNames is mutated only in our constructor, but this is okay because it is part of the expected behavior.
-     *          validPuzzleNames is never returned or taken in as a method to any method, so we do not keep references of it
+     *          validPuzzleNames is never returned or taken in as an argument to any method, so we do not keep references of it
      *      folderPath is also immutable, so we have no rep exposure here, even when it is taken in as a parameter to other methods,
      *      allPlayers is mutated in handleStart, but this is part of expected behavior. It is not mutated, taken in as a parameter,
      *          or returned in any other method.
@@ -98,7 +98,12 @@ public class Server {
      *      twoPlayerMatches is mutated in playMatch and exit, but this is expected client behavior, so it is not rep exposure.
      *          It is not mutated, taken in as a parameter, or returned in any other method.
      *      mapIDToWinners is mutated in numerous methods, but this is expected client behavior, so it is not rep exposure.
-     *        
+     *      
+     *      Overall, none of these rep fields are returned or taken in as arguments to any of our methods, and we do
+     *      not keep references of them.
+     *          We do return a mutable Match in parse(), but this is okay because this match is not part of our rep,
+     *          since we are simply creating a match by parsing a file.
+     *      
      * Thread safety argument:
      *  Every method that is non-static is locked by the rep folderPath. Therefore, all accesses to our rep are guarded by
      *  the lock on folderPath, which is an instance variable. This means that only one thread can access/change our rep
