@@ -8,6 +8,7 @@ Race against one of your other friends to guess more crossword puzzles correctly
 - Play on the same network or other the web with a command line interface or a more natural interface using Java's Swing package.
 - Updates submissions in real time -- no more having to wait for a turn-by-turn game!
 - Server side code ensures that no two actions on the same blanks cause breakage: asynchronous requests and responses are handled in a thread-safe manner.
+- Compatible with `.puzzle` files for easy puzzle creation.
 
 ## Dependencies
 **Built With:**
