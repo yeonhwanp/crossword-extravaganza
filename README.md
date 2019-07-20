@@ -2,7 +2,7 @@
 
 Race against one of your other friends to guess more crossword puzzles correctly before the board is filled up!
 
-![Alt desc](https://github.com/yeonhwanp/autowater/blob/master/docs/Front.png)
+![Alt desc](https://github.com/yeonhwanp/crossword-extravaganza/blob/master/.settings/Front.png)
 
 ## Features
 - Play on the same network or other the web with a command line interface or a more natural interface using Java's Swing package.
