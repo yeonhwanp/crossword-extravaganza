@@ -1,4 +1,4 @@
-# Crossword Extravaganza: A competitive real-time online crossword game 
+# Crossword Extravaganza: Competitive real-time online crossword game!
 
 Race against one of your other friends to guess more crossword puzzles correctly before the board is filled up!
 
