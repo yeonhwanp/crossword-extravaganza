@@ -19,8 +19,8 @@ git clone git@github.com:yeonhwanp/crossword-extravaganza.git
 ```
 
 ## Usage
-- **Server**: Upload to a designated web-server to run the code. 
-- **Client**: Open `/src/client/client.ino` in Arduino and compile it into the ESP32.
+- **Server**: `java -cp bin:lib/parserlib.jar crossword.Server one-puzzle` 
+- **Client**: `java -cp bin crossword.ClientManager localhost 4949` (Replace <localhost> and <4949> with IP addresses/ports respectively.
 
 ## Game Rules
 - A player will enter a word with the syntax `TRY <WORD_ID> WORD`. That word is not locked into the board until it is either confirmed with a `CONFIRM <WORD_ID> WORD` or a `CHALLENGE <WORD_ID> WORD` by a different player.
