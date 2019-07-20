@@ -10,7 +10,7 @@ Race against one of your other friends to guess more crossword puzzles correctly
 - Server side code ensures that no two actions on the same blanks cause breakage: asynchronous requests and responses are handled in a thread-safe manner.
 
 ## Dependencies
-*Built With:*
+**Built With:**
 - [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 ## Install
